@@ -1,6 +1,6 @@
-# OKFy
+# OKF-CLI
 
-OKFy converts documentation websites and local Markdown folders into Open Knowledge Format (OKF) bundles. These bundles can be served via MCP (Model Context Protocol) to AI agents like Claude, Codex, or Cursor.
+OKF-CLI converts documentation websites and local Markdown folders into Open Knowledge Format (OKF) bundles. These bundles can be served via MCP (Model Context Protocol) to AI agents like Claude, Codex, or Cursor.
 
 ## Installation
 
