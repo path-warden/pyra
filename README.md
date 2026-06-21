@@ -129,6 +129,37 @@ Options:
 - `--name` - Server name
 - `--max-result-chars` - Maximum characters in tool results (default: 12000)
 
+### `okf-cli update <bundle>`
+
+Update an existing OKF bundle from its original source.
+
+```bash
+okf-cli update ./bundle [options]
+```
+
+The source is automatically read from the bundle's `changelog.txt` file (created during crawl or import). You can override it with the `--source` flag.
+
+Options:
+- `--source, -s` - Override source URL or path
+- `--force` - Apply all changes without prompting
+- `--dry-run` - Show changes without applying them
+- `--max-pages` - Maximum pages to crawl, for URL sources (default: 100)
+- `--max-depth` - Maximum crawl depth, for URL sources (default: 4)
+- `--concurrency` - Fetch concurrency, for URL sources (default: 4)
+- `--include` - Include patterns
+- `--exclude` - Exclude patterns
+
+Example workflow:
+```bash
+# Initial crawl
+okf-cli crawl https://docs.example.com --out ./my-bundle
+
+# Later, update with changes
+okf-cli update ./my-bundle --dry-run  # Preview changes
+okf-cli update ./my-bundle --force    # Apply all changes
+okf-cli update ./my-bundle            # Interactive mode
+```
+
 ### `okf-cli demo`
 
 Run an offline demo with the bundled example.
@@ -141,14 +172,101 @@ okf-cli demo [--serve]
 
 When serving a bundle via MCP, the following tools are available to AI agents:
 
+### Search & Read Tools
+
 | Tool | Description |
 |------|-------------|
-| `search_concepts` | Full-text search across concepts |
-| `read_concept` | Read a specific concept's content |
+| `search_concepts` | Full-text search across concepts with token budget control |
+| `read_concept` | Read a specific concept's content with compression options |
 | `get_neighbors` | Find related concepts via links |
+| `get_context` | Smart context assembly for a topic with token budget |
 | `list_types` | List all concept types in the bundle |
 | `list_tags` | List all tags in the bundle |
 | `bundle_summary` | Get bundle statistics |
+
+### Live Update Tools
+
+| Tool | Description |
+|------|-------------|
+| `check_updates` | Check if the bundle source has updates available |
+| `apply_updates` | Apply pending updates from the source |
+| `bundle_health` | Check bundle health, staleness, and source reachability |
+
+### Utility Tools
+
+| Tool | Description |
+|------|-------------|
+| `compression_stats` | View token compression statistics for this session |
+
+### Token Budget & Compression
+
+The search and read tools support token-aware responses to help AI agents manage context windows efficiently:
+
+**Parameters:**
+- `token_budget` - Maximum tokens for the response (estimates using cl100k_base encoding)
+- `compression` - Compression level: `none`, `light`, `medium`, `aggressive`
+- `detail_level` - Detail level 0-3 (0=minimal, 3=full content)
+
+**Compression Levels:**
+| Level | Effect |
+|-------|--------|
+| `none` | No compression, full content |
+| `light` | Normalize whitespace, collapse blank lines |
+| `medium` | Light + truncate to section boundaries with outline |
+| `aggressive` | Medium + aggressive truncation with retrieval hints |
+
+**Example: Budget-Aware Search**
+```json
+{
+  "tool": "search_concepts",
+  "arguments": {
+    "query": "authentication",
+    "token_budget": 2000,
+    "compression": "medium",
+    "detail_level": 2
+  }
+}
+```
+
+**Example: Get Context for a Topic**
+```json
+{
+  "tool": "get_context",
+  "arguments": {
+    "query": "how to authenticate users",
+    "token_budget": 4000,
+    "compression": "light"
+  }
+}
+```
+
+### Live Updates
+
+Bundles can be updated from their original source while the MCP server is running:
+
+**Check for Updates**
+```json
+{
+  "tool": "check_updates",
+  "arguments": {
+    "timeout_seconds": 30
+  }
+}
+```
+
+Response includes `has_changes`, `added`, `modified`, `deleted` counts.
+
+**Apply Updates**
+```json
+{
+  "tool": "apply_updates",
+  "arguments": {
+    "confirm": true
+  }
+}
+```
+
+Use `dry_run: true` to preview changes without applying them.
 
 ## Open Knowledge Format
 

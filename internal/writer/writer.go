@@ -11,6 +11,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/okfy/okf-mcp/internal/changelog"
 	"github.com/okfy/okf-mcp/internal/normalize"
 	"github.com/okfy/okf-mcp/internal/types"
 	"github.com/okfy/okf-mcp/internal/util"
@@ -25,6 +26,7 @@ type WriteOptions struct {
 	InputPath                    string
 	DangerouslyAllowUnsafeOutput bool
 	Timestamp                    string
+	Source                       string // URL or file path for changelog
 }
 
 // reservedFilenames are OKF reserved filenames that cannot be used for concepts.
@@ -159,8 +161,8 @@ func rewriteLinks(doc types.NormalizedDocument, sourceToOutput map[string]string
 	})
 }
 
-// withTitle ensures markdown has a title heading.
-func withTitle(title, markdown string) string {
+// WithTitle ensures markdown has a title heading.
+func WithTitle(title, markdown string) string {
 	trimmed := strings.TrimSpace(markdown)
 	if regexp.MustCompile(`^#\s+`).MatchString(trimmed) {
 		return trimmed
@@ -174,8 +176,8 @@ func yamlScalar(value string) string {
 	return string(data)
 }
 
-// generateFrontmatter generates YAML frontmatter for a document.
-func generateFrontmatter(doc types.NormalizedDocument, timestamp string) string {
+// GenerateFrontmatter generates YAML frontmatter for a document.
+func GenerateFrontmatter(doc types.NormalizedDocument, timestamp string) string {
 	resource := doc.Resource
 	if resource == "" {
 		resource = doc.SourcePath
@@ -225,10 +227,10 @@ func WriteOKFBundle(docs []types.NormalizedDocument, opts WriteOptions) ([]strin
 
 		// Rewrite links
 		markdown := rewriteLinks(*doc, sourceToOutput)
-		markdown = withTitle(doc.Title, markdown)
+		markdown = WithTitle(doc.Title, markdown)
 
 		// Generate frontmatter
-		fm := generateFrontmatter(*doc, timestamp)
+		fm := GenerateFrontmatter(*doc, timestamp)
 
 		// Write file
 		outPath := filepath.Join(opts.OutDir, doc.OutputPath)
@@ -258,6 +260,13 @@ func WriteOKFBundle(docs []types.NormalizedDocument, opts WriteOptions) ([]strin
 	// Generate index files
 	if err := writeIndexFiles(opts, conceptsByDir); err != nil {
 		return nil, err
+	}
+
+	// Create changelog if source is provided
+	if opts.Source != "" {
+		if err := changelog.CreateChangelog(opts.OutDir, opts.Source, len(docs)); err != nil {
+			return nil, fmt.Errorf("failed to create changelog: %w", err)
+		}
 	}
 
 	return written, nil

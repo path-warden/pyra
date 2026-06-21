@@ -119,6 +119,9 @@ type SearchResult struct {
 	Resource    string   `json:"resource,omitempty"`
 	Snippet     string   `json:"snippet"`
 	Score       float64  `json:"score"`
+	Expandable  bool     `json:"expandable,omitempty"`
+	FullTokens  int      `json:"full_tokens,omitempty"`
+	TokenCount  int      `json:"token_count,omitempty"`
 }
 
 // CrawlProgressEvent represents a progress update during crawling.

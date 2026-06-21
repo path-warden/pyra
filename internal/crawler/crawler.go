@@ -143,6 +143,7 @@ func Crawl(ctx context.Context, opts CrawlOptions) (*types.CrawlResult, error) {
 		Force:                        opts.Force,
 		DangerouslyAllowUnsafeOutput: opts.DangerouslyAllowUnsafeOutput,
 		Timestamp:                    timestamp,
+		Source:                       opts.SeedURL,
 	})
 	if err != nil {
 		return nil, err

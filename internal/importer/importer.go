@@ -157,6 +157,7 @@ func Import(opts ImportOptions) (*types.ImportResult, error) {
 		InputPath:                    root,
 		DangerouslyAllowUnsafeOutput: opts.DangerouslyAllowUnsafeOutput,
 		Timestamp:                    timestamp,
+		Source:                       root,
 	})
 	if err != nil {
 		return nil, err

@@ -9,6 +9,7 @@ require (
 	github.com/fatih/color v1.19.0
 	github.com/gobwas/glob v0.2.3
 	github.com/mark3labs/mcp-go v0.54.1
+	github.com/pkoukk/tiktoken-go v0.1.8
 	github.com/spf13/cobra v1.10.2
 	github.com/temoto/robotstxt v1.1.2
 	golang.org/x/text v0.38.0
@@ -37,6 +38,7 @@ require (
 	github.com/blevesearch/zapx/v15 v15.4.3 // indirect
 	github.com/blevesearch/zapx/v16 v16.3.4 // indirect
 	github.com/blevesearch/zapx/v17 v17.1.2 // indirect
+	github.com/dlclark/regexp2 v1.11.0 // indirect
 	github.com/golang/snappy v1.0.0 // indirect
 	github.com/google/jsonschema-go v0.4.2 // indirect
 	github.com/google/uuid v1.6.0 // indirect

@@ -18,7 +18,7 @@ func TestGenerateFrontmatter(t *testing.T) {
 		Tags:     []string{"intro", "tutorial"},
 	}
 
-	fm := generateFrontmatter(doc, "2024-01-15T10:30:00.000Z")
+	fm := GenerateFrontmatter(doc, "2024-01-15T10:30:00.000Z")
 
 	if !strings.Contains(fm, `type: "Guide"`) {
 		t.Errorf("frontmatter missing type")
@@ -165,9 +165,9 @@ func TestWithTitle(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		got := withTitle(tt.title, tt.markdown)
+		got := WithTitle(tt.title, tt.markdown)
 		if got != tt.want {
-			t.Errorf("withTitle(%q, %q) = %q, want %q", tt.title, tt.markdown, got, tt.want)
+			t.Errorf("WithTitle(%q, %q) = %q, want %q", tt.title, tt.markdown, got, tt.want)
 		}
 	}
 }
