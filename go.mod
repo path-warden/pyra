@@ -40,6 +40,7 @@ require (
 	github.com/blevesearch/zapx/v17 v17.1.2 // indirect
 	github.com/dlclark/regexp2 v1.11.0 // indirect
 	github.com/golang/snappy v1.0.0 // indirect
+	github.com/golangci/golangci-lint v1.64.8 // indirect
 	github.com/google/jsonschema-go v0.4.2 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect

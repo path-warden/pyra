@@ -41,7 +41,7 @@ func runDemo(cmd *cobra.Command, args []string) error {
 			return err
 		}
 		bundleDir = tmpDir
-		cleanup = func() { os.RemoveAll(tmpDir) }
+		cleanup = func() { _ = os.RemoveAll(tmpDir) }
 	} else {
 		// Fall back to filesystem locations
 		demoPaths := []string{
