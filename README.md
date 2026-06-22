@@ -1,5 +1,9 @@
 # OKF-CLI
 
+<p align="center">
+<img width="704" alt="okf-cli_github" src="https://github.com/user-attachments/assets/dcb42aa0-9ad5-4c05-810c-db8a19bda9b1" />
+</p>
+
 OKF-CLI converts documentation websites and local Markdown folders into extended Open Knowledge Format (OKF) bundles. These bundles implement a filing cabinet concept architecture pattern for AI agents, providing durable structured artifacts with summary-first navigation that scales sublinearly with corpus size.
 
 ## Why?
