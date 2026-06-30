@@ -1,14 +1,14 @@
-# memphis Claude Code skills
+# Memphis Claude Code skills
 
-These three skills implement the spec-driven development lifecycle that memphis is built for, with the `memphis project` / `gate` / `hooks` / MCP grounding steps wired directly into each phase:
+These three skills implement the spec-driven development lifecycle that Memphis is built for, with the `memphis project` / `gate` / `hooks` / MCP grounding steps wired directly into each phase:
 
-| Skill | Phase | memphis integration |
+| Skill | Phase | Memphis integration |
 |---|---|---|
 | `spec` | Requirements -> Design -> Tasks | Projects each approved `requirements.md` / `design.md` into typed Canon and gates it. |
 | `dev` | Implementation | Grounds the work in Canon over MCP (`find_decisions` / `get_artifact` / `get_context`) before writing code; rebuilds indexes after status changes. |
 | `code-review` | Review | Runs `memphis gate --sarif` as a required authority check and cites touched artifacts via `memphis relationships --summary`. |
 
-Every memphis step is guarded by "if this is a memphis store (a `.okf/config.yaml` exists)", so the skills also work unchanged in repositories that don't use memphis.
+Every Memphis step is guarded by "if this is a Memphis store (a `.okf/config.yaml` exists)", so the skills also work unchanged in repositories that don't use Memphis.
 
 ## Install
 

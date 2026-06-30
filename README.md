@@ -8,7 +8,7 @@
 
 **Memphis (MEM-phis) is an enforceable authority layer for AI coding agents.** It is a single Go binary that turns the decisions, requirements, and designs your team agrees to into **'Canon'**, which is: typed Markdown artifacts, validated against real standards, wired into a blocking **gate** sysetm, and served to agents over **MCP**. No decision goes unrecorded, and no agent silently violates one.
 
-The problem Memphis solves is simple to state and expensive to ignore: an AI agent's only real constraint is its context window, and most "memory" tools conflate two very different properties. **Authority** asks whether something is the canonical truth the team agreed to. **Discoverability** asks whether the right piece can be found at the right moment. Vector stores optimize discoverability and have no concept of authority. memphis makes authority a first-class, *enforced* property: Canon artifacts are typed, their relationships are integrity-checked, and a deterministic gate rejects malformed or conflicting authority before it lands, with no LLM and no network in that path.
+The problem Memphis solves is simple to state and expensive to ignore: an AI agent's only real constraint is its context window, and most "memory" tools conflate two very different properties. **Authority** asks whether something is the canonical truth the team agreed to. **Discoverability** asks whether the right piece can be found at the right moment. Vector stores optimize discoverability and have no concept of authority. Memphis makes authority a first-class, *enforced* property: Canon artifacts are typed, their relationships are integrity-checked, and a deterministic gate rejects malformed or conflicting authority before it lands, with no LLM and no network in that path.
 
 Memphis is built directly for **spec-driven development**. The specs your workflow already produces (`requirements.md`, `design.md`) become typed Canon with one command, and the agents that read them are held to that Canon automatically, whether you drive Claude Code's `/spec → /dev → /code-review` skills, Kiro's specs and agent hooks, or any MCP client.
 
@@ -20,19 +20,18 @@ The Canon authority model conforms to the concept of **Requirements-as-Code (RaC
 
 ## Why Memphis? - A Common Use Case
 
-You make an architectural decision and record it as Canon:
+You make an architectural decision — "use Bleve for search" — while working a feature through the `/spec` skill. You don't file it anywhere by hand: when you approve the design, the skill records it as Canon and gates it for you.
 
-```bash
-memphis new decision canon/adr-001-use-bleve.md --title "Use Bleve for search"
-$EDITOR canon/adr-001-use-bleve.md      # fill ## Status (Accepted), ## Decision, ## Consequences
-memphis gate .                          # validates structure, standards, relationship integrity
+```text
+/spec   → approve design.md (it chooses Bleve)
+        → skill projects it into typed Canon and runs the gate   → the decision lands as authority
 ```
 
-Two weeks later, in a brand-new session with no memory of that conversation, an agent proposes ripping out Bleve for a vector database. Because memphis is wired into the workflow:
+Two weeks later, in a brand-new session with no memory of that conversation, an agent proposes ripping out Bleve for a vector database. Because Memphis is wired into the workflow through the same skills:
 
-- The agent **grounds on Canon over MCP** first. `find_decisions` surfaces the "Use Bleve for search" artifact with status **Accepted** and its consequences, so the agent argues *from* the decision instead of around it.
-- If a change still lands that contradicts Accepted Canon, the **gate blocks it** at commit time (git hook) and in CI (`gate --sarif`), citing the exact artifact and rule.
-- When the decision genuinely *should* change, you mint a successor that `## Supersedes` the old one. memphis follows the supersede chain so agents always see the current truth, never a stale one.
+- `/dev` **grounds on Canon over MCP** first. `find_decisions` surfaces the "Use Bleve for search" artifact with status **Accepted** and its consequences, so the agent argues *from* the decision instead of around it.
+- If a change still lands that contradicts Accepted Canon, the **gate blocks it** at commit time (git hook), inside `/code-review`, and in CI (`gate --sarif`), citing the exact artifact and rule.
+- When the decision genuinely *should* change, you mint a successor that `## Supersedes` the old one. Memphis follows the supersede chain so agents always see the current truth, never a stale one.
 
 That is the whole point: **the decision is recorded once and respected thereafter**, by people and agents alike, without anyone having to remember it.
 
@@ -40,7 +39,7 @@ That is the whole point: **the decision is recorded once and respected thereafte
 
 ## The core model
 
-memphis gives an agent two kinds of knowledge over one substrate, plain Markdown plus YAML frontmatter, versioned in Git:
+Memphis gives an agent two kinds of knowledge over one substrate, plain Markdown plus YAML frontmatter, versioned in Git:
 
 | | **Canon** (authority) | **Reference** (recall, optional) |
 |---|---|---|
@@ -50,7 +49,7 @@ memphis gives an agent two kinds of knowledge over one substrate, plain Markdown
 | Validation | Typed, standards-checked, relationship-integrity-checked, **gated in CI** | Permissive, abundant and searchable |
 | Determinism | Pure function of repo state, **no LLM, no network** | AI may summarize and rank in the discovery layer |
 
-A **store** is one directory in Git holding both tiers. The only thing separating them is `canon_roots` in `.okf/config.yaml`: files under those roots are Canon, and everything else is Reference. Canon is the hero of memphis. Reference is an optional convenience for teams that also want a large docs corpus searchable as agent memory (see the [Appendix](#appendix-reference-tier-and-okf-format)).
+A **store** is one directory in Git holding both tiers. The only thing separating them is `canon_roots` in `.okf/config.yaml`: files under those roots are Canon, and everything else is Reference. Canon is the hero of Memphis. Reference is an optional convenience for teams that also want a large docs corpus searchable as agent memory (see the [Appendix](#appendix-reference-tier-and-okf-format)).
 
 ### The five Canon artifact types
 
@@ -95,13 +94,13 @@ cd memphis
 make build
 ```
 
-> **Apple Intelligence (optional, Reference summaries only):** on macOS 26 Tahoe with Apple Silicon, memphis can summarize Reference docs through Apple's on-device Foundation Models via the opt-in `applefm` build tag. See [docs/APPLE_INTELLIGENCE.md](docs/APPLE_INTELLIGENCE.md). This never touches the Canon authority path.
+> **Apple Intelligence (optional, Reference summaries only):** on macOS 26 Tahoe with Apple Silicon, Memphis can summarize Reference docs through Apple's on-device Foundation Models via the opt-in `applefm` build tag. See [docs/APPLE_INTELLIGENCE.md](docs/APPLE_INTELLIGENCE.md). This never touches the Canon authority path.
 
 ---
 
 ## Quick start
 
-memphis is meant to be driven through your agent's **skills**, not by typing `memphis` commands by hand. Three bundled Claude Code skills — `/spec`, `/dev`, `/code-review` — run the right memphis command at the right moment in the lifecycle. Set the store up once, then live in the skills.
+Memphis is meant to be driven through your agent's **skills**, not by typing `memphis` commands by hand. Three bundled Claude Code skills — `/spec`, `/dev`, `/code-review` — run the right Memphis command at the right moment in the lifecycle. Set the store up once, then live in the skills.
 
 ### One-time setup
 
@@ -135,7 +134,7 @@ memphis hooks install               # git + detected agent toolchains (Claude Co
 /code-review  review against authority before committing        (skill runs: memphis gate --sarif + relationships)
 ```
 
-Each skill detects a memphis store (a `.okf/config.yaml`) and projects, gates, grounds, and rebuilds automatically — so authority is captured and enforced as a byproduct of the work you were already doing. The equivalent raw commands are shown in [Spec-driven development with memphis](#spec-driven-development-with-memphis) for when you want to run them directly or wire them into another toolchain.
+Each skill detects a Memphis store (a `.okf/config.yaml`) and projects, gates, grounds, and rebuilds automatically — so authority is captured and enforced as a byproduct of the work you were already doing. The equivalent raw commands are shown in [Spec-driven development with Memphis](#spec-driven-development-with-memphis) for when you want to run them directly or wire them into another toolchain.
 
 ### Authoring Canon directly (optional)
 
@@ -190,9 +189,9 @@ enforcement: {}
 
 ---
 
-## Spec-driven development with memphis
+## Spec-driven development with Memphis
 
-memphis is the authoritative memory beneath your spec-driven workflow. The specs your agent already writes become Canon, the gate keeps that Canon honest, and MCP feeds it back to the agent on every task. The same flow works whether you drive **Claude Code** (`/spec → /dev → /code-review` skills) or **Kiro** (specs + agent hooks). Both emit the same `requirements.md` / `design.md` contract, so one projector serves both.
+Memphis is the authoritative memory beneath your spec-driven workflow. The specs your agent already writes become Canon, the gate keeps that Canon honest, and MCP feeds it back to the agent on every task. The same flow works whether you drive **Claude Code** (`/spec → /dev → /code-review` skills) or **Kiro** (specs + agent hooks). Both emit the same `requirements.md` / `design.md` contract, so one projector serves both.
 
 The recommended way to run this loop is through the bundled skills (see [Quick start](#quick-start)) — they invoke the commands below for you at each phase. The raw commands are documented here so you can run them directly or adapt them to another toolchain.
 
@@ -234,17 +233,17 @@ memphis promote <concept-id-or-path> --type decision
 
 ### Integrating into your agent's skills
 
-memphis is designed to disappear into your workflow. Each phase of spec-driven development emits authoritative memory as a natural byproduct of the work the agent is already doing: requirements become Canon the moment they're approved, decisions are captured as they're made, and the gate enforces all of it continuously. Drop these commands into the skill definitions you already use, and the loop runs itself. Every spec strengthens the memory, every task is grounded in it, and every review is checked against it.
+Memphis is designed to disappear into your workflow. Each phase of spec-driven development emits authoritative memory as a natural byproduct of the work the agent is already doing: requirements become Canon the moment they're approved, decisions are captured as they're made, and the gate enforces all of it continuously. Drop these commands into the skill definitions you already use, and the loop runs itself. Every spec strengthens the memory, every task is grounded in it, and every review is checked against it.
 
-**Ready-to-use skill examples ship in this repo.** You don't have to wire the commands below by hand — [`.claude/skills/`](.claude/skills/) contains three working Claude Code skills that already integrate memphis into each phase of the lifecycle:
+**Ready-to-use skill examples ship in this repo.** You don't have to wire the commands below by hand — [`.claude/skills/`](.claude/skills/) contains three working Claude Code skills that already integrate Memphis into each phase of the lifecycle:
 
-| Skill | Phase | memphis integration |
+| Skill | Phase | Memphis integration |
 |---|---|---|
 | [`spec`](.claude/skills/spec/SKILL.md) | Requirements → Design → Tasks | Projects each approved `requirements.md` / `design.md` into typed Canon and gates it. |
 | [`dev`](.claude/skills/dev/SKILL.md) | Implementation | Grounds the work in Canon over MCP (`find_decisions` / `get_artifact` / `get_context`) before writing code; rebuilds indexes after status changes. |
 | [`code-review`](.claude/skills/code-review/SKILL.md) | Review | Runs `memphis gate --sarif` as a required authority check and cites touched artifacts via `memphis relationships --summary`. |
 
-Every memphis step in these skills is guarded by an "if this is a memphis store" check, so they also work unchanged in repositories that don't use memphis. The quickest way to install them — along with the gate hooks for every toolchain you have — is the bundled installer:
+Every Memphis step in these skills is guarded by an "if this is a Memphis store" check, so they also work unchanged in repositories that don't use Memphis. The quickest way to install them — along with the gate hooks for every toolchain you have — is the bundled installer:
 
 ```bash
 ./install_skills.sh .     # auto-detects Claude Code / Kiro / git and wires up each one
@@ -323,8 +322,8 @@ In rough order of use. Store-scoped commands default to the current directory (`
 | Command | Purpose |
 |---|---|
 | `memphis hooks install` | Install hooks that run the gate automatically. git is always installed (`pre-commit` runs the blocking gate, `post-merge` runs the integrity guard), and agent targets are auto-detected. Target flags: `--git`, `--claude`, `--kiro-ide`, `--kiro-cli`, `--kiro`, `--all`, plus `--kiro-agent`, `--store`. |
-| `memphis hooks uninstall` | Remove only memphis-managed hook content, leaving other hooks intact. |
-| `memphis hooks status` | Show which memphis hooks are installed per target. |
+| `memphis hooks uninstall` | Remove only Memphis-managed hook content, leaving other hooks intact. |
+| `memphis hooks status` | Show which Memphis hooks are installed per target. |
 
 Surfaces written: git (`.git/hooks/`), Claude Code (`.claude/settings.json` PostToolUse), Kiro IDE (`.kiro/hooks/memphis-gate.json`), and Kiro CLI (`.kiro/agents/<agent>.json` under `hooks.postToolUse`). Every install is marker-delimited and idempotent.
 
