@@ -1,0 +1,11 @@
+{
+  "action": {
+    "command": "memphis gate",
+    "type": "command"
+  },
+  "description": "Gate Canon on save (memphis-managed)",
+  "enabled": true,
+  "matcher": "(^|/)(canon|specs|\\.kiro/specs)/.*\\.md$",
+  "name": "memphis-gate",
+  "trigger": "PostFileSave"
+}

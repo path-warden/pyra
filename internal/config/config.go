@@ -39,11 +39,19 @@ type Enforcement struct {
 	Disabled []string `yaml:"disabled" json:"disabled"`
 }
 
+// DefaultCodeRoots returns the directories code-intelligence operations search
+// by default when no explicit path is given. A fresh slice is returned each call
+// so callers may mutate the result safely.
+func DefaultCodeRoots() []string {
+	return []string{"."}
+}
+
 // Config is the resolved store configuration.
 type Config struct {
 	RepositoryKey string      `yaml:"repository_key" json:"repository_key"`
 	CanonRoots    []string    `yaml:"canon_roots" json:"canon_roots"`
 	SpecRoots     []string    `yaml:"spec_roots" json:"spec_roots"`
+	CodeRoots     []string    `yaml:"code_roots" json:"code_roots"`
 	Ticketing     Ticketing   `yaml:"ticketing" json:"ticketing"`
 	Enforcement   Enforcement `yaml:"enforcement" json:"enforcement"`
 }
@@ -54,6 +62,7 @@ func Default() Config {
 		RepositoryKey: DefaultRepositoryKey,
 		CanonRoots:    []string{"canon"},
 		SpecRoots:     DefaultSpecRoots(),
+		CodeRoots:     DefaultCodeRoots(),
 		Ticketing:     Ticketing{Provider: "github"},
 		Enforcement:   Enforcement{},
 	}
@@ -91,6 +100,11 @@ func Load(storeRoot string) (Config, error) {
 	// discovery", so projection keeps working on an un-customized store.
 	if len(cfg.SpecRoots) == 0 {
 		cfg.SpecRoots = DefaultSpecRoots()
+	}
+	// An omitted code_roots means "the defaults", so code-intelligence search
+	// keeps working on an un-customized store.
+	if len(cfg.CodeRoots) == 0 {
+		cfg.CodeRoots = DefaultCodeRoots()
 	}
 	if cfg.RepositoryKey == "" {
 		cfg.RepositoryKey = DefaultRepositoryKey

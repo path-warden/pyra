@@ -1,0 +1,5 @@
+{
+  "function_kinds": ["method_declaration", "constructor_declaration"],
+  "containers": [["class_declaration", "name"], ["interface_declaration", "name"], ["enum_declaration", "name"]],
+  "identifier_kinds": ["identifier", "type_identifier"]
+}

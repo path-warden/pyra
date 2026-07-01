@@ -1,0 +1,6 @@
+{
+  "function_kinds": ["function_declaration", "function_signature", "method_definition"],
+  "containers": [["class_declaration", "name"], ["interface_declaration", "name"]],
+  "identifier_kinds": ["identifier", "property_identifier", "type_identifier"],
+  "import_resolution": "relative_path"
+}

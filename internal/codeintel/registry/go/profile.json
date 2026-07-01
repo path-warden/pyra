@@ -1,0 +1,13 @@
+{
+  "function_kinds": [
+    "function_declaration",
+    "method_declaration"
+  ],
+  "containers": [],
+  "identifier_kinds": [
+    "identifier",
+    "field_identifier",
+    "type_identifier",
+    "package_identifier"
+  ]
+}

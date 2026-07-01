@@ -40,6 +40,14 @@ func Render(cfg Config) string {
 	}
 	b.WriteString("\n")
 
+	b.WriteString("# Code roots: directories that structural code-intelligence operations\n")
+	b.WriteString("# (outline, symbols, map, ...) search by default when no path is given.\n")
+	b.WriteString("code_roots:\n")
+	for _, r := range cfg.CodeRoots {
+		fmt.Fprintf(&b, "  - %s\n", yamlScalar(r))
+	}
+	b.WriteString("\n")
+
 	b.WriteString("# Ticketing provider: format-lints external \"## Related Tickets\" links.\n")
 	b.WriteString("# One of: github, jira, linear, azure-devops, servicenow, none.\n")
 	b.WriteString("ticketing:\n")

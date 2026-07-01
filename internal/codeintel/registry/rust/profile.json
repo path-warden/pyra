@@ -1,0 +1,26 @@
+{
+  "containers": [
+    [
+      "impl_item",
+      "type"
+    ],
+    [
+      "trait_item",
+      "name"
+    ],
+    [
+      "mod_item",
+      "name"
+    ]
+  ],
+  "function_kinds": [
+    "function_item",
+    "function_signature_item"
+  ],
+  "identifier_kinds": [
+    "identifier",
+    "type_identifier",
+    "field_identifier",
+    "shorthand_field_identifier"
+  ]
+}

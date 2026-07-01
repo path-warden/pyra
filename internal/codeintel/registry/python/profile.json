@@ -1,0 +1,15 @@
+{
+  "containers": [
+    [
+      "class_definition",
+      "name"
+    ]
+  ],
+  "function_kinds": [
+    "function_definition"
+  ],
+  "identifier_kinds": [
+    "identifier"
+  ],
+  "import_resolution": "dotted_package"
+}

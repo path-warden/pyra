@@ -1,0 +1,17 @@
+{
+  "containers": [
+    [
+      "class_declaration",
+      "name"
+    ]
+  ],
+  "function_kinds": [
+    "function_declaration",
+    "method_definition"
+  ],
+  "identifier_kinds": [
+    "identifier",
+    "property_identifier"
+  ],
+  "import_resolution": "relative_path"
+}

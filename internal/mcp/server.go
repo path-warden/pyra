@@ -10,6 +10,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/chasedputnam/memphis/internal/codeintel"
 	"github.com/chasedputnam/memphis/internal/compress"
 	"github.com/chasedputnam/memphis/internal/config"
 	"github.com/chasedputnam/memphis/internal/scale"
@@ -38,7 +39,8 @@ type Server struct {
 	mcpServer      *server.MCPServer
 	stats          *CompressionStats
 
-	store *store.Store // unified Canon + Reference store for authority-aware tools
+	store *store.Store   // unified Canon + Reference store for authority-aware tools
+	code  *codeintel.Ops // code-intelligence operations, rooted at the bundle dir
 }
 
 // NewServer creates a new MCP server.
@@ -74,9 +76,12 @@ func NewServer(opts ServerOptions) (*Server, error) {
 		}
 	}
 
+	s.code = codeintel.NewOps(codeintel.NewEngine(nil), opts.BundleDir)
+
 	s.mcpServer = server.NewMCPServer(name, "0.1.0")
 	s.registerTools()
 	s.registerCanonTools()
+	s.registerCodeIntelTools()
 
 	return s, nil
 }

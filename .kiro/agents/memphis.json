@@ -1,0 +1,11 @@
+{
+  "hooks": {
+    "postToolUse": [
+      {
+        "command": "memphis gate  # memphis-managed",
+        "matcher": "fs_write"
+      }
+    ]
+  },
+  "name": "memphis"
+}
