@@ -112,7 +112,7 @@ func ground(s *store.Store, hits []store.Hit) []store.Hit {
 	for _, h := range hits {
 		item := h.Item
 		if item.Tier == store.TierCanon {
-			if succ := resolveSuccessor(s, item); succ != nil {
+			if succ := s.Successor(item.ID); succ != nil {
 				item = succ
 			}
 		}
@@ -123,37 +123,6 @@ func ground(s *store.Store, hits []store.Hit) []store.Hit {
 		out = append(out, store.Hit{Item: item, Score: h.Score})
 	}
 	return out
-}
-
-// resolveSuccessor follows supersedes edges from a superseded artifact to the
-// live artifact that supersedes it.
-func resolveSuccessor(s *store.Store, item *store.Item) *store.Item {
-	if s.Graph == nil {
-		return nil
-	}
-	visited := map[string]bool{}
-	cur := item
-	for cur != nil && cur.Status == "superseded" {
-		if visited[cur.ID] {
-			break
-		}
-		visited[cur.ID] = true
-		var next *store.Item
-		for _, e := range s.Graph.Inbound[cur.ID] {
-			if e.Kind == "supersedes" {
-				next = s.ByID(e.From)
-				break
-			}
-		}
-		if next == nil {
-			break
-		}
-		cur = next
-	}
-	if cur == item {
-		return nil
-	}
-	return cur
 }
 
 // rank applies authority-first ordering: Canon outranks Reference whenever both

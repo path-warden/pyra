@@ -126,6 +126,44 @@ func (s *Store) Discover(query string, limit int) []Hit {
 // ByID returns the item with the given ID, or nil.
 func (s *Store) ByID(id string) *Item { return s.byID[id] }
 
+// Successor follows `supersedes` edges from a superseded artifact to the live
+// artifact that supersedes it. Starting at id, it walks inbound supersedes edges
+// while the current artifact's status is "superseded", guarding against cycles.
+// It returns nil when id is unknown, the artifact is not superseded, or the
+// chain cannot advance; otherwise it returns the terminal artifact reached.
+//
+// This is the single implementation of supersede resolution, shared by the
+// retrieval loop and the change-aware gate.
+func (s *Store) Successor(id string) *Item {
+	item := s.byID[id]
+	if item == nil || s.Graph == nil {
+		return nil
+	}
+	visited := map[string]bool{}
+	cur := item
+	for cur != nil && cur.Status == "superseded" {
+		if visited[cur.ID] {
+			break
+		}
+		visited[cur.ID] = true
+		var next *Item
+		for _, e := range s.Graph.Inbound[cur.ID] {
+			if e.Kind == "supersedes" {
+				next = s.byID[e.From]
+				break
+			}
+		}
+		if next == nil {
+			break
+		}
+		cur = next
+	}
+	if cur == item {
+		return nil
+	}
+	return cur
+}
+
 // Relationships returns the resolved Canon relationship edges.
 func (s *Store) Relationships() []relate.Relationship { return s.rels }
 

@@ -20,6 +20,10 @@ func TestCanonDoesNotDependOnCodeIntel(t *testing.T) {
 	forbidden := []string{
 		"github.com/chasedputnam/memphis/internal/codeintel",
 		"github.com/odvcencio/gotreesitter",
+		// The change-aware gate depends on codeintel + store; the authority path
+		// must never depend on it, or the gate's determinism/offline guarantee
+		// would be at risk.
+		"github.com/chasedputnam/memphis/internal/changegate",
 	}
 	for _, dep := range strings.Split(strings.TrimSpace(string(out)), "\n") {
 		for _, bad := range forbidden {

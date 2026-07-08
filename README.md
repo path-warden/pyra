@@ -16,6 +16,8 @@ Memphis is built directly for **spec-driven development**. The specs your workfl
 
 The Canon authority model conforms to the concept of **Requirements-as-Code (RaC)**.
 
+Memphis also speaks **code**. The same binary and the same MCP server expose **structural code intelligence** — byte-precise, token-cheap search and navigation over your source via tree-sitter (`outline`, `symbols`, go-to-`definition`, `callers`, and more) so one agent using one server can answer both *what the team decided* (Canon) and *what the code actually does*. The two connect: a Canon artifact can **ground** in real code, resolving an authoritative decision to the exact symbols it governs, and a symbol back to the decisions that constrain it. Authoritative decisions and real code search are centralized into a single binary and MCP server.
+
 ---
 
 ## Why Memphis? - A Common Use Case
@@ -67,10 +69,48 @@ Each is typed Markdown with required sections, a minted opaque ID (`<repository-
 
 `memphis gate` is the enforcement mechanism and the heart of the authority model. It loads the corpus, validates every artifact, checks relationship integrity, applies your enforcement policy, and exits non-zero on any blocking finding, emitting SARIF for required-checks. It is **deterministic and offline** (a build-failing test forbids `net/http` or any LLM dependency in the authority path), so it is safe in pre-commit hooks and CI. Validation includes:
 
+> **Change-aware mode (`--diff`).** By default the gate checks whether *Canon* is well-formed. Add `--diff` (staged diff), `--since <ref>`, or `--changed <files>` and the gate additionally reports which **Accepted Canon artifacts govern each changed file** — an artifact governs a file when its prose cites that file path or a symbol-id in it — so a change that touches governed code is surfaced with a citation, and drift (a cited symbol that no longer resolves) is flagged. These findings are **advisory by default**; escalate them to blocking via the enforcement rule codes `canon-governed-change` and `governed-symbol-unresolved`. The mode reuses the same policy, exit code, and SARIF output, and stays deterministic and offline (the mapping is purely structural — it lives in `internal/changegate`, outside the authority path).
+
 - **BCP-14 / RFC 8174**: only ALL-CAPS `MUST`/`SHALL`/`SHOULD` carry normative weight.
 - **ISO/IEC/IEEE 29148**: requirements should be singular and testable.
 - **EARS**: Easy Approach to Requirements Syntax conformance.
 - **Relationship integrity**: no dangling, ambiguous, miscast, or cyclic references, and live artifacts don't depend on retired ones (except via `## Supersedes`).
+
+---
+
+## Code intelligence
+
+Beyond memory, Memphis reads code. The same `memphis` binary and MCP server expose seven **read-only, structural** operations built on a pure-Go tree-sitter runtime — no cgo, grammars embedded, fully offline:
+
+| Operation | Answers |
+|---|---|
+| `outline <file>` | The file's definitions as a compact skeleton (kind, name, parent, signature, id) — read this instead of the whole file. |
+| `symbols <dir>` | Where a name is defined across a tree (gitignore-aware); exact or substring. |
+| `source <symbol-id>` | The exact source of one symbol — one symbol at a time, by bytes. |
+| `check <file>` | Syntax errors (ERROR/MISSING nodes); exits non-zero when any exist. |
+| `callers <name>` | Every reference to a name, tagged **structural** (parsed) or **textual** (whole-word). |
+| `map <dir>` | A directory's dependency graph: each definition and its outgoing references, no bodies. |
+| `definition <name> \| --at file:line:col` | Go-to-definition; the `--at` form is scope-aware and follows imports across files. |
+
+Every result carries a stable **symbol-id** — `<lang>:<relpath>#<name>@<line>` (1-based) — that an agent passes from one call to the next. This is deliberately *not* an LSP: it is purely syntactic, token-cheap, and offline, and it replaces an agent's habit of grepping and reading whole files with one symbol at a time, by exact bytes. It never mutates source, honors `.gitignore`, and confines traversal to the working root.
+
+Supported languages by default: **Go, Python, JavaScript, TypeScript/TSX, Java, Rust** to keep the binary size small.
+
+Additional languages require building from source (see Instalation below).
+
+### How Canon maps to code (grounding)
+
+Authority and code meet through the symbol-id. **A Canon artifact names the code it governs simply by mentioning a symbol-id in its prose** — the same way relationships between artifacts are inferred from literal `OKF-…` IDs, never fuzzy matching. Two read-only tools (and `memphis ground`) walk that bridge in both directions:
+
+- **Artifact → code** (`code_for_artifact`): given a Canon artifact ID, resolve every symbol-id in its body to the current source, and report any that no longer resolve (renamed, moved, or deleted) rather than returning an incorrect match.
+- **Code → artifacts** (`artifacts_for_symbol`): given a symbol-id or file path, find the Canon decisions, requirements, and designs that reference it.
+
+```text
+decision  OKF-…  "cache documents in memory"   ──cites──►   go:internal/cache/store.go#Put@42   (real source)
+symbol    go:internal/cache/store.go#Put@42     ──whose?──►   OKF-…  the decisions & requirements that govern it
+```
+
+So a decision can point at the exact function that implements it; an agent can ask *"which decisions govern this symbol?"* before changing it; and a reviewer can see when an artifact's cited code has drifted out from under it. Authority and implementation stay tied together — **Canon is the memory, the symbol-id is the anchor into live code, and both live in one binary.**
 
 ---
 
@@ -93,6 +133,10 @@ git clone https://github.com/chasedputnam/memphis.git
 cd memphis
 make build
 ```
+
+### Additional Language Grammar Inclusions
+
+The binary is **pure Go, no cgo**, and cross-compiles to every target with plain `go build`; code intelligence uses a pure-Go tree-sitter runtime to keep it that way. `make build` embeds only the grammars for the supported languages (via `grammar_subset` build tags) for a lean binary; a plain `go install`/`go build` without those tags embeds the runtime's full grammar set and produces a larger binary.
 
 > **Apple Intelligence (optional, Reference summaries only):** on macOS 26 Tahoe with Apple Silicon, Memphis can summarize Reference docs through Apple's on-device Foundation Models via the opt-in `applefm` build tag. See [docs/APPLE_INTELLIGENCE.md](docs/APPLE_INTELLIGENCE.md). This never touches the Canon authority path.
 
@@ -177,6 +221,11 @@ spec_roots:
   - specs
   - .kiro/specs
 
+# Code roots: directories that structural code-intelligence operations
+# (outline, symbols, map, ...) search by default when no path is given.
+code_roots:
+  - .
+
 # Ticketing provider: format-lints external "## Related Tickets" links.
 # One of: github, jira, linear, azure-devops, servicenow, none.
 ticketing:
@@ -218,6 +267,7 @@ memphis project specs/<feature>/design.md
 
 # 4. Code review: /code-review runs the gate as a required check and cites what changed:
 memphis gate . --sarif > memphis.sarif
+memphis gate . --diff                  # change-aware: which Accepted Canon governs the staged diff
 memphis relationships . --summary
 ```
 
@@ -316,8 +366,23 @@ In rough order of use. Store-scoped commands default to the current directory (`
 
 | Command | Purpose |
 |---|---|
-| `memphis gate [store]` | Run the unified authority gate (validate + relationships + policy). Exits non-zero on any blocking finding. Flags: `--json`, `--sarif`. |
+| `memphis gate [store]` | Run the unified authority gate (validate + relationships + policy). Exits non-zero on any blocking finding. Flags: `--json`, `--sarif`; change-aware: `--diff` (staged), `--since <ref>`, `--changed <a,b>`. |
 | `memphis relationships [store]` | Report and validate the typed relationship graph. Flags: `--validate`, `--summary`, `--json`. |
+
+### Code intelligence
+
+Read-only structural search and navigation over source. Every command takes `--json`; results carry stable symbol-ids.
+
+| Command | Purpose |
+|---|---|
+| `memphis outline <file>` | List a file's definitions as a skeleton. Flags: `--kind`, `--detail` (0/1/2), `--json`. |
+| `memphis symbols <dir>` | Find symbols across a directory. Flags: `--name`, `--name-contains`, `--kind`, `--refs`, `--json`. |
+| `memphis source <symbol-id>` | Print one symbol's source (or `--file` + `--name`). Flag: `--json`. |
+| `memphis check <file>` | Report syntax errors; exits non-zero if any. Flag: `--json`. |
+| `memphis callers <name>` | Find references, tagged `[S]`tructural / `[T]`extual. Flags: `--dir`, `--json`. |
+| `memphis map <dir>` | Directory dependency graph. Flags: `--kind`, `--name`, `--name-contains`, `--json`. |
+| `memphis definition [name]` | Go-to-definition by name or `--at file:line:col`. Flags: `--at`, `--dir`, `--json`. |
+| `memphis ground <artifact-id \| symbol-id>` | Bridge Canon and code: resolve an artifact's cited symbols, or find artifacts that cite a symbol. Flags: `--store`, `--json`. |
 
 ### Automation (event hooks)
 
@@ -366,6 +431,25 @@ For teams that also want a large docs corpus searchable as agent memory. These p
 | `get_related` | Typed relationships of an artifact (related requirements, decisions, and so on). |
 | `get_neighbors` | The relationship neighborhood of an artifact within N hops. |
 
+### Code intelligence
+
+| Tool | Returns |
+|---|---|
+| `outline` | A file's definitions as a skeleton, with stable symbol-ids. |
+| `symbols` | Symbols matching a name/kind across a directory (gitignore-aware). |
+| `source` | The exact source of one symbol (by id, or file + name). |
+| `check` | Syntax errors (ERROR/MISSING nodes) in a file. |
+| `callers` | References to a name, tagged structural vs textual. |
+| `map` | A directory's dependency graph (definitions + outgoing references). |
+| `definition` | Go-to-definition by name, or scope-aware/cross-file by position. |
+
+### Grounding (Canon ↔ code)
+
+| Tool | Returns |
+|---|---|
+| `code_for_artifact` | The current source for every symbol-id a Canon artifact cites; lists any that no longer resolve. |
+| `artifacts_for_symbol` | The Canon artifacts that reference a given symbol-id or file. |
+
 ### Recall (Reference)
 
 | Tool | Returns |
@@ -388,6 +472,7 @@ For teams that also want a large docs corpus searchable as agent memory. These p
 | `repository_key` | Prefix for minted Canon IDs (for example `OKF`). |
 | `canon_roots` | Directories that hold the authority tier; everything else is Reference. |
 | `spec_roots` | Directories `memphis project` scans for spec docs. Default: `["specs", ".kiro/specs"]`. |
+| `code_roots` | Directories code-intelligence operations search by default when no path is given. Default: `["."]`. |
 | `ticketing.provider` | Format-lints `## Related Tickets` links. One of `github`, `jira`, `linear`, `azure-devops`, `servicenow`, `none`. |
 | `enforcement` | Reclassify gate findings by rule code into `blocking` / `advisory` / `disabled`. Empty means each rule keeps its default severity. |
 
@@ -397,7 +482,7 @@ For teams that also want a large docs corpus searchable as agent memory. These p
 
 ## Appendix: Reference tier and OKF format
 
-The Reference tier is optional supporting material (abundant, summarized, searchable) rendered as an **Open Knowledge Format** (OKF) bundle: human- and agent-readable Markdown with YAML frontmatter, exchangeable without a central registry ([what is OKF](https://openknowledgeformat.com/what-is-okf)). It is the right tool when you want a large docs corpus usable as agent memory without standing up a vector store.
+The Reference tier is optional supporting material (abundant, summarized, searchable) rendered as an **Open Knowledge Format** (OKF) bundle: human- and agent-readable Markdown with YAML frontmatter, exchangeable without a central registry ([What is OKF?cccccbhdfjdlr](https://openknowledgeformat.com/what-is-okf)). It is the right tool when you want a large docs corpus usable as agent memory without standing up a vector store.
 
 ### Retrofit an existing repository (Reference-only)
 

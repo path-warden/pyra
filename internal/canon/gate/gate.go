@@ -24,6 +24,44 @@ type Result struct {
 // Passed reports whether the gate has no blocking findings.
 func (r Result) Passed() bool { return r.Blocking == 0 }
 
+// Merge combines two results into one aggregate: it sums the blocking, advisory,
+// and artifact counts and concatenates the issue lists. It lets the CLI fold an
+// independent evaluation (e.g. the change-aware gate) into the corpus result so a
+// single exit code reflects both.
+func (r Result) Merge(o Result) Result {
+	return Result{
+		Issues:        append(append([]model.Issue{}, r.Issues...), o.Issues...),
+		Blocking:      r.Blocking + o.Blocking,
+		Advisory:      r.Advisory + o.Advisory,
+		ArtifactCount: r.ArtifactCount + o.ArtifactCount,
+	}
+}
+
+// ApplyPolicy classifies raw issues against the store's enforcement policy and
+// returns an aggregable Result. A disabled code is dropped; otherwise the issue
+// is counted as blocking or advisory and its severity normalized to match. This
+// is the single classification path shared by the corpus gate (Run) and the
+// change-aware gate. It sets no ArtifactCount; callers add that.
+func ApplyPolicy(cfg config.Config, raw []model.Issue) Result {
+	pol := policyFrom(cfg.Enforcement)
+	var res Result
+	for _, iss := range raw {
+		blocking, drop := pol.classify(iss)
+		if drop {
+			continue
+		}
+		if blocking {
+			iss.Severity = model.SeverityError
+			res.Blocking++
+		} else {
+			iss.Severity = model.SeverityWarning
+			res.Advisory++
+		}
+		res.Issues = append(res.Issues, iss)
+	}
+	return res
+}
+
 // Policy classifies issue codes. A code in Disabled is dropped; a code in
 // Blocking is forced blocking; a code in Advisory is forced advisory; otherwise
 // the issue's own severity decides (error = blocking).
@@ -68,7 +106,6 @@ func Run(storeRoot string, cfg config.Config) (Result, error) {
 	if err != nil {
 		return Result{}, err
 	}
-	pol := policyFrom(cfg.Enforcement)
 
 	var raw []model.Issue
 
@@ -91,21 +128,8 @@ func Run(storeRoot string, cfg config.Config) (Result, error) {
 	_, relIssues := relate.Build(entries, relate.DefaultSpecs())
 	raw = append(raw, relIssues...)
 
-	// Apply policy.
-	res := Result{ArtifactCount: len(arts)}
-	for _, iss := range raw {
-		blocking, drop := pol.classify(iss)
-		if drop {
-			continue
-		}
-		if blocking {
-			iss.Severity = model.SeverityError
-			res.Blocking++
-		} else {
-			iss.Severity = model.SeverityWarning
-			res.Advisory++
-		}
-		res.Issues = append(res.Issues, iss)
-	}
+	// Apply the shared enforcement policy, then annotate with the corpus size.
+	res := ApplyPolicy(cfg, raw)
+	res.ArtifactCount = len(arts)
 	return res, nil
 }

@@ -4,14 +4,18 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 
 	"github.com/chasedputnam/memphis/internal/canon/gate"
 	"github.com/chasedputnam/memphis/internal/canon/model"
+	"github.com/chasedputnam/memphis/internal/changegate"
+	"github.com/chasedputnam/memphis/internal/codeintel"
 	"github.com/chasedputnam/memphis/internal/config"
 	"github.com/chasedputnam/memphis/internal/sarif"
+	"github.com/chasedputnam/memphis/internal/store"
 )
 
 var gateCmd = &cobra.Command{
@@ -19,7 +23,13 @@ var gateCmd = &cobra.Command{
 	Short: "Run the Canon authority gate (validate + relationships + policy)",
 	Long: `Run the unified Canon gate over a store: validate every artifact, check
 relationship integrity, and classify findings as blocking or advisory per the
-store's enforcement policy. Exits non-zero if any blocking finding exists.`,
+store's enforcement policy. Exits non-zero if any blocking finding exists.
+
+Change-aware mode (--diff / --changed / --since) additionally reports which
+Accepted Canon artifacts govern each changed file, so a change that touches
+governed code is surfaced (and, per enforcement policy, can block). These
+findings are advisory by default; set them blocking via the enforcement policy
+rule codes "canon-governed-change" and "governed-symbol-unresolved".`,
 	Args: cobra.MaximumNArgs(1),
 	RunE: runGate,
 }
@@ -28,6 +38,38 @@ func init() {
 	rootCmd.AddCommand(gateCmd)
 	gateCmd.Flags().Bool("json", false, "Output result as JSON")
 	gateCmd.Flags().Bool("sarif", false, "Output result as SARIF 2.1.0")
+	gateCmd.Flags().Bool("diff", false, "Change-aware: evaluate the git staged diff against Canon")
+	gateCmd.Flags().String("changed", "", "Change-aware: evaluate this comma-separated file list (bypasses git)")
+	gateCmd.Flags().String("since", "", "Change-aware: evaluate files changed since this git ref")
+}
+
+// changeSource builds a changegate.Source from the flags, and reports whether
+// change-aware mode is enabled at all. An explicit list wins over --since, which
+// wins over --diff (staged).
+func changeSource(cmd *cobra.Command) (changegate.Source, bool) {
+	diff, _ := cmd.Flags().GetBool("diff")
+	changed, _ := cmd.Flags().GetString("changed")
+	since, _ := cmd.Flags().GetString("since")
+	switch {
+	case cmd.Flags().Changed("changed"):
+		return changegate.Source{Kind: changegate.SourceExplicit, Files: splitList(changed)}, true
+	case since != "":
+		return changegate.Source{Kind: changegate.SourceSince, Ref: since}, true
+	case diff:
+		return changegate.Source{Kind: changegate.SourceStaged}, true
+	default:
+		return changegate.Source{}, false
+	}
+}
+
+func splitList(s string) []string {
+	var out []string
+	for _, p := range strings.Split(s, ",") {
+		if p = strings.TrimSpace(p); p != "" {
+			out = append(out, p)
+		}
+	}
+	return out
 }
 
 func runGate(cmd *cobra.Command, args []string) error {
@@ -42,7 +84,8 @@ func runGate(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	res, err := gate.Run(storeRoot, cfg)
+	src, on := changeSource(cmd)
+	res, changedCount, err := computeGate(storeRoot, cfg, src, on)
 	if err != nil {
 		return err
 	}
@@ -56,7 +99,7 @@ func runGate(cmd *cobra.Command, args []string) error {
 		data, _ := json.MarshalIndent(res, "", "  ")
 		fmt.Println(string(data))
 	default:
-		printGateText(res)
+		printGateText(res, changedCount)
 	}
 
 	if !res.Passed() {
@@ -65,9 +108,38 @@ func runGate(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func printGateText(res gate.Result) {
+// computeGate runs the corpus gate and, when change-aware mode is on, folds the
+// governance findings into a single merged result. changedCount is the number of
+// changed files (-1 when the mode is off). This is the testable core of runGate,
+// separated from rendering and os.Exit.
+func computeGate(storeRoot string, cfg config.Config, src changegate.Source, on bool) (gate.Result, int, error) {
+	res, err := gate.Run(storeRoot, cfg)
+	if err != nil {
+		return gate.Result{}, -1, err
+	}
+	if !on {
+		return res, -1, nil
+	}
+	files, err := changegate.ChangedFiles(storeRoot, src)
+	if err != nil {
+		return gate.Result{}, -1, err
+	}
+	st, err := store.Load(storeRoot, cfg)
+	if err != nil {
+		return gate.Result{}, -1, err
+	}
+	defer st.Close()
+	ops := codeintel.NewOps(nil, storeRoot)
+	raw := changegate.Evaluate(st, ops, files)
+	return res.Merge(gate.ApplyPolicy(cfg, raw)), len(files), nil
+}
+
+func printGateText(res gate.Result, changedCount int) {
 	fmt.Println("memphis gate")
 	fmt.Printf("Artifacts: %d\n", res.ArtifactCount)
+	if changedCount >= 0 {
+		fmt.Printf("Changed files: %d\n", changedCount)
+	}
 	if res.Blocking > 0 {
 		color.Red("Blocking: %d", res.Blocking)
 	} else {

@@ -15,6 +15,17 @@ Memphis holds two kinds of memory:
   sites, imported Markdown) rendered as a navigable Open Knowledge Format (OKF) bundle of
   abundant, summarized, fast-changing supporting material.
 
+Alongside these two memory tiers, Memphis exposes a third, non-memory capability:
+
+- **Code intelligence**, a *live view of source*. Not stored memory — a read-only,
+  structural read of the repository's code via a pure-Go tree-sitter runtime
+  (`internal/codeintel`). It answers "what does the code actually do?" (outline, symbols,
+  source, callers, map, definition, check) with byte-precise, token-cheap results behind
+  stable **symbol-ids**, and **grounds Canon in code**: it resolves an authoritative
+  artifact to the real symbols it governs, and a symbol back to the artifacts that
+  reference it. This centralizes authoritative decisions and real code search into one
+  binary and one MCP server.
+
 The guiding model:
 
 > **Memory is Canon. Context is the budgeted projection of Canon plus Reference.
@@ -45,6 +56,20 @@ assemble (under a token budget)**.
    original Memphis; no gate is imposed on a pure-Reference store.
 6. **Writes happen outside the serve path.** All mutation is via CLI / Git PR review; the
    MCP server is read-only.
+7. **Code intelligence is read-only, pure-Go, and outside the authority path.**
+   `internal/codeintel` only reads source (never mutates), honors `.gitignore`, and
+   confines traversal to the working root. It uses a **pure-Go, cgo-free** tree-sitter
+   runtime with embedded grammars, so it adds no native toolchain and the binary still
+   cross-compiles with plain `go build`. It lives outside `internal/canon/...` and a
+   dedicated boundary test proves the authority path never depends on it, so the gate stays
+   deterministic and offline.
+8. **The gate evaluates change, not just Canon.** By default `memphis gate` checks that
+   *Canon* is well-formed; in change-aware mode (`--diff` / `--since` / `--changed`) it
+   also reports which Accepted Canon governs each changed file and flags drift on touched
+   code. This mapping needs `store` + `codeintel`, so it lives in `internal/changegate`,
+   **outside** `internal/canon/...` — the same quarantine as code intelligence, enforced by
+   the same boundary test. It stays a pure structural function of repository state (no LLM,
+   no network): it surfaces and cites governed change, it never renders a semantic verdict.
 
 ---
 
@@ -80,18 +105,49 @@ flowchart TB
         scale["scale (RAG graduation)"]
     end
 
+    subgraph Code["internal/codeintel: CODE INTELLIGENCE (pure-Go, read-only, offline)"]
+        engine["engine (tree-sitter extract / check / resolve)"]
+        codeops["ops (outline, symbols, source, callers, map, definition)"]
+        reg["registry (//go:embed grammars + .scm queries)"]
+    end
+
+    subgraph CGate["internal/changegate: CHANGE-AWARE GATE (outside authority path)"]
+        csrc["source (git staged / --since / --changed)"]
+        cgov["govern (changed files → governing Canon)"]
+        cdrift["drift (touched symbol no longer resolves)"]
+    end
+
     subgraph MCP["internal/mcp: read-only server"]
         tools["Canon + discovery tools"]
+        codetools["code tools + grounding (code_for_artifact / artifacts_for_symbol)"]
     end
 
     CLI --> Store
+    CLI --> codeops
+    CLI --> CGate
     Store --> Canon
     Store --> Ref
     MCP --> Store
+    MCP --> codeops
+    codetools --> Store
+    codetools --> codeops
+    codeops --> engine
+    engine --> reg
+    cgov --> Store
+    cdrift --> codeops
+    CGate --> gate
     retrieval --> search
     retrieval --> relate
     gate --> CLI
+    gate -. no dependency .-> Code
+    gate -. no dependency .-> CGate
 ```
+
+The dashed edges are load-bearing: `internal/codeintel` and `internal/changegate` both sit
+outside `internal/canon/...`, so the gate's dependency graph — and therefore its
+deterministic, offline behavior — is unaffected by either. The change-aware gate *consumes*
+the corpus gate's classifier (`gate.ApplyPolicy`) and merges its findings; the corpus gate
+never depends on it.
 
 ---
 
@@ -117,11 +173,31 @@ flowchart TB
 
 | Package | Responsibility |
 |---|---|
-| `internal/config` | `.okf/config.yaml`: `repository_key`, `canon_roots`, `ticketing.provider`, `enforcement` policy |
+| `internal/config` | `.okf/config.yaml`: `repository_key`, `canon_roots`, `spec_roots`, `code_roots`, `ticketing.provider`, `enforcement` policy |
 | `internal/store` | The seam: load both tiers into one `Item`, build the unified search index, relationship graph, and resolved relationships; `Rebuild()` regenerates all derived state |
 | `internal/retrieval` | The agent loop: `Assemble` = discover (both tiers) → ground (Canon: status, edges, citation; resolve superseded → successor) → pack under a token budget (Canon-first; `[REQ-NNN]` text kept verbatim; overflow → follow-up) |
 | `internal/sarif` | SARIF 2.1.0 emitter for CI |
-| `internal/mcp` | Read-only MCP server exposing Canon + discovery tools |
+| `internal/changegate` | The **change-aware gate** (outside `internal/canon/...`): given a changed-file set (git staged / `--since` / explicit), resolve which Accepted Canon artifacts govern each file (literal path or symbol-id citation, deterministic full-corpus scan) and report drift on touched code. Emits ordinary `model.Issue`s classified by the shared `gate.ApplyPolicy` and merged into the corpus result. Depends on `store` + `codeintel`, so it is quarantined here and a boundary test forbids `internal/canon/...` from importing it. |
+| `internal/mcp` | Read-only MCP server exposing Canon + discovery tools, the code-intelligence tools, and the two Canon↔code grounding tools |
+
+### Code intelligence: `internal/codeintel` (pure-Go, read-only, offline)
+
+A native Go re-implementation of structural code search/navigation over a **pure-Go,
+cgo-free** tree-sitter runtime (`github.com/odvcencio/gotreesitter`). The `symbol-id`
+scheme, output shapes, and extraction semantics mirror grove for parity.
+
+| File | Responsibility |
+|---|---|
+| `codeintel.go` | Package doc + the output types (`Symbol`, `Defect`, `SourceResult`, `CallSite`, `FileMap`/`MapEntry`, `DefinitionResult`). |
+| `symbolid.go` | The `symbol-id` scheme `<lang>:<relpath>#<name>@<line>` (1-based): `FormatID`, and the two distinct parsers `ParseID` and `ParsePos`. |
+| `registry.go` + `registry/<lang>/` | `//go:embed`-ed per-language `tags.scm`/`locals.scm`/`imports.scm` + `profile.json`; resolves a file to its grammar (via gotreesitter) and query set. Supported: Go, Python, JavaScript, TypeScript, TSX, Java, Rust. |
+| `engine.go`, `resolve.go` | Parse-on-demand extraction (tags query → `Symbol`s, parent via `containers`, overlap dedup), `Check` (ERROR/MISSING), and scope-aware `definition --at` resolution. |
+| `ops.go`, `opshelpers.go`, `imports.go`, `ignore.go` | The seven operations, `.gitignore`-aware/root-confined directory walks, and import-edge resolution (`dotted_package` / `relative_path`). |
+
+Grammars are embedded at build time via gotreesitter's `grammar_subset` build tags (set in
+the Makefile), so no operation performs any network access and the release binary stays
+lean. Both faces — CLI subcommands (`internal/cli/codeintel.go`) and MCP tools
+(`internal/mcp/codeintel.go`) — call the same `Ops`, so their results are equivalent.
 
 ### Reference engine: existing Memphis packages (unchanged half)
 
@@ -173,6 +249,39 @@ flowchart LR
 blocking / advisory / disabled; otherwise the finding's intrinsic severity decides
 (error → blocking).
 
+### The change-aware gate (`internal/changegate`)
+
+```mermaid
+flowchart LR
+    A["--diff / --since / --changed"] --> B["ChangedFiles: git or explicit → store-root-relative paths"]
+    B --> C["govern: scan every Canon body<br/>(literal path / symbol-id citation)"]
+    C --> D["superseded → live successor;<br/>skip dead authority"]
+    B --> E["drift: cited symbol on a changed<br/>file no longer resolves (codeintel)"]
+    D --> F["findings → model.Issue (severity warning)"]
+    E --> F
+    F --> G["gate.ApplyPolicy (shared classifier)"]
+    G --> H["Result.Merge into the corpus result → one exit code"]
+```
+
+The change set is resolved from the git staged index (default), a `--since <ref>` range,
+or an explicit `--changed` list (which bypasses git and works in a non-git tree). Paths are
+normalized to store-root-relative slash form; anything outside the store root is dropped.
+Governance is matched at **file granularity** by iterating the full Canon corpus in load
+order (never the fuzzy search index) so results are complete and deterministic, and only
+from **literal** references — a file path or a symbol-id whose path is that file — never
+fuzzy matching. Two stable finding codes are emitted, both advisory by default and
+escalatable via `enforcement`:
+
+| Code | Meaning |
+|---|---|
+| `canon-governed-change` | a changed file is governed by an Accepted artifact (path or symbol-id citation) |
+| `governed-symbol-unresolved` | a governing artifact cites a symbol on a changed file that no longer resolves (renamed / moved / deleted) |
+
+Because the findings are ordinary `model.Issue`s classified by the same `gate.ApplyPolicy`
+and merged with `Result.Merge`, every existing renderer (text / JSON / SARIF) and the single
+exit code cover them with no new plumbing. With no change flag, the gate is byte-identical to
+before.
+
 ### Retrieval (`internal/retrieval`)
 
 ```mermaid
@@ -188,6 +297,37 @@ sequenceDiagram
     MCP->>MCP: assemble: Canon first; compress Reference;<br/>preserve [REQ-NNN] verbatim; overflow → follow-up
     MCP-->>Agent: budgeted context + citations
 ```
+
+### Code intelligence (parse on demand)
+
+```
+outline/symbols/source/callers/map/definition/check
+  → registry.ForFile: detect language, load embedded grammar + tags/locals/imports queries
+  → engine.Extract: parse once (tree-sitter), run tags query → []Symbol (each with a symbol-id)
+  → op-specific shaping (detail tiers, structural+textual callers, innermost-enclosing refs, …)
+  → JSON (CLI --json / MCP), symbol-ids stable across calls
+```
+
+No index and no cache beyond compiled queries: every call parses the file(s) it needs, so
+identical repository state yields identical results.
+
+### Grounding: how Canon maps to code
+
+The bridge is the **symbol-id**. A Canon artifact names the code it governs by mentioning a
+symbol-id in its prose — the same literal-reference model used for `OKF-…` relationships
+between artifacts (no fuzzy matching). The `internal/mcp` grounding tools (and
+`memphis ground`) traverse it both ways, bridging `store.Store` and `codeintel.Ops`:
+
+```mermaid
+flowchart LR
+    A["Canon artifact OKF-…<br/>body cites go:pkg/f.go#Fn@42"] -->|code_for_artifact| B[codeintel.Source per symbol-id]
+    B --> C["resolved source<br/>+ unresolved[] (renamed/moved/deleted)"]
+    D["symbol-id or file path"] -->|artifacts_for_symbol| E["store.Discover → Canon hits<br/>that reference it"]
+```
+
+Both tools are **read-only** and never write Canon. An unresolvable reference is reported as
+unresolved rather than matched to the wrong symbol, so the authority↔implementation link is
+honest: a reviewer can see when an artifact's cited code has drifted out from under it.
 
 ---
 
@@ -250,10 +390,32 @@ When interoperating, the two tools meet at the Open Knowledge Format: rac-core c
 - **Backward-compatibility**: pure-Reference stores impose no gate and behave as legacy.
 - **Retrieval tests**: authority-first ranking, verbatim `[REQ-NNN]` fidelity under
   compression, superseded→successor resolution, overflow → follow-up.
+- **Code-intelligence tests**: per-language extraction/parity for every supported grammar,
+  symbol-id round-trip and the two-parser edge cases, the seven operations, `.gitignore`
+  (root + nested) and root-confinement, and grounding in both directions (including the
+  `unresolved` path). Run under `-race`.
+- **Code-intelligence boundary test**: fails the build if `internal/canon/...` ever depends
+  on `internal/codeintel`, `internal/changegate`, or the tree-sitter runtime, keeping the
+  gate untouched by either feature. The Makefile's `build-all` (with `CGO_ENABLED=0`) is the
+  executable proof that the binary stays cgo-free and cross-compilable.
+- **Change-aware gate tests**: change sourcing (staged / `--since` / explicit / non-git →
+  clear error / nested-store path normalization); governance matching (cite-by-path,
+  cite-by-symbol-id, path-boundary non-matches, superseded→successor, dead-authority skip);
+  drift (unresolved cited symbol reported, never mis-matched; nil-ops and deleted-file
+  paths); policy classification and single merged exit code (advisory default, blocking via
+  enforcement, corpus-blocking + change-advisory); JSON/SARIF field and location stability;
+  determinism across runs; and a backward-compat golden proving the no-flags gate equals the
+  corpus gate byte-for-byte.
 
 ---
 
 ## Spec
 
-The full requirements, design, and task breakdown for this implementation live under
-[`specs/unified-agent-memory/`](./specs/unified-agent-memory/).
+The full requirements, design, and task breakdown live under the spec directories:
+
+- [`specs/unified-agent-memory/`](./specs/unified-agent-memory/) — the Canon/Reference
+  authority-and-recall implementation.
+- [`specs/code-intelligence/`](./specs/code-intelligence/) — the structural code
+  intelligence and Canon↔code grounding implementation.
+- [`specs/change-aware-gate/`](./specs/change-aware-gate/) — the change-aware gate:
+  evaluating a code change against the Canon that governs it.
