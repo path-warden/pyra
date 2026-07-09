@@ -398,6 +398,32 @@ Behavioral signals mined from git history — deterministic, offline, no LLM, an
 
 Metrics: per-file commit windows, line churn, age, temporal hotspot score (180-day half-life), primary/recent owner, contributor count, bus factor (min authors reaching 80% of commits), co-change partners; repo-level hotspot ranking; and per-module rollups. Ownership is by commit-author distribution (`git blame` line-ownership and the churn×complexity hotspot refinement arrive with code health). See [`docs/REPOWISE_PARITY.md`](docs/REPOWISE_PARITY.md).
 
+### Code graph
+
+A persistent two-tier (file + symbol) dependency graph built from code intelligence — deterministic, offline, no LLM, no external graph library.
+
+| Command | Purpose |
+|---|---|
+| `memphis graph [store]` | Query the code dependency graph. Subviews: `--centrality` (PageRank hubs), `--communities` (logical modules via label propagation), `--cycles` (dependency cycles / SCCs), `--reachability` (reachable-from-entry-points vs. the unreachable rest). Flags: `--limit`, `--scope`, `--node-cap`, `--json`. |
+
+Symbol nodes (keyed by symbol-id) + file nodes; reference edges resolved by the same honest name-matching `callers` uses (edge to every matching definition on a name collision, never a guessed target). Analyses are standard and self-contained — PageRank, deterministic label propagation, Tarjan SCC, and entry-point reachability (whose unreachable set feeds dead-code detection). Betweenness centrality and Leiden are intentionally deferred.
+
+| Command | Purpose |
+|---|---|
+| `memphis dead-code [store]` | Report likely-unreachable definitions (no path from entry points in the graph), ranked by cleanup impact, each with a confidence tier — **high** (no textual references, safe to delete), **medium** (has textual/possibly-dynamic references), **low** (a test-file helper) — and a `[governed]` marker when Accepted Canon still cites the now-unreachable code (drift). Flags: `--tier`, `--limit`, `--json`. |
+
+Dead-code **consumes** the graph's reachability (no new analysis); it excludes `Test*`/`main` entry points and, because memphis has no framework route→handler edges, uses the conservative high tier to avoid flagging route-only handlers (which are usually exported, hence reachable). No auto-removal.
+
+### Code health
+
+Per-file **health scoring** across three signals — **defect risk · maintainability · performance** — from a deterministic biomarker roster over code structure, git history, the dependency graph, and Canon governance. Zero LLM, offline.
+
+| Command | Purpose |
+|---|---|
+| `memphis health [store]` | Repo KPIs (NLOC-weighted average + hotspot health, worst performer) and the lowest-scoring files with their three dimension scores and top marker. Flags: `--file <path>` (per-file findings + impacts + refactoring suggestion), `--coverage <report>` (ingest LCOV/Cobertura), `--limit`, `--json`. |
+
+The roster (~28 markers) spans **structural** (cyclomatic complexity, nesting, `god_class`/`god_file`, LCOM4 cohesion, …), **organizational** (churn, change entropy, co-change scatter, ownership risk, prior defects, …), **duplication** (Rabin–Karp clone detection), **coverage** (when a report is supplied), and memphis-unique **governance** markers — `ungoverned_hotspot` (a churn hotspot with no governing Canon), `stale_governance`, and `contradictory_decision`. Each file starts at 10 and biomarkers deduct under per-category caps; the scoring kernel is a **faithful port of [repowise](https://github.com/repowise-dev/repowise)'s** (AGPL-3.0), isolated to one swappable file and pinned by a parity test. The **performance dimension ships present-but-empty** (its loop/dataflow detectors are a follow-up); see [`docs/REPOWISE_PARITY.md`](docs/REPOWISE_PARITY.md).
+
 ### Automation (event hooks)
 
 | Command | Purpose |
@@ -470,6 +496,21 @@ For teams that also want a large docs corpus searchable as agent memory. These p
 |---|---|
 | `get_hotspots` | The repository's churn hotspots, ranked, with churn %, commit counts, owner, and bus factor. |
 | `get_ownership` | Ownership / bus factor for a file, or the top-level module rollups for a directory or empty path. |
+
+### Code graph
+
+| Tool | Returns |
+|---|---|
+| `get_graph_centrality` | Symbols ranked by PageRank over the dependency graph (the hubs). |
+| `get_communities` | The graph partitioned into communities (logical modules). |
+| `get_cycles` | Dependency cycles (strongly-connected components). |
+| `get_dead_code` | Likely-unreachable definitions ranked by cleanup impact, with confidence tier and governed flag. |
+
+### Code health
+
+| Tool | Returns |
+|---|---|
+| `get_health` | Repo health KPIs and the lowest-scoring files (defect / maintainability / performance) with top marker and refactoring suggestion. |
 
 ### Recall (Reference)
 

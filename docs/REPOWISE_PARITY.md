@@ -106,29 +106,47 @@ the diff*, surfaced alongside the change-aware gate's governance findings.
 Depends on a minimal slice of #1 (co-change + churn + author), which this spec
 bootstraps and #1 later generalizes.
 
-### 3. Dependency graph + centrality — `internal/codegraph`
+### 3. Dependency graph + centrality — `internal/codegraph` — **Status: landed**
 
-Promote `internal/codeintel`'s on-demand structural reads into a persistent,
-queryable graph: two-tier file+symbol nodes, PageRank / centrality, Leiden (or
-label-propagation) communities, execution flows. Powers "which symbols are
-hubs," better `will_break` ranking (centrality-weighted), and #5.
+[`specs/code-graph/`](../specs/code-graph/). One `codeintel.Map` walk of the code
+roots builds two-tier file+symbol nodes with containment, name-resolved reference
+(edge-to-all-matches), and derived file→file edges, then runs standard,
+self-contained analyses: **PageRank** centrality, deterministic **label-propagation**
+communities, **Tarjan SCC** cycles, and **entry-point reachability** (whose
+unreachable set #5 consumes). Surfaced via `memphis graph`
+(`--centrality`/`--communities`/`--cycles`/`--reachability`) and the
+`get_graph_centrality`/`get_communities`/`get_cycles` MCP tools (lazily built +
+cached). **Betweenness centrality and Leiden are deferred** (PageRank +
+label-propagation are the deterministic, no-dependency equivalents); the
+centrality-weighted `will_break` enhancement to #2 remains a follow-up.
 
-### 4. Code health — `internal/codehealth`
+### 4. Code health — `internal/codehealth` — **Status: landed**
 
-Repowise's crown jewel: **25 deterministic markers** (McCabe, deep nesting, brain
-methods, LCOM4, god class, Rabin–Karp clones, untested hotspots, churn, code-age
-volatility, ownership dispersion, change entropy, co-change scatter, prior-defect
-history, test smells) → three separate signals (**defect risk /
-maintainability / performance**), plus **graph-aware refactoring plans** (Extract
-Class / Helper, Move Method, Break Cycle, Split File) with blast radius. Leads
-with repo-relative ranking; ships no un-trained absolute claim. Authority tie-in:
-`ungoverned_hotspot` (a low-health hotspot with no governing Canon) and
-`stale_governance`. Depends on #1 (git signals) and benefits from #3 (graph).
+[`specs/code-health/`](../specs/code-health/). The full defect/maintainability
+biomarker roster (~28 markers: McCabe complexity, deep nesting, brain methods,
+LCOM4, god class/file, Rabin–Karp clones, coverage gap/gradient/untested-hotspot,
+churn, code-age volatility, ownership risk, change entropy, co-change scatter,
+prior-defect, hidden coupling, developer congestion, knowledge loss, error
+handling, test-quality) → three independently-capped signals (**defect /
+maintainability / performance**), aggregated by a **ported repowise scoring kernel
++ calibrated constants** (AGPL-3.0, `kernel_constants.go`, parity-pinned). Needs
+one enabler — an AST-**metrics** pass added to `internal/codeintel`. Authority tie-in
+(memphis-unique): `ungoverned_hotspot`, `stale_governance`, `contradictory_decision`.
+Surfaced via `memphis health` (`--file`/`--coverage`/`--json`) and `get_health`.
+**Deferred:** the performance detector subsystem (io_in_loop + ~20 loop/async/SQL
+markers + the CFG engine) — the performance dimension ships present-but-empty; and
+graph-aware refactoring *code generation* (memphis names the fix, no codegen).
 
-### 5. Dead code — `internal/deadcode`
+### 5. Dead code — `internal/deadcode` — **Status: landed**
 
-Unreachable definitions by confidence tier with cleanup-impact estimates, built
-on the #3 reachability graph, honoring entry points and framework routes.
+[`specs/dead-code/`](../specs/dead-code/). A thin consumer of #3's reachability:
+it takes `codegraph.Reachability().Unreachable`, tiers each symbol by confidence
+(high = no references · medium = textual/dynamic references · low = test helper),
+estimates cleanup impact (line count via `codeintel.Source`), and flags **governed
+dead code** (an unreachable symbol still cited by Canon — drift). Excludes
+`Test*`/`main`. Surfaced via `memphis dead-code` (`--tier`/`--json`) and
+`get_dead_code`. **Documented limitations:** no framework route→handler edges (the
+conservative high tier mitigates), no auto-removal, no cross-repo consumers.
 
 ## What each capability adds to the authority model
 

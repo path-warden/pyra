@@ -179,6 +179,9 @@ never depends on it.
 | `internal/sarif` | SARIF 2.1.0 emitter for CI |
 | `internal/changegate` | The **change-aware gate** (outside `internal/canon/...`): given a changed-file set (git staged / `--since` / explicit), resolve which Accepted Canon artifacts govern each file (literal path or symbol-id citation, deterministic full-corpus scan) and report drift on touched code. Emits ordinary `model.Issue`s classified by the shared `gate.ApplyPolicy` and merged into the corpus result. Depends on `store` + `codeintel`, so it is quarantined here and a boundary test forbids `internal/canon/...` from importing it. |
 | `internal/changerisk` | **Change-risk** (outside `internal/canon/...`): score a change (staged / commit / range) for defect risk from Kamei JIT diff metrics, lead with a repo-relative ranking, and emit PR directives (`risk-missing-tests`, `risk-missing-cochanges`, `risk-will-break`, `risk-governance` — the last reusing `changegate`). The scoring model + learned constants are a faithful **port of repowise** (AGPL-3.0) confined to `model_constants.go` (swappable) and pinned by a parity test. Emits `model.Issue`s merged via `gate.ApplyPolicy`. Depends on `gitint` + `codeintel` + `store`. |
+| `internal/deadcode` | **Dead-code detection** (outside `internal/canon/...`): a thin consumer of `codegraph.Reachability` — it takes the `Unreachable` set, tiers each symbol by confidence (high = no references · medium = has textual/dynamic references · low = test helper) via one whole-source scan, estimates cleanup impact (line count via `codeintel.Source`), and flags governed dead code (an unreachable symbol still cited by Canon, literal symbol-id match). Excludes `Test*`/`main`. Surfaced via `memphis dead-code` and `get_dead_code`. Depends on `codegraph` + `codeintel` + `store`. |
+| `internal/codehealth` | The **code-health layer** (outside `internal/canon/...`): scores every file across three independently-capped signals (defect / maintainability / performance) from a ~28-marker deterministic biomarker roster over `codeintel` (a new AST-**metrics** pass: cyclomatic complexity, nesting, LCOM4 field access, error patterns), `gitint`, `codegraph`, and Canon governance, plus LCOV/Cobertura coverage ingestion and a Rabin–Karp clone detector. The scoring **kernel + calibrated constants** are a faithful port of repowise (AGPL-3.0), confined to `kernel_constants.go` and pinned by a parity test. Surfaced via `memphis health` and `get_health`. Governance markers (`ungoverned_hotspot`/`stale_governance`/`contradictory_decision`) are the authority tie-in. The performance dimension is wired but present-but-empty (detectors deferred). Depends on `codeintel` + `gitint` + `codegraph` + `store` + `changegate`. |
+| `internal/codegraph` | The **code dependency graph** (outside `internal/canon/...`): from one `codeintel.Map` walk of the code roots it builds two-tier file+symbol nodes with containment, reference (name-resolved, edge-to-all-matches), and derived file→file edges, then runs standard self-contained analyses — PageRank centrality, deterministic label-propagation communities, Tarjan SCC cycles, and entry-point reachability (whose unreachable set feeds dead-code, #5). Surfaced via `memphis graph` and the `get_graph_centrality`/`get_communities`/`get_cycles` MCP tools (lazily built + cached on the server). No external graph library, no learned constants; betweenness + Leiden deferred. Depends on `codeintel` + `config`. See [`docs/REPOWISE_PARITY.md`](docs/REPOWISE_PARITY.md). |
 | `internal/gitint` | The **git-intelligence layer** (outside `internal/canon/...`): from one bounded `git log --numstat` walk it derives per-file metrics (commit windows, churn, age, temporal hotspot score, ownership %, recent owner, contributor count, bus factor, co-change), a repo-relative hotspot ranking (top-quartile churn + activity floors), and top-level-module rollups — all anchored to HEAD's commit time for byte-identical reruns. Pure git (no `codeintel` import; the "co-change minus import edges" join lives in `changerisk`). Surfaced via `memphis hotspots` / `memphis ownership` and the `get_hotspots` / `get_ownership` MCP tools; the `Churn`/`CoChangePartners`/`AuthorCommits` API is preserved for `changerisk`. Independent implementation, no learned constants — see [`docs/REPOWISE_PARITY.md`](docs/REPOWISE_PARITY.md). |
 | `internal/mcp` | Read-only MCP server exposing Canon + discovery tools, the code-intelligence tools, and the two Canon↔code grounding tools |
 
@@ -398,9 +401,16 @@ When interoperating, the two tools meet at the Open Knowledge Format: rac-core c
   `unresolved` path). Run under `-race`.
 - **Code-intelligence boundary test**: fails the build if `internal/canon/...` ever depends
   on `internal/codeintel`, `internal/changegate`, `internal/changerisk`, `internal/gitint`,
-  or the tree-sitter runtime, keeping the gate untouched by any of these features. The
-  Makefile's `build-all` (with `CGO_ENABLED=0`) is the executable proof that the binary
-  stays cgo-free and cross-compilable.
+  `internal/codegraph`, `internal/codehealth`, `internal/deadcode`, or the tree-sitter runtime, keeping the gate
+  untouched by any of these features. The Makefile's `build-all` (with `CGO_ENABLED=0`) is the executable proof
+  that the binary stays cgo-free and cross-compilable.
+- **Code-graph tests**: build (node/containment/reference edges incl. name-collision
+  edge-to-all, file-edge aggregation, unresolved→no-edge, node-cap truncation, per-language
+  exported detection); PageRank (hub outranks leaf, dangling handling, determinism);
+  label-propagation communities (two clusters split, reproducible); Tarjan cycles (mutual +
+  self-loop reported, acyclic ignored); reachability (exported/main roots, no-entry-points →
+  all unreachable); a build-and-analyze-twice + root-order-independence determinism test; and
+  CLI/MCP equivalence.
 - **Change-risk tests**: model parity against repowise's `score_change` (golden table, ±0.05)
   and determinism; feature extraction (numstat, entropy edge cases, author experience);
   repo-relative ranking (mid-rank percentile with ties, tercile boundaries, unavailable under
@@ -435,3 +445,11 @@ The full requirements, design, and task breakdown live under the spec directorie
 - [`specs/git-intelligence/`](./specs/git-intelligence/) — the full git-intelligence
   layer (hotspots, ownership, bus factor, module rollups); repowise-parity
   capability #1.
+- [`specs/code-graph/`](./specs/code-graph/) — the code dependency graph
+  (centrality, communities, cycles, reachability); repowise-parity capability #3.
+- [`specs/code-health/`](./specs/code-health/) — the code-health layer (the full
+  biomarker roster, three signals, ported scoring kernel, governance tie-ins);
+  repowise-parity capability #4.
+- [`specs/dead-code/`](./specs/dead-code/) — dead-code detection (tiered
+  unreachable symbols, cleanup impact, governed-dead-code); repowise-parity
+  capability #5 — the roadmap is complete.
