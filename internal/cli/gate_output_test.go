@@ -15,7 +15,7 @@ func TestGateOutput_JSONIncludesGovernanceFields(t *testing.T) {
 	writeGateFile(t, root, "canon/d.md", governedDecision("OKF-000000000AAA"))
 
 	res, _, err := computeGate(root, config.Default(),
-		changegate.Source{Kind: changegate.SourceExplicit, Files: []string{"internal/cache/store.go"}}, true)
+		changegate.Source{Kind: changegate.SourceExplicit, Files: []string{"internal/cache/store.go"}}, true, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -41,7 +41,7 @@ func TestGateOutput_SARIFLocationAndRuleID(t *testing.T) {
 	writeGateFile(t, root, "canon/d.md", governedDecision("OKF-000000000AAA"))
 
 	res, _, err := computeGate(root, config.Default(),
-		changegate.Source{Kind: changegate.SourceExplicit, Files: []string{"internal/cache/store.go"}}, true)
+		changegate.Source{Kind: changegate.SourceExplicit, Files: []string{"internal/cache/store.go"}}, true, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -72,13 +72,13 @@ func TestGateOutput_StableAcrossRuns(t *testing.T) {
 	writeGateFile(t, root, "canon/a.md", governedDecision("OKF-000000000AAA"))
 
 	src := changegate.Source{Kind: changegate.SourceExplicit, Files: []string{"internal/cache/store.go"}}
-	res1, _, err := computeGate(root, config.Default(), src, true)
+	res1, _, err := computeGate(root, config.Default(), src, true, false)
 	if err != nil {
 		t.Fatal(err)
 	}
 	first, _ := json.Marshal(res1)
 	for i := 0; i < 3; i++ {
-		res2, _, err := computeGate(root, config.Default(), src, true)
+		res2, _, err := computeGate(root, config.Default(), src, true, false)
 		if err != nil {
 			t.Fatal(err)
 		}

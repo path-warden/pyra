@@ -11,6 +11,7 @@ import (
 	"sync"
 
 	"github.com/chasedputnam/memphis/internal/codeintel"
+	"github.com/chasedputnam/memphis/internal/gitint"
 	"github.com/chasedputnam/memphis/internal/compress"
 	"github.com/chasedputnam/memphis/internal/config"
 	"github.com/chasedputnam/memphis/internal/scale"
@@ -39,8 +40,9 @@ type Server struct {
 	mcpServer      *server.MCPServer
 	stats          *CompressionStats
 
-	store *store.Store   // unified Canon + Reference store for authority-aware tools
-	code  *codeintel.Ops // code-intelligence operations, rooted at the bundle dir
+	store *store.Store    // unified Canon + Reference store for authority-aware tools
+	code  *codeintel.Ops  // code-intelligence operations, rooted at the bundle dir
+	git   *gitint.History // git-intelligence index, rooted at the bundle dir (may be nil)
 }
 
 // NewServer creates a new MCP server.
@@ -78,10 +80,17 @@ func NewServer(opts ServerOptions) (*Server, error) {
 
 	s.code = codeintel.NewOps(codeintel.NewEngine(nil), opts.BundleDir)
 
+	// Git-intelligence index, best-effort like the store: nil when the bundle is
+	// not a git repository (the tools then report "unavailable").
+	if gi, ok := gitint.New(opts.BundleDir, gitint.DefaultWindow); ok {
+		s.git = gi
+	}
+
 	s.mcpServer = server.NewMCPServer(name, "0.1.0")
 	s.registerTools()
 	s.registerCanonTools()
 	s.registerCodeIntelTools()
+	s.registerGitIntelTools()
 
 	return s, nil
 }

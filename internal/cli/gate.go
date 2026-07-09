@@ -12,6 +12,7 @@ import (
 	"github.com/chasedputnam/memphis/internal/canon/gate"
 	"github.com/chasedputnam/memphis/internal/canon/model"
 	"github.com/chasedputnam/memphis/internal/changegate"
+	"github.com/chasedputnam/memphis/internal/changerisk"
 	"github.com/chasedputnam/memphis/internal/codeintel"
 	"github.com/chasedputnam/memphis/internal/config"
 	"github.com/chasedputnam/memphis/internal/sarif"
@@ -29,7 +30,13 @@ Change-aware mode (--diff / --changed / --since) additionally reports which
 Accepted Canon artifacts govern each changed file, so a change that touches
 governed code is surfaced (and, per enforcement policy, can block). These
 findings are advisory by default; set them blocking via the enforcement policy
-rule codes "canon-governed-change" and "governed-symbol-unresolved".`,
+rule codes "canon-governed-change" and "governed-symbol-unresolved".
+
+--risk additionally scores the change for defect risk (repo-relative ranking +
+directives: missing_tests, missing_cochanges, will_break, governance_risk) and
+merges those findings into the same result and exit code. Rule codes:
+"change-risk", "risk-missing-tests", "risk-missing-cochanges", "risk-will-break",
+"risk-governance". See "memphis risk" for the standalone report.`,
 	Args: cobra.MaximumNArgs(1),
 	RunE: runGate,
 }
@@ -41,6 +48,7 @@ func init() {
 	gateCmd.Flags().Bool("diff", false, "Change-aware: evaluate the git staged diff against Canon")
 	gateCmd.Flags().String("changed", "", "Change-aware: evaluate this comma-separated file list (bypasses git)")
 	gateCmd.Flags().String("since", "", "Change-aware: evaluate files changed since this git ref")
+	gateCmd.Flags().Bool("risk", false, "Also score the change for defect risk (implies change-aware; staged by default)")
 }
 
 // changeSource builds a changegate.Source from the flags, and reports whether
@@ -85,7 +93,12 @@ func runGate(cmd *cobra.Command, args []string) error {
 		return err
 	}
 	src, on := changeSource(cmd)
-	res, changedCount, err := computeGate(storeRoot, cfg, src, on)
+	risk, _ := cmd.Flags().GetBool("risk")
+	if risk && !on {
+		// --risk with no explicit source defaults to the staged diff.
+		src, on = changegate.Source{Kind: changegate.SourceStaged}, true
+	}
+	res, changedCount, err := computeGate(storeRoot, cfg, src, on, risk)
 	if err != nil {
 		return err
 	}
@@ -112,7 +125,7 @@ func runGate(cmd *cobra.Command, args []string) error {
 // governance findings into a single merged result. changedCount is the number of
 // changed files (-1 when the mode is off). This is the testable core of runGate,
 // separated from rendering and os.Exit.
-func computeGate(storeRoot string, cfg config.Config, src changegate.Source, on bool) (gate.Result, int, error) {
+func computeGate(storeRoot string, cfg config.Config, src changegate.Source, on, risk bool) (gate.Result, int, error) {
 	res, err := gate.Run(storeRoot, cfg)
 	if err != nil {
 		return gate.Result{}, -1, err
@@ -130,8 +143,28 @@ func computeGate(storeRoot string, cfg config.Config, src changegate.Source, on 
 	}
 	defer st.Close()
 	ops := codeintel.NewOps(nil, storeRoot)
-	raw := changegate.Evaluate(st, ops, files)
-	return res.Merge(gate.ApplyPolicy(cfg, raw)), len(files), nil
+	res = res.Merge(gate.ApplyPolicy(cfg, changegate.Evaluate(st, ops, files)))
+
+	if risk {
+		rep, err := changerisk.Assess(storeRoot, storeRoot, riskChange(src), st, ops, changerisk.Options{})
+		if err != nil {
+			return gate.Result{}, -1, err
+		}
+		res = res.Merge(gate.ApplyPolicy(cfg, rep.Issues()))
+	}
+	return res, len(files), nil
+}
+
+// riskChange maps the gate's change source to a changerisk.Change.
+func riskChange(src changegate.Source) changerisk.Change {
+	switch src.Kind {
+	case changegate.SourceSince:
+		return changerisk.Change{Mode: changerisk.ModeSince, Ref: src.Ref}
+	case changegate.SourceExplicit:
+		return changerisk.Change{Mode: changerisk.ModeFiles, Files: src.Files}
+	default:
+		return changerisk.Change{Mode: changerisk.ModeStaged}
+	}
 }
 
 func printGateText(res gate.Result, changedCount int) {
@@ -155,10 +188,15 @@ func printGateText(res gate.Result, changedCount int) {
 		if iss.Line > 0 {
 			loc = fmt.Sprintf("%s:%d", iss.Path, iss.Line)
 		}
+		// Repo-level findings (e.g. the change-risk headline) carry no path.
+		prefix := fmt.Sprintf("  [%s] %s: ", iss.Code, loc)
+		if loc == "" {
+			prefix = fmt.Sprintf("  [%s] ", iss.Code)
+		}
 		if iss.Severity == model.SeverityError {
-			color.Red("  [%s] %s: %s", iss.Code, loc, iss.Message)
+			color.Red("%s%s", prefix, iss.Message)
 		} else {
-			color.Yellow("  [%s] %s: %s", iss.Code, loc, iss.Message)
+			color.Yellow("%s%s", prefix, iss.Message)
 		}
 	}
 	if res.Passed() {

@@ -24,6 +24,10 @@ func TestCanonDoesNotDependOnCodeIntel(t *testing.T) {
 		// must never depend on it, or the gate's determinism/offline guarantee
 		// would be at risk.
 		"github.com/chasedputnam/memphis/internal/changegate",
+		// Change-risk and its git-intelligence substrate likewise depend on
+		// codeintel/store and must stay outside the authority path.
+		"github.com/chasedputnam/memphis/internal/changerisk",
+		"github.com/chasedputnam/memphis/internal/gitint",
 	}
 	for _, dep := range strings.Split(strings.TrimSpace(string(out)), "\n") {
 		for _, bad := range forbidden {

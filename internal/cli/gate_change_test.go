@@ -72,7 +72,7 @@ func TestComputeGate_StagedGovernedChange_Advisory(t *testing.T) {
 	gitCmd(t, root, "add", "internal/cache/store.go")
 
 	res, count, err := computeGate(root, config.Default(),
-		changegate.Source{Kind: changegate.SourceStaged}, true)
+		changegate.Source{Kind: changegate.SourceStaged}, true, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -100,7 +100,7 @@ func TestComputeGate_PolicyEscalatesToBlocking(t *testing.T) {
 	cfg := config.Default()
 	cfg.Enforcement.Blocking = []string{changegate.CodeGovernedChange}
 
-	res, _, err := computeGate(root, cfg, changegate.Source{Kind: changegate.SourceStaged}, true)
+	res, _, err := computeGate(root, cfg, changegate.Source{Kind: changegate.SourceStaged}, true, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -117,7 +117,7 @@ func TestComputeGate_ExplicitBypassesGit(t *testing.T) {
 	writeGateFile(t, root, "canon/d.md", governedDecision("OKF-000000000AAA"))
 
 	res, count, err := computeGate(root, config.Default(),
-		changegate.Source{Kind: changegate.SourceExplicit, Files: []string{"internal/cache/store.go"}}, true)
+		changegate.Source{Kind: changegate.SourceExplicit, Files: []string{"internal/cache/store.go"}}, true, false)
 	if err != nil {
 		t.Fatalf("explicit source must not need git: %v", err)
 	}
@@ -134,7 +134,7 @@ func TestComputeGate_NoGitNoExplicit_Errors(t *testing.T) {
 	writeGateFile(t, root, "canon/d.md", governedDecision("OKF-000000000AAA"))
 
 	_, _, err := computeGate(root, config.Default(),
-		changegate.Source{Kind: changegate.SourceStaged}, true)
+		changegate.Source{Kind: changegate.SourceStaged}, true, false)
 	if err != changegate.ErrNoChangeSource {
 		t.Errorf("err = %v, want ErrNoChangeSource", err)
 	}
@@ -161,7 +161,7 @@ Accepted
 	gitCmd(t, root, "add", "internal/cache/store.go")
 
 	res, _, err := computeGate(root, config.Default(),
-		changegate.Source{Kind: changegate.SourceStaged}, true)
+		changegate.Source{Kind: changegate.SourceStaged}, true, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -187,7 +187,7 @@ func TestComputeGate_ModeOffUnchanged(t *testing.T) {
 	root := t.TempDir()
 	writeGateFile(t, root, "canon/d.md", governedDecision("OKF-000000000AAA"))
 
-	res, count, err := computeGate(root, config.Default(), changegate.Source{}, false)
+	res, count, err := computeGate(root, config.Default(), changegate.Source{}, false, false)
 	if err != nil {
 		t.Fatal(err)
 	}

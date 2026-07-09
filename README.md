@@ -71,6 +71,8 @@ Each is typed Markdown with required sections, a minted opaque ID (`<repository-
 
 > **Change-aware mode (`--diff`).** By default the gate checks whether *Canon* is well-formed. Add `--diff` (staged diff), `--since <ref>`, or `--changed <files>` and the gate additionally reports which **Accepted Canon artifacts govern each changed file** — an artifact governs a file when its prose cites that file path or a symbol-id in it — so a change that touches governed code is surfaced with a citation, and drift (a cited symbol that no longer resolves) is flagged. These findings are **advisory by default**; escalate them to blocking via the enforcement rule codes `canon-governed-change` and `governed-symbol-unresolved`. The mode reuses the same policy, exit code, and SARIF output, and stays deterministic and offline (the mapping is purely structural — it lives in `internal/changegate`, outside the authority path).
 
+> **Change-risk (`--risk`).** Add `--risk` (or run `memphis risk`) and the gate also scores the change itself for **defect risk** from the shape of the diff (Kamei just-in-time metrics: lines ±, files, directories, subsystems, diffusion entropy, author experience). The headline is **repo-relative** — `Below typical` / `Typical` / `Elevated` plus a percentile against the repo's *own* recent commits (the portable signal; the raw 0–10 is shown only as a secondary, uncalibrated number). It emits PR **directives** as advisory findings: `risk-missing-tests` (changed source with no test in the diff), `risk-missing-cochanges` (files that usually change together but were omitted — hidden coupling, minus structural import links), `risk-will-break` (structural dependents of changed symbols), and `risk-governance` (the change touches Accepted Canon). All merge into the same result, exit code, JSON, and SARIF. Deterministic and offline — no LLM, no network — in `internal/changerisk` (with a minimal git-history substrate in `internal/gitint`), both outside the authority path. The scoring model is a **faithful port of [repowise](https://github.com/repowise-dev/repowise)'s change-risk model** (AGPL-3.0), isolated to one swappable file and pinned by a parity test; see [`docs/REPOWISE_PARITY.md`](docs/REPOWISE_PARITY.md).
+
 - **BCP-14 / RFC 8174**: only ALL-CAPS `MUST`/`SHALL`/`SHOULD` carry normative weight.
 - **ISO/IEC/IEEE 29148**: requirements should be singular and testable.
 - **EARS**: Easy Approach to Requirements Syntax conformance.
@@ -366,7 +368,8 @@ In rough order of use. Store-scoped commands default to the current directory (`
 
 | Command | Purpose |
 |---|---|
-| `memphis gate [store]` | Run the unified authority gate (validate + relationships + policy). Exits non-zero on any blocking finding. Flags: `--json`, `--sarif`; change-aware: `--diff` (staged), `--since <ref>`, `--changed <a,b>`. |
+| `memphis gate [store]` | Run the unified authority gate (validate + relationships + policy). Exits non-zero on any blocking finding. Flags: `--json`, `--sarif`; change-aware: `--diff` (staged), `--since <ref>`, `--changed <a,b>`; change-risk: `--risk`. |
+| `memphis risk [commit \| base..head]` | Score a change for defect risk (repo-relative ranking + PR directives). No arg scores the staged diff. Flags: `--store`, `--baseline`, `--ext`, `--json`. |
 | `memphis relationships [store]` | Report and validate the typed relationship graph. Flags: `--validate`, `--summary`, `--json`. |
 
 ### Code intelligence
@@ -383,6 +386,17 @@ Read-only structural search and navigation over source. Every command takes `--j
 | `memphis map <dir>` | Directory dependency graph. Flags: `--kind`, `--name`, `--name-contains`, `--json`. |
 | `memphis definition [name]` | Go-to-definition by name or `--at file:line:col`. Flags: `--at`, `--dir`, `--json`. |
 | `memphis ground <artifact-id \| symbol-id>` | Bridge Canon and code: resolve an artifact's cited symbols, or find artifacts that cite a symbol. Flags: `--store`, `--json`. |
+
+### Git intelligence
+
+Behavioral signals mined from git history — deterministic, offline, no LLM, anchored to HEAD's commit time so identical repository state yields identical output.
+
+| Command | Purpose |
+|---|---|
+| `memphis hotspots [store]` | Rank files by temporally-decayed churn (top-quartile hotspots that clear activity floors), with churn %, commits, owner, and bus factor. Flags: `--limit`, `--window`, `--json`. |
+| `memphis ownership [path]` | Ownership %, recent owner, contributor count, and bus factor for a file; module (top-level directory) rollups for a directory or no path. Flags: `--store`, `--window`, `--json`. |
+
+Metrics: per-file commit windows, line churn, age, temporal hotspot score (180-day half-life), primary/recent owner, contributor count, bus factor (min authors reaching 80% of commits), co-change partners; repo-level hotspot ranking; and per-module rollups. Ownership is by commit-author distribution (`git blame` line-ownership and the churn×complexity hotspot refinement arrive with code health). See [`docs/REPOWISE_PARITY.md`](docs/REPOWISE_PARITY.md).
 
 ### Automation (event hooks)
 
@@ -449,6 +463,13 @@ For teams that also want a large docs corpus searchable as agent memory. These p
 |---|---|
 | `code_for_artifact` | The current source for every symbol-id a Canon artifact cites; lists any that no longer resolve. |
 | `artifacts_for_symbol` | The Canon artifacts that reference a given symbol-id or file. |
+
+### Git intelligence
+
+| Tool | Returns |
+|---|---|
+| `get_hotspots` | The repository's churn hotspots, ranked, with churn %, commit counts, owner, and bus factor. |
+| `get_ownership` | Ownership / bus factor for a file, or the top-level module rollups for a directory or empty path. |
 
 ### Recall (Reference)
 

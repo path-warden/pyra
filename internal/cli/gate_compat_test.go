@@ -39,7 +39,7 @@ Something is slow.
 	if err != nil {
 		t.Fatal(err)
 	}
-	got, count, err := computeGate(root, cfg, changegate.Source{}, false)
+	got, count, err := computeGate(root, cfg, changegate.Source{}, false, false)
 	if err != nil {
 		t.Fatal(err)
 	}
