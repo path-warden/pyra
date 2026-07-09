@@ -10,10 +10,12 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/chasedputnam/memphis/internal/codegraph"
+	"github.com/chasedputnam/memphis/internal/codehealth"
 	"github.com/chasedputnam/memphis/internal/codeintel"
-	"github.com/chasedputnam/memphis/internal/gitint"
 	"github.com/chasedputnam/memphis/internal/compress"
 	"github.com/chasedputnam/memphis/internal/config"
+	"github.com/chasedputnam/memphis/internal/gitint"
 	"github.com/chasedputnam/memphis/internal/scale"
 	"github.com/chasedputnam/memphis/internal/search"
 	"github.com/chasedputnam/memphis/internal/store"
@@ -43,6 +45,12 @@ type Server struct {
 	store *store.Store    // unified Canon + Reference store for authority-aware tools
 	code  *codeintel.Ops  // code-intelligence operations, rooted at the bundle dir
 	git   *gitint.History // git-intelligence index, rooted at the bundle dir (may be nil)
+
+	graph     *codegraph.Graph // code dependency graph, built lazily on first use
+	graphOnce sync.Once
+
+	health     *codehealth.Report // code-health report, built lazily on first use
+	healthOnce sync.Once
 }
 
 // NewServer creates a new MCP server.
@@ -91,6 +99,9 @@ func NewServer(opts ServerOptions) (*Server, error) {
 	s.registerCanonTools()
 	s.registerCodeIntelTools()
 	s.registerGitIntelTools()
+	s.registerGraphTools()
+	s.registerHealthTools()
+	s.registerDeadCodeTools()
 
 	return s, nil
 }
