@@ -50,10 +50,12 @@ func governanceFindings(s *store.Store, fileSet map[string]bool) []Finding {
 		cited := item
 		if item.Status == "superseded" {
 			succ := s.Successor(item.ID)
-			if succ == nil || isDead(succ.Status) {
-				continue // dead authority with no live successor is never cited
+			if succ == nil || !isGoverning(succ.Status) {
+				continue // dead/draft authority with no live successor is never cited
 			}
 			cited = succ
+		} else if !isGoverning(item.Status) {
+			continue // only Accepted (or status-less requirements/designs) govern
 		}
 		for _, f := range gov {
 			out = append(out, Finding{
@@ -142,6 +144,20 @@ func isPathByte(c byte) bool {
 	case c >= 'a' && c <= 'z', c >= 'A' && c <= 'Z', c >= '0' && c <= '9':
 		return true
 	case c == '_', c == '-', c == '.':
+		return true
+	}
+	return false
+}
+
+// isGoverning reports whether an artifact with this lifecycle status actively
+// governs code. Accepted decisions govern; requirements/designs that carry no
+// status section (status == "") govern; draft/rejected/deprecated/retired/
+// superseded statuses do not (a superseded artifact resolves to its successor
+// first). This scopes governance to Accepted authority per the requirement, so a
+// proposed or rejected decision never reads as governing a change.
+func isGoverning(status string) bool {
+	switch strings.ToLower(strings.TrimSpace(status)) {
+	case "", "accepted":
 		return true
 	}
 	return false

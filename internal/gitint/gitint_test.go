@@ -115,3 +115,18 @@ func TestHistory_NonGitDegrades(t *testing.T) {
 		t.Error("degraded history should be empty, not panic")
 	}
 }
+
+func TestIsFixCommit_WordBoundary(t *testing.T) {
+	fix := []string{"fix: cache bug", "Fix the thing", "revert bad change", "bug in parser", "hotfix deploy"}
+	notFix := []string{"add prefix handling", "improve debug logging", "dispatch events", "refactor suffix parser", "new feature"}
+	for _, s := range fix {
+		if !isFixCommit(s) {
+			t.Errorf("%q should be a fix commit", s)
+		}
+	}
+	for _, s := range notFix {
+		if isFixCommit(s) {
+			t.Errorf("%q should NOT be a fix commit (substring false positive)", s)
+		}
+	}
+}

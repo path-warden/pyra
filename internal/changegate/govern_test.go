@@ -207,3 +207,39 @@ func indexOf(s, sub string) int {
 	}
 	return -1
 }
+
+func TestEvaluate_OnlyAcceptedGoverns(t *testing.T) {
+	root := t.TempDir()
+	// A PROPOSED decision (not yet accepted) that cites the changed file.
+	writeFile(t, root, "canon/draft.md", `---
+schema_version: 1
+id: OKF-00000000DRFT
+type: decision
+---
+
+# Draft
+
+## Status
+
+Proposed
+
+## Context
+
+The file internal/cache/store.go must cache in memory.
+
+## Decision
+
+We SHALL cache in memory.
+
+## Consequences
+
+Fast.
+`)
+	s := loadStore(t, root)
+	got := Evaluate(s, nil, []string{"internal/cache/store.go"})
+	for _, iss := range got {
+		if iss.Code == CodeGovernedChange {
+			t.Errorf("a Proposed (non-Accepted) decision must not govern a change: %+v", iss)
+		}
+	}
+}

@@ -3,6 +3,7 @@ package gitint
 import (
 	"math"
 	"sort"
+	"strings"
 )
 
 // HotspotHalfLifeDays is the half-life of the exponential churn decay in the
@@ -30,11 +31,15 @@ type FileHistory struct {
 	BusFactor        int       `json:"bus_factor"`
 	ChurnPercentile  float64   `json:"churn_percentile"`
 	IsHotspot        bool      `json:"is_hotspot"`
+	ChangeEntropy    float64   `json:"change_entropy"`     // Shannon entropy of per-commit churn (diffusion over time)
+	PriorDefectCount int       `json:"prior_defect_count"` // bug-fix commits touching this file in the window
 	CoChange         []Partner `json:"co_change,omitempty"`
 
 	// authors is the per-author commit count for this file, retained (unexported,
 	// so not serialized) to compute module-level ownership rollups.
 	authors map[string]int
+	// perCommitChurn accumulates this file's churn per commit, for change entropy.
+	perCommitChurn []int
 }
 
 // buildFileHistories aggregates commit records into per-file histories, anchored
@@ -80,6 +85,12 @@ func buildFileHistories(recs []commitRec, asOf int64) map[string]*FileHistory {
 					f.LastCommit = rec.TS
 				}
 				inc(authorCounts, fd.Path, rec.Author)
+				if churn := fd.Added + fd.Deleted; churn > 0 {
+					f.perCommitChurn = append(f.perCommitChurn, churn)
+				}
+				if isFixCommit(rec.Subject) {
+					f.PriorDefectCount++
+				}
 			}
 			// Temporal hotspot: decayed per-commit churn (counted per file delta).
 			ageDays := math.Max(float64(asOf-rec.TS)/secondsPerDay, 0)
@@ -101,6 +112,8 @@ func buildFileHistories(recs []commitRec, asOf int64) map[string]*FileHistory {
 		if f.FirstCommit > 0 {
 			f.AgeDays = int((asOf - f.FirstCommit) / secondsPerDay)
 		}
+		f.ChangeEntropy = entropy(f.perCommitChurn)
+		f.perCommitChurn = nil
 		ac := authorCounts[path]
 		f.authors = ac
 		f.ContributorCount = len(ac)
@@ -189,4 +202,44 @@ func inc(m map[string]map[string]int, k1, k2 string) {
 		m[k1] = map[string]int{}
 	}
 	m[k1][k2]++
+}
+
+// fixWords are the whole-word bug-fix markers, matched on word boundaries so that
+// "prefix"/"debug"/"dispatch" do not count.
+var fixWords = map[string]bool{
+	"fix": true, "fixes": true, "fixed": true, "bug": true, "bugfix": true,
+	"hotfix": true, "revert": true, "reverts": true, "patch": true,
+}
+
+// isFixCommit reports whether a commit subject looks like a bug fix, by message
+// convention (documented, not learned): a whole-word "fix"/"bug"/"hotfix"/... token.
+func isFixCommit(subject string) bool {
+	for _, w := range strings.FieldsFunc(strings.ToLower(subject), func(r rune) bool {
+		return !(r >= 'a' && r <= 'z')
+	}) {
+		if fixWords[w] {
+			return true
+		}
+	}
+	return false
+}
+
+// entropy is the Shannon entropy (base 2) of a churn distribution; 0 when there
+// is nothing to measure (no churn or a single commit).
+func entropy(perCommit []int) float64 {
+	total := 0
+	for _, c := range perCommit {
+		total += c
+	}
+	if total <= 0 || len(perCommit) < 2 {
+		return 0.0
+	}
+	var h float64
+	for _, c := range perCommit {
+		if c > 0 {
+			frac := float64(c) / float64(total)
+			h -= frac * math.Log2(frac)
+		}
+	}
+	return h
 }

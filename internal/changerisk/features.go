@@ -177,21 +177,20 @@ func (c Change) Extract(root string, exts []string) (ChangeFeatures, []string) {
 	switch c.Mode {
 	case ModeCommit:
 		author, subject = commitMeta(root, c.SHA)
-		numstat = git(root, "show", c.SHA, "--numstat", "--format=")
-		parent := strings.TrimSpace(git(root, "rev-parse", "--verify", "--quiet", c.SHA+"^"))
-		if upto = parent; upto == "" {
-			upto = c.SHA
-		}
+		numstat = git(root, "show", c.SHA, "--no-renames", "--numstat", "--format=")
+		upto = strings.TrimSpace(git(root, "rev-parse", "--verify", "--quiet", c.SHA+"^"))
 		ref = c.SHA
+		// For the root commit (no parent), author experience is 0 — counting from
+		// the commit itself would include the commit being scored.
 	case ModeRange:
-		numstat = git(root, "diff", "--numstat", c.Base+".."+c.Head)
+		numstat = git(root, "diff", "--no-renames", "--numstat", c.Base+".."+c.Head)
 		author, subject = commitMeta(root, c.Head)
 		upto, ref = c.Base, c.Base+".."+c.Head
 	case ModeSince:
-		numstat = git(root, "diff", "--numstat", c.Ref)
+		numstat = git(root, "diff", "--no-renames", "--numstat", c.Ref)
 		ref = "since " + c.Ref
 	default: // ModeStaged
-		numstat = git(root, "diff", "--cached", "--numstat")
+		numstat = git(root, "diff", "--cached", "--no-renames", "--numstat")
 		ref = "staged"
 	}
 	changes := parseNumstat(numstat, exts)

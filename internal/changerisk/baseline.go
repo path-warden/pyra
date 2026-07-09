@@ -11,7 +11,7 @@ import "strings"
 // is like-with-like — a diff-shape percentile within this repo. excludeSHA drops
 // the target from its own baseline (short or full sha).
 func BaselineScores(root, anchor string, limit int, exts []string, excludeSHA string) []float64 {
-	out := git(root, "log", "-n"+itoa(limit), "--no-merges", "--format=%x1e%H", "--numstat", anchor)
+	out := git(root, "log", "-n"+itoa(limit), "--no-merges", "--no-renames", "--format=%x1e%H", "--numstat", anchor)
 	var scores []float64
 	for _, block := range strings.Split(out, "\x1e") {
 		lines := strings.Split(strings.TrimSpace(block), "\n")
