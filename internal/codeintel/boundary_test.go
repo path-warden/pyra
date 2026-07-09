@@ -28,6 +28,15 @@ func TestCanonDoesNotDependOnCodeIntel(t *testing.T) {
 		// codeintel/store and must stay outside the authority path.
 		"github.com/chasedputnam/memphis/internal/changerisk",
 		"github.com/chasedputnam/memphis/internal/gitint",
+		// The code dependency graph depends on codeintel and must stay outside
+		// the authority path.
+		"github.com/chasedputnam/memphis/internal/codegraph",
+		// The code-health layer composes codeintel/gitint/codegraph/store and
+		// must stay outside the authority path.
+		"github.com/chasedputnam/memphis/internal/codehealth",
+		// Dead-code consumes codegraph reachability and must stay outside the
+		// authority path.
+		"github.com/chasedputnam/memphis/internal/deadcode",
 	}
 	for _, dep := range strings.Split(strings.TrimSpace(string(out)), "\n") {
 		for _, bad := range forbidden {
