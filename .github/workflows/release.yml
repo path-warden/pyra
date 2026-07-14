@@ -47,13 +47,13 @@ jobs:
           GOARCH: ${{ matrix.goarch }}
         run: |
           VERSION=${GITHUB_REF#refs/tags/}
-          go build -ldflags "-X main.version=$VERSION" -o memphis-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.suffix }} ./cmd/memphis
+          go build -ldflags "-X main.version=$VERSION" -o pyra-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.suffix }} ./cmd/pyra
 
       - name: Upload artifact
         uses: actions/upload-artifact@v7
         with:
-          name: memphis-${{ matrix.goos }}-${{ matrix.goarch }}
-          path: memphis-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.suffix }}
+          name: pyra-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: pyra-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.suffix }}
 
   release:
     needs: build

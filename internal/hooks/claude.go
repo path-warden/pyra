@@ -7,7 +7,7 @@ import (
 )
 
 // claudeInstaller manages the project-scoped Claude Code PostToolUse hook in
-// <store>/.claude/settings.json. It JSON-merges a single memphis-managed entry,
+// <store>/.claude/settings.json. It JSON-merges a single pyra-managed entry,
 // preserving every other setting and PostToolUse entry.
 type claudeInstaller struct{}
 
@@ -22,13 +22,13 @@ func (claudeInstaller) Detect(ctx Context) bool {
 	return err == nil && fi.IsDir()
 }
 
-// memphisClaudeEntry is the PostToolUse entry memphis installs: it runs the gate
+// pyraClaudeEntry is the PostToolUse entry pyra installs: it runs the gate
 // after file-writing tool calls. The marker in the command makes it identifiable.
-func memphisClaudeEntry() map[string]any {
+func pyraClaudeEntry() map[string]any {
 	return map[string]any{
 		"matcher": "Write|Edit|MultiEdit",
 		"hooks": []any{
-			map[string]any{"type": "command", "command": "memphis gate  # " + ManagedMarker},
+			map[string]any{"type": "command", "command": "pyra gate  # " + ManagedMarker},
 		},
 	}
 }
@@ -42,8 +42,8 @@ func (c claudeInstaller) Install(ctx Context) (Result, error) {
 		return Result{}, err
 	}
 	hooksObj := asObject(obj["hooks"])
-	ptu := filterOutMemphisEntries(asArray(hooksObj["PostToolUse"]))
-	ptu = append(ptu, memphisClaudeEntry())
+	ptu := filterOutPyraEntries(asArray(hooksObj["PostToolUse"]))
+	ptu = append(ptu, pyraClaudeEntry())
 	hooksObj["PostToolUse"] = ptu
 	obj["hooks"] = hooksObj
 
@@ -68,7 +68,7 @@ func (c claudeInstaller) Uninstall(ctx Context) (Result, error) {
 	}
 	hooksObj := asObject(obj["hooks"])
 	before := asArray(hooksObj["PostToolUse"])
-	after := filterOutMemphisEntries(before)
+	after := filterOutPyraEntries(before)
 	if len(after) == len(before) {
 		return Result{Target: TargetClaude, Action: ActionUnchanged, Paths: []string{path}}, nil
 	}
@@ -96,27 +96,27 @@ func (c claudeInstaller) Status(ctx Context) (Result, error) {
 	}
 	hooksObj := asObject(obj["hooks"])
 	for _, e := range asArray(hooksObj["PostToolUse"]) {
-		if isMemphisEntry(e) {
+		if isPyraEntry(e) {
 			return Result{Target: TargetClaude, Action: ActionPresent, Paths: []string{path}}, nil
 		}
 	}
 	return Result{Target: TargetClaude, Action: ActionAbsent}, nil
 }
 
-// filterOutMemphisEntries returns the entries that are not memphis-managed.
-func filterOutMemphisEntries(entries []any) []any {
+// filterOutPyraEntries returns the entries that are not pyra-managed.
+func filterOutPyraEntries(entries []any) []any {
 	out := make([]any, 0, len(entries))
 	for _, e := range entries {
-		if !isMemphisEntry(e) {
+		if !isPyraEntry(e) {
 			out = append(out, e)
 		}
 	}
 	return out
 }
 
-// isMemphisEntry reports whether a PostToolUse entry was installed by memphis,
+// isPyraEntry reports whether a PostToolUse entry was installed by pyra,
 // detected by the managed marker in any of its hook commands.
-func isMemphisEntry(entry any) bool {
+func isPyraEntry(entry any) bool {
 	m, ok := entry.(map[string]any)
 	if !ok {
 		return false

@@ -97,14 +97,14 @@ func TestCLI_RootEscapeRejected(t *testing.T) {
 	}
 }
 
-// TestCLI_CheckExitCode verifies `memphis check` exits non-zero on syntax errors
+// TestCLI_CheckExitCode verifies `pyra check` exits non-zero on syntax errors
 // and zero on a clean file, using the standard subprocess-of-test pattern (the
 // command calls os.Exit, which cannot be observed in-process).
 func TestCLI_CheckExitCode(t *testing.T) {
-	if os.Getenv("MEMPHIS_CLI_CHECK_SUBPROC") == "1" {
+	if os.Getenv("PYRA_CLI_CHECK_SUBPROC") == "1" {
 		// Child: run the check command for real; it may call os.Exit. chdir to
 		// the file's directory so the default "." root confines to it.
-		file := os.Getenv("MEMPHIS_CLI_CHECK_FILE")
+		file := os.Getenv("PYRA_CLI_CHECK_FILE")
 		_ = os.Chdir(filepath.Dir(file))
 		rootCmd.SetArgs([]string{"check", filepath.Base(file)})
 		_ = rootCmd.Execute()
@@ -123,7 +123,7 @@ func TestCLI_CheckExitCode(t *testing.T) {
 
 	run := func(file string) int {
 		cmd := exec.Command(os.Args[0], "-test.run=TestCLI_CheckExitCode")
-		cmd.Env = append(os.Environ(), "MEMPHIS_CLI_CHECK_SUBPROC=1", "MEMPHIS_CLI_CHECK_FILE="+file)
+		cmd.Env = append(os.Environ(), "PYRA_CLI_CHECK_SUBPROC=1", "PYRA_CLI_CHECK_FILE="+file)
 		err := cmd.Run()
 		if err == nil {
 			return 0

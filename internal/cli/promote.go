@@ -9,15 +9,15 @@ import (
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 
-	"github.com/chasedputnam/memphis/internal/canon/artifacts"
-	"github.com/chasedputnam/memphis/internal/canon/classify"
-	"github.com/chasedputnam/memphis/internal/canon/frontmatter"
-	"github.com/chasedputnam/memphis/internal/canon/identity"
-	"github.com/chasedputnam/memphis/internal/canon/model"
-	"github.com/chasedputnam/memphis/internal/canon/parse"
-	"github.com/chasedputnam/memphis/internal/canon/validate"
-	"github.com/chasedputnam/memphis/internal/config"
-	"github.com/chasedputnam/memphis/internal/store"
+	"github.com/chasedputnam/pyra/internal/canon/artifacts"
+	"github.com/chasedputnam/pyra/internal/canon/classify"
+	"github.com/chasedputnam/pyra/internal/canon/frontmatter"
+	"github.com/chasedputnam/pyra/internal/canon/identity"
+	"github.com/chasedputnam/pyra/internal/canon/model"
+	"github.com/chasedputnam/pyra/internal/canon/parse"
+	"github.com/chasedputnam/pyra/internal/canon/validate"
+	"github.com/chasedputnam/pyra/internal/config"
+	"github.com/chasedputnam/pyra/internal/store"
 )
 
 var promoteCmd = &cobra.Command{
@@ -110,7 +110,7 @@ func runPromote(cmd *cobra.Command, args []string) error {
 		for _, iss := range blocking {
 			color.Yellow("  [%s] %s", iss.Code, iss.Message)
 		}
-		fmt.Println("\nEdit the artifact to resolve these, then run `memphis gate`.")
+		fmt.Println("\nEdit the artifact to resolve these, then run `pyra gate`.")
 	} else {
 		color.Green("Promoted draft passes validation.")
 	}

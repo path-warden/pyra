@@ -22,7 +22,7 @@ func Render(cfg Config) string {
 	fmt.Fprintf(&b, "repository_key: %s\n\n", yamlScalar(cfg.RepositoryKey))
 
 	b.WriteString("# Canon roots: directories that hold the authoritative tier. Everything else\n")
-	b.WriteString("# under the store is treated as Reference. Files here are validated by `memphis gate`.\n")
+	b.WriteString("# under the store is treated as Reference. Files here are validated by `pyra gate`.\n")
 	b.WriteString("canon_roots:\n")
 	for _, r := range cfg.CanonRoots {
 		// Block sequence: commas in a value are not delimiters here, so a root
@@ -32,7 +32,7 @@ func Render(cfg Config) string {
 	b.WriteString("\n")
 
 	b.WriteString("# Spec roots: directories scanned for spec documents (requirements.md,\n")
-	b.WriteString("# design.md) that `memphis project` turns into typed Canon. Covers the local\n")
+	b.WriteString("# design.md) that `pyra project` turns into typed Canon. Covers the local\n")
 	b.WriteString("# specs/ layout and Kiro's .kiro/specs/ layout by default.\n")
 	b.WriteString("spec_roots:\n")
 	for _, r := range cfg.SpecRoots {

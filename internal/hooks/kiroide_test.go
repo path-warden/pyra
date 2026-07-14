@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/chasedputnam/memphis/internal/config"
+	"github.com/chasedputnam/pyra/internal/config"
 )
 
 func kiroStore(t *testing.T, withDir bool) Context {
@@ -33,12 +33,12 @@ func TestKiroIDE_CreatesValidHook(t *testing.T) {
 	if _, err := (kiroIDEInstaller{}).Install(ctx); err != nil {
 		t.Fatal(err)
 	}
-	path := filepath.Join(ctx.StoreRoot, ".kiro", "hooks", "memphis-gate.json")
+	path := filepath.Join(ctx.StoreRoot, ".kiro", "hooks", "pyra-gate.json")
 	obj, err := readJSONObject(path)
 	if err != nil {
 		t.Fatalf("hook file not valid JSON: %v", err)
 	}
-	if obj["name"] != "memphis-gate" {
+	if obj["name"] != "pyra-gate" {
 		t.Errorf("name=%v", obj["name"])
 	}
 	if obj["trigger"] != "PostFileSave" {
@@ -79,7 +79,7 @@ func TestKiroIDE_Idempotent(t *testing.T) {
 	if _, err := g.Install(ctx); err != nil {
 		t.Fatal(err)
 	}
-	path := filepath.Join(ctx.StoreRoot, ".kiro", "hooks", "memphis-gate.json")
+	path := filepath.Join(ctx.StoreRoot, ".kiro", "hooks", "pyra-gate.json")
 	first, _ := os.ReadFile(path)
 	if _, err := g.Install(ctx); err != nil {
 		t.Fatal(err)
@@ -103,8 +103,8 @@ func TestKiroIDE_Uninstall(t *testing.T) {
 	if _, err := g.Uninstall(ctx); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := os.Stat(filepath.Join(ctx.StoreRoot, ".kiro", "hooks", "memphis-gate.json")); !os.IsNotExist(err) {
-		t.Error("memphis hook file should be removed")
+	if _, err := os.Stat(filepath.Join(ctx.StoreRoot, ".kiro", "hooks", "pyra-gate.json")); !os.IsNotExist(err) {
+		t.Error("pyra hook file should be removed")
 	}
 	if _, err := os.Stat(other); err != nil {
 		t.Error("sibling hook file must remain")

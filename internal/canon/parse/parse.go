@@ -17,7 +17,7 @@ import (
 	"github.com/yuin/goldmark/text"
 	"gopkg.in/yaml.v3"
 
-	"github.com/chasedputnam/memphis/internal/canon/model"
+	"github.com/chasedputnam/pyra/internal/canon/model"
 )
 
 var (

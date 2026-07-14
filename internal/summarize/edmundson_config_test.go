@@ -57,7 +57,7 @@ stigma_words: [gamma]
 
 func TestLoadEdmundsonConfig_HomeDir(t *testing.T) {
 	home := t.TempDir()
-	cfgDir := filepath.Join(home, ".config", "memphis")
+	cfgDir := filepath.Join(home, ".config", "pyra")
 	if err := os.MkdirAll(cfgDir, 0755); err != nil {
 		t.Fatalf("mkdir: %v", err)
 	}

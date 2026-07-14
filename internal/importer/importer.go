@@ -8,10 +8,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/chasedputnam/memphis/internal/normalize"
-	"github.com/chasedputnam/memphis/internal/types"
-	"github.com/chasedputnam/memphis/internal/util"
-	"github.com/chasedputnam/memphis/internal/writer"
+	"github.com/chasedputnam/pyra/internal/normalize"
+	"github.com/chasedputnam/pyra/internal/types"
+	"github.com/chasedputnam/pyra/internal/util"
+	"github.com/chasedputnam/pyra/internal/writer"
 )
 
 // ImportOptions configures the import operation.

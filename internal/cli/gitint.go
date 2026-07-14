@@ -5,7 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/chasedputnam/memphis/internal/gitint"
+	"github.com/chasedputnam/pyra/internal/gitint"
 )
 
 var hotspotsCmd = &cobra.Command{
@@ -61,7 +61,7 @@ func runHotspots(cmd *cobra.Command, args []string) error {
 		printJSON(hot)
 		return nil
 	}
-	fmt.Printf("memphis hotspots (%d)\n", len(hot))
+	fmt.Printf("pyra hotspots (%d)\n", len(hot))
 	if len(hot) == 0 {
 		fmt.Println("No hotspots (repository activity is below the hotspot floors).")
 		return nil

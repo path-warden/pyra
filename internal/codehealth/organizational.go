@@ -1,6 +1,6 @@
 package codehealth
 
-// Documented organizational thresholds (memphis-owned, tunable).
+// Documented organizational thresholds (pyra-owned, tunable).
 const (
 	churnRiskCommits     = 20
 	changeEntropyBits    = 2.5

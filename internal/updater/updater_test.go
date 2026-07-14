@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/chasedputnam/memphis/internal/changelog"
-	"github.com/chasedputnam/memphis/internal/differ"
+	"github.com/chasedputnam/pyra/internal/changelog"
+	"github.com/chasedputnam/pyra/internal/differ"
 )
 
 func TestIsURL(t *testing.T) {

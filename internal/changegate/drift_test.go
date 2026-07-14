@@ -3,7 +3,7 @@ package changegate
 import (
 	"testing"
 
-	"github.com/chasedputnam/memphis/internal/codeintel"
+	"github.com/chasedputnam/pyra/internal/codeintel"
 )
 
 func TestDrift_UnresolvedSymbolReported(t *testing.T) {

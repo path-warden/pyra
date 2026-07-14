@@ -41,7 +41,7 @@ local_endpoint: http://localhost:11434
 }
 
 func TestLoadConfig_Missing(t *testing.T) {
-	// Make sure we don't accidentally pick up a real ~/.config/memphis/llm.config
+	// Make sure we don't accidentally pick up a real ~/.config/pyra/llm.config
 	tmp := t.TempDir()
 	t.Setenv("HOME", tmp)
 	cfg, err := LoadConfig(tmp)

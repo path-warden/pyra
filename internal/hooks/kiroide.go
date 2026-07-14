@@ -8,14 +8,14 @@ import (
 )
 
 // kiroIDEInstaller manages the Kiro IDE Agent Hook as a standalone JSON file at
-// <store>/.kiro/hooks/memphis-gate.json. It owns only that file and never
+// <store>/.kiro/hooks/pyra-gate.json. It owns only that file and never
 // touches other hook files in the directory.
 type kiroIDEInstaller struct{}
 
 func (kiroIDEInstaller) Target() Target { return TargetKiroIDE }
 
 func kiroIDEPath(ctx Context) string {
-	return filepath.Join(ctx.StoreRoot, ".kiro", "hooks", "memphis-gate.json")
+	return filepath.Join(ctx.StoreRoot, ".kiro", "hooks", "pyra-gate.json")
 }
 
 func (kiroIDEInstaller) Detect(ctx Context) bool {
@@ -44,11 +44,11 @@ func pathMatcher(ctx Context) string {
 
 func (k kiroIDEInstaller) hookObject(ctx Context) map[string]any {
 	return map[string]any{
-		"name":        "memphis-gate",
+		"name":        "pyra-gate",
 		"description": "Gate Canon on save (" + ManagedMarker + ")",
 		"trigger":     "PostFileSave",
 		"matcher":     pathMatcher(ctx),
-		"action":      map[string]any{"type": "command", "command": "memphis gate"},
+		"action":      map[string]any{"type": "command", "command": "pyra gate"},
 		"enabled":     true,
 	}
 }

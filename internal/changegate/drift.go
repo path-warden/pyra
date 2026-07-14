@@ -1,8 +1,8 @@
 package changegate
 
 import (
-	"github.com/chasedputnam/memphis/internal/codeintel"
-	"github.com/chasedputnam/memphis/internal/store"
+	"github.com/chasedputnam/pyra/internal/codeintel"
+	"github.com/chasedputnam/pyra/internal/store"
 )
 
 // driftFindings reports, for each live Canon artifact, any symbol-id it cites

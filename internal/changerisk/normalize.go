@@ -13,7 +13,7 @@ const (
 	typicalPct  = 100.0 / 3.0 // ≈ 33.33
 )
 
-// Review-priority labels (Memphis wording for the repo-relative terciles).
+// Review-priority labels (Pyra wording for the repo-relative terciles).
 const (
 	PriorityBelow    = "Below typical"
 	PriorityTypical  = "Typical"

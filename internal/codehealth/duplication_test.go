@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/chasedputnam/memphis/internal/codeintel"
+	"github.com/chasedputnam/pyra/internal/codeintel"
 )
 
 func TestClones_PlantedDuplicateFound(t *testing.T) {

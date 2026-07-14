@@ -7,11 +7,11 @@ import (
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 
-	"github.com/chasedputnam/memphis/internal/codegraph"
-	"github.com/chasedputnam/memphis/internal/codeintel"
-	"github.com/chasedputnam/memphis/internal/config"
-	"github.com/chasedputnam/memphis/internal/deadcode"
-	"github.com/chasedputnam/memphis/internal/store"
+	"github.com/chasedputnam/pyra/internal/codegraph"
+	"github.com/chasedputnam/pyra/internal/codeintel"
+	"github.com/chasedputnam/pyra/internal/config"
+	"github.com/chasedputnam/pyra/internal/deadcode"
+	"github.com/chasedputnam/pyra/internal/store"
 )
 
 var deadCodeCmd = &cobra.Command{
@@ -24,7 +24,7 @@ references, safe to delete), medium (has textual/possibly-dynamic references), o
 low (a test-file helper). A "[governed]" marker means Accepted Canon still cites
 that now-unreachable code (drift).
 
-Read-only, offline, no LLM. Note: memphis has no framework route→handler edges, so
+Read-only, offline, no LLM. Note: pyra has no framework route→handler edges, so
 a handler reachable only via a route may read as unreachable — the high tier is
 conservative to mitigate this.`,
 	Args: cobra.MaximumNArgs(1),
@@ -79,7 +79,7 @@ func runDeadCode(cmd *cobra.Command, args []string) error {
 		printJSON(map[string]any{"candidates": cands, "total_impact": rep.TotalImpact})
 		return nil
 	}
-	fmt.Printf("memphis dead-code — %d candidate(s), %d lines of cleanup impact\n", len(cands), rep.TotalImpact)
+	fmt.Printf("pyra dead-code — %d candidate(s), %d lines of cleanup impact\n", len(cands), rep.TotalImpact)
 	if len(cands) == 0 {
 		color.Green("  no unreachable code found")
 		return nil

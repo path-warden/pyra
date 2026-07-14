@@ -3,7 +3,7 @@ package graph
 import (
 	"testing"
 
-	"github.com/chasedputnam/memphis/internal/types"
+	"github.com/chasedputnam/pyra/internal/types"
 )
 
 func TestExtractInternalLinks(t *testing.T) {

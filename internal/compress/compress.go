@@ -4,7 +4,7 @@ package compress
 import (
 	"encoding/json"
 
-	"github.com/chasedputnam/memphis/internal/tokens"
+	"github.com/chasedputnam/pyra/internal/tokens"
 )
 
 // Level defines compression aggressiveness.

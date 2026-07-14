@@ -7,8 +7,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/chasedputnam/memphis/internal/types"
-	"github.com/chasedputnam/memphis/internal/util"
+	"github.com/chasedputnam/pyra/internal/types"
+	"github.com/chasedputnam/pyra/internal/util"
 )
 
 // ExtractInternalLinks extracts internal markdown links from a concept's body.

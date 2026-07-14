@@ -9,7 +9,7 @@ import (
 // kiroCLIInstaller manages the Kiro CLI hook, which lives inside an agent config
 // at <store>/.kiro/agents/<agent>.json under hooks.postToolUse. Because this
 // edits a user-owned file, agent selection is conservative (Requirement 7.5):
-// create a memphis-owned agent when none exists, target the sole agent when there
+// create a pyra-owned agent when none exists, target the sole agent when there
 // is exactly one, and refuse (ambiguous) when several exist without --kiro-agent.
 type kiroCLIInstaller struct{}
 
@@ -29,12 +29,12 @@ func (k kiroCLIInstaller) Detect(ctx Context) bool {
 	return len(k.listAgents(ctx)) > 0
 }
 
-// memphisCLIEntry is the postToolUse entry memphis installs: it runs the gate
+// pyraCLIEntry is the postToolUse entry pyra installs: it runs the gate
 // after file-writing tool calls. The marker makes it identifiable.
-func memphisCLIEntry() map[string]any {
+func pyraCLIEntry() map[string]any {
 	return map[string]any{
 		"matcher": "fs_write",
-		"command": "memphis gate  # " + ManagedMarker,
+		"command": "pyra gate  # " + ManagedMarker,
 	}
 }
 
@@ -48,7 +48,7 @@ func (k kiroCLIInstaller) selectAgent(ctx Context) (path string, ambiguous bool)
 	agents := k.listAgents(ctx)
 	switch len(agents) {
 	case 0:
-		return filepath.Join(dir, "memphis.json"), false
+		return filepath.Join(dir, "pyra.json"), false
 	case 1:
 		return agents[0], false
 	default:
@@ -71,8 +71,8 @@ func (k kiroCLIInstaller) Install(ctx Context) (Result, error) {
 		return Result{}, err
 	}
 	hooksObj := asObject(obj["hooks"])
-	ptu := filterOutMemphisCLI(asArray(hooksObj["postToolUse"]))
-	ptu = append(ptu, memphisCLIEntry())
+	ptu := filterOutPyraCLI(asArray(hooksObj["postToolUse"]))
+	ptu = append(ptu, pyraCLIEntry())
 	hooksObj["postToolUse"] = ptu
 	obj["hooks"] = hooksObj
 	// A freshly created agent config needs a name (the filename stem).
@@ -99,7 +99,7 @@ func (k kiroCLIInstaller) Uninstall(ctx Context) (Result, error) {
 		}
 		hooksObj := asObject(obj["hooks"])
 		before := asArray(hooksObj["postToolUse"])
-		after := filterOutMemphisCLI(before)
+		after := filterOutPyraCLI(before)
 		if len(after) == len(before) {
 			continue
 		}
@@ -131,7 +131,7 @@ func (k kiroCLIInstaller) Status(ctx Context) (Result, error) {
 		}
 		hooksObj := asObject(obj["hooks"])
 		for _, e := range asArray(hooksObj["postToolUse"]) {
-			if isMemphisCLIEntry(e) {
+			if isPyraCLIEntry(e) {
 				res.Paths = append(res.Paths, path)
 				res.Action = ActionPresent
 			}
@@ -140,17 +140,17 @@ func (k kiroCLIInstaller) Status(ctx Context) (Result, error) {
 	return res, nil
 }
 
-func filterOutMemphisCLI(entries []any) []any {
+func filterOutPyraCLI(entries []any) []any {
 	out := make([]any, 0, len(entries))
 	for _, e := range entries {
-		if !isMemphisCLIEntry(e) {
+		if !isPyraCLIEntry(e) {
 			out = append(out, e)
 		}
 	}
 	return out
 }
 
-func isMemphisCLIEntry(entry any) bool {
+func isPyraCLIEntry(entry any) bool {
 	m, ok := entry.(map[string]any)
 	if !ok {
 		return false

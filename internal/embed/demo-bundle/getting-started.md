@@ -16,7 +16,7 @@ OKFy is a tool that converts documentation websites and local Markdown folders i
 Download the latest binary for your platform from the releases page, or build from source:
 
 ```bash
-go install github.com/chasedputnam/memphis/cmd/memphis@latest
+go install github.com/chasedputnam/pyra/cmd/pyra@latest
 ```
 
 ## Quick Start
@@ -24,25 +24,25 @@ go install github.com/chasedputnam/memphis/cmd/memphis@latest
 ### 1. Crawl a Documentation Site
 
 ```bash
-memphis crawl https://docs.example.com --out ./my-bundle
+pyra crawl https://docs.example.com --out ./my-bundle
 ```
 
 ### 2. Or Import Local Markdown
 
 ```bash
-memphis import ./docs --out ./my-bundle
+pyra import ./docs --out ./my-bundle
 ```
 
 ### 3. Validate Your Bundle
 
 ```bash
-memphis validate ./my-bundle
+pyra validate ./my-bundle
 ```
 
 ### 4. Serve via MCP
 
 ```bash
-memphis serve ./my-bundle --mcp
+pyra serve ./my-bundle --mcp
 ```
 
 ## Next Steps

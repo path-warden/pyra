@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/chasedputnam/memphis/internal/codeintel"
+	"github.com/chasedputnam/pyra/internal/codeintel"
 )
 
 func TestAnalyze_ByteIdenticalAcrossRuns(t *testing.T) {

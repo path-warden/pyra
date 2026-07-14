@@ -1,6 +1,6 @@
-# First Principles Evaluation: Memphis vs. its core outcome
+# First Principles Evaluation: Pyra vs. its core outcome
 
-> **Scope of this evaluation.** Assessing Memphis against the stated core outcome:
+> **Scope of this evaluation.** Assessing Pyra against the stated core outcome:
 > track established and approved requirements, evaluate updates against them, and
 > give AI agents efficient reference and relationship understanding across a
 > codebase. Produced 2026-07-08.
@@ -18,7 +18,7 @@ every session, without anyone remembering.
 - A *change* that violates or drifts from authority is caught before it lands, with a citation.
 - An agent, cold, can go requirement → design → decision → the exact code + test that satisfies it, cheaply.
 
-The honest finding: **Memphis already fully solves (a) and most of (c). The stated
+The honest finding: **Pyra already fully solves (a) and most of (c). The stated
 "core outcome" is largely the shipped mission.** The real leverage is in (b) —
 *evaluating updates against Canon* — and in one specific seam of (c): the Canon↔code
 link is present but thin. So this is not "what's wrong," it is "where does the
@@ -53,7 +53,7 @@ link is a finding) and *maintained* (drift is a finding), not just *queryable*.
 
 The buildable additions, ranked by leverage:
 
-### 1. Change-aware gate (`memphis gate --diff` / hook-fed)
+### 1. Change-aware gate (`pyra gate --diff` / hook-fed)
 
 Today the pre-commit/CI gate re-validates the whole corpus. Add a mode that takes the
 staged diff, maps changed files → symbols (using the existing `codeintel` +
@@ -69,14 +69,14 @@ Add a validation code like `requirement-ungrounded`: an Accepted `requirement` w
 body cites *no* resolvable symbol-id is reported (advisory by default, blocking by
 policy). This turns grounding from optional lookup into a **traceability guarantee**,
 and is a pure function of repo state — fits beside the existing relationship-integrity
-checks in `relate`/`validate`. Pair it with a `memphis coverage` /
+checks in `relate`/`validate`. Pair it with a `pyra coverage` /
 `traceability --summary` view (mirroring `relationships --summary`): requirement →
 design → decision → symbol → *test symbol*, with orphans and drift called out.
 
 ### 3. Assisted grounding (author-time, outside the authority path)
 
 The link is only as complete as what humans type. Add a *suggestion* step —
-`memphis project`/`promote` proposes candidate symbol-ids for a requirement
+`pyra project`/`promote` proposes candidate symbol-ids for a requirement
 (name/heuristic match via `codeintel`), a human ratifies (consistent with `project`'s
 existing "ratify-or-correct, never silently overwrite" contract). Keep this strictly
 in the AI-allowed/CLI half; the gate still only trusts literal citations.
@@ -95,11 +95,11 @@ already exists.** The pieces (typed Canon, the deterministic gate, `codeintel`,
 bidirectional grounding) are all present, but the gate evaluates the *wrong thing* for
 outcome #2: it checks that Canon is well-formed, not that a *change* respects it. Add
 (1) a **change-aware/diff mode to the gate** and (2) **grounding-coverage as a gate
-finding**, and Memphis moves from "records and validates authority" to "evaluates
+finding**, and Pyra moves from "records and validates authority" to "evaluates
 every update against authority" — which is exactly outcome #2, and it hardens outcome
 #3's Canon↔code seam at the same time.
 
-**Key insight:** Memphis's grounding is currently a *lookup*, not a *contract*. The
+**Key insight:** Pyra's grounding is currently a *lookup*, not a *contract*. The
 whole system's promise ("no agent silently violates a decision") is only enforced
 against edits to Canon — not against the code changes that are the actual risk. The
 minimum change that fulfills the stated core outcome is to make the gate diff-aware and
@@ -125,7 +125,7 @@ to make coverage a finding.
 - `internal/retrieval/retrieval.go` — discover → ground → assemble; grounding here
   resolves superseded → successor, not code.
 - `internal/mcp/codeintel.go`, `internal/cli/codeintel.go` — grounding (`code_for_artifact`,
-  `artifacts_for_symbol`, `memphis ground`) regex-scans an artifact body for literal
+  `artifacts_for_symbol`, `pyra ground`) regex-scans an artifact body for literal
   symbol-ids; read-only lookup, no coverage requirement, no author-time assistance.
 - `canon/code-intelligence/requirements.md` — REQ-701..704 define grounding as
   resolve/lookup and mandate honest `unresolved` reporting; REQ-501/503 pin the

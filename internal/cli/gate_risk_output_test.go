@@ -5,10 +5,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/chasedputnam/memphis/internal/changegate"
-	"github.com/chasedputnam/memphis/internal/changerisk"
-	"github.com/chasedputnam/memphis/internal/config"
-	"github.com/chasedputnam/memphis/internal/sarif"
+	"github.com/chasedputnam/pyra/internal/changegate"
+	"github.com/chasedputnam/pyra/internal/changerisk"
+	"github.com/chasedputnam/pyra/internal/config"
+	"github.com/chasedputnam/pyra/internal/sarif"
 )
 
 func TestRiskOutput_JSONAndSARIF(t *testing.T) {
@@ -31,7 +31,7 @@ func TestRiskOutput_JSONAndSARIF(t *testing.T) {
 
 	// SARIF: each risk directive rule id equals its code and its location is the
 	// changed file (directives carry a Path).
-	doc := sarif.FromIssues("memphis", "test", res.Issues)
+	doc := sarif.FromIssues("pyra", "test", res.Issues)
 	var sawDirectiveLoc bool
 	for _, run := range doc.Runs {
 		for _, r := range run.Results {

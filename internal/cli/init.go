@@ -9,17 +9,17 @@ import (
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 
-	"github.com/chasedputnam/memphis/internal/canon/validate"
-	"github.com/chasedputnam/memphis/internal/config"
+	"github.com/chasedputnam/pyra/internal/canon/validate"
+	"github.com/chasedputnam/pyra/internal/config"
 )
 
 var initCmd = &cobra.Command{
 	Use:   "init [path]",
 	Short: "Scaffold a new store (.okf/config.yaml + canon roots)",
-	Long: `Initialize a memphis store: write a self-documenting .okf/config.yaml and
+	Long: `Initialize a pyra store: write a self-documenting .okf/config.yaml and
 create the canon root directories so you can start authoring Canon immediately.
 
-The defaults match memphis's implicit configuration, so an initialized store and
+The defaults match pyra's implicit configuration, so an initialized store and
 a config-less store behave identically. init is safe by default: it refuses to
 overwrite an existing store unless --force is given.`,
 	Args: cobra.MaximumNArgs(1),
@@ -168,7 +168,7 @@ func writeStore(storeRoot string, cfg config.Config) error {
 }
 
 func printInitSummary(storeRoot, cfgPath string, cfg config.Config) {
-	color.Green("Initialized memphis store at %s", storeRoot)
+	color.Green("Initialized pyra store at %s", storeRoot)
 	fmt.Printf("  Config: %s\n", cfgPath)
 	for _, root := range cfg.CanonRoots {
 		fmt.Printf("  Canon root: %s\n", filepath.Join(storeRoot, root))
@@ -179,5 +179,5 @@ func printInitSummary(storeRoot, cfgPath string, cfg config.Config) {
 	}
 	example := filepath.Join(firstRoot, "adr-001-example.md")
 	fmt.Println("\nNext: author your first Canon artifact")
-	fmt.Printf("  memphis new decision %s --title \"My first decision\"\n", example)
+	fmt.Printf("  pyra new decision %s --title \"My first decision\"\n", example)
 }

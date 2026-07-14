@@ -10,7 +10,7 @@ import (
 )
 
 // ExtractiveAdapter adapts a sumer.Summarizer to the high-level Summarizer
-// interface used elsewhere in memphis.
+// interface used elsewhere in pyra.
 type ExtractiveAdapter struct {
 	algorithm       string
 	language        string

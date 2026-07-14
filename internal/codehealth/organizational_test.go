@@ -3,8 +3,8 @@ package codehealth
 import (
 	"testing"
 
-	"github.com/chasedputnam/memphis/internal/codegraph"
-	"github.com/chasedputnam/memphis/internal/gitint"
+	"github.com/chasedputnam/pyra/internal/codegraph"
+	"github.com/chasedputnam/pyra/internal/gitint"
 )
 
 func TestOrganizational_Gates(t *testing.T) {

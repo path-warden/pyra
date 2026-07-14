@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/chasedputnam/memphis/internal/canon/gate"
-	"github.com/chasedputnam/memphis/internal/changegate"
-	"github.com/chasedputnam/memphis/internal/config"
+	"github.com/chasedputnam/pyra/internal/canon/gate"
+	"github.com/chasedputnam/pyra/internal/changegate"
+	"github.com/chasedputnam/pyra/internal/config"
 )
 
 // TestComputeGate_ModeOffEqualsCorpusGate proves the change-aware feature is

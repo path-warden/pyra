@@ -1,4 +1,4 @@
-module github.com/chasedputnam/memphis
+module github.com/chasedputnam/pyra
 
 go 1.25.5
 

@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-// upsertBlock inserts or replaces the memphis-managed block (delimited by
+// upsertBlock inserts or replaces the pyra-managed block (delimited by
 // BlockBegin/BlockEnd) carrying body, preserving all surrounding content. It is
 // idempotent: applying it with the same body yields identical output.
 func upsertBlock(existing, body string) string {
@@ -30,7 +30,7 @@ func upsertBlock(existing, body string) string {
 	return existing + block
 }
 
-// removeBlock strips the memphis-managed block, preserving surrounding content.
+// removeBlock strips the pyra-managed block, preserving surrounding content.
 func removeBlock(existing string) string {
 	i := strings.Index(existing, BlockBegin)
 	if i < 0 {
@@ -46,7 +46,7 @@ func removeBlock(existing string) string {
 	return before + rest
 }
 
-// hasBlock reports whether a memphis-managed block is present.
+// hasBlock reports whether a pyra-managed block is present.
 func hasBlock(existing string) bool {
 	return strings.Contains(existing, BlockBegin) && strings.Contains(existing, BlockEnd)
 }

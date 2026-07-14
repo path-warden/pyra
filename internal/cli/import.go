@@ -8,8 +8,8 @@ import (
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 
-	"github.com/chasedputnam/memphis/internal/importer"
-	"github.com/chasedputnam/memphis/internal/types"
+	"github.com/chasedputnam/pyra/internal/importer"
+	"github.com/chasedputnam/pyra/internal/types"
 )
 
 var importCmd = &cobra.Command{
@@ -33,7 +33,7 @@ func init() {
 	importCmd.Flags().String("summarize", "extractive", "Summarization mode: extractive (default) or llm")
 	importCmd.Flags().String("summarize-algorithm", "lsa", "Extractive algorithm: lsa, lexrank, textrank, luhn, edmundson, sumbasic, kl, reduction, random")
 	importCmd.Flags().String("language", "english", "Language for summarization")
-	importCmd.Flags().String("edmundson-config", "", "Path to edmundson.config YAML (defaults to bundle/edmundson.config or ~/.config/memphis/edmundson.config)")
+	importCmd.Flags().String("edmundson-config", "", "Path to edmundson.config YAML (defaults to bundle/edmundson.config or ~/.config/pyra/edmundson.config)")
 
 	_ = importCmd.MarkFlagRequired("out")
 }
@@ -52,8 +52,8 @@ func runImport(cmd *cobra.Command, args []string) error {
 	language, _ := cmd.Flags().GetString("language")
 	edmundsonConfig, _ := cmd.Flags().GetString("edmundson-config")
 
-	printStatus(fmt.Sprintf("memphis import: reading %s", inputPath))
-	printStatus(fmt.Sprintf("memphis import: writing bundle to %s", outDir))
+	printStatus(fmt.Sprintf("pyra import: reading %s", inputPath))
+	printStatus(fmt.Sprintf("pyra import: writing bundle to %s", outDir))
 
 	result, err := importer.Import(importer.ImportOptions{
 		InputPath:                    inputPath,
@@ -76,14 +76,14 @@ func runImport(cmd *cobra.Command, args []string) error {
 		os.Exit(1)
 	}
 
-	fmt.Println("memphis import")
+	fmt.Println("pyra import")
 	fmt.Printf("Source: %s\n", inputPath)
 	fmt.Printf("Concepts: %d written\n", len(result.Documents))
 	fmt.Printf("Output: %s\n", outDir)
 	if result.Stats != nil {
 		printSummaryStats(result.Stats)
 	}
-	printStatus(fmt.Sprintf("memphis import: done, wrote %d concepts", len(result.Documents)))
+	printStatus(fmt.Sprintf("pyra import: done, wrote %d concepts", len(result.Documents)))
 
 	return nil
 }
@@ -91,7 +91,7 @@ func runImport(cmd *cobra.Command, args []string) error {
 // makeImportProgressHandler returns a callback that prints progress to stderr.
 func makeImportProgressHandler() func(int, int, string) {
 	return func(index, total int, source string) {
-		fmt.Fprintf(os.Stderr, "\rmemphis import: summarizing %d/%d", index, total)
+		fmt.Fprintf(os.Stderr, "\rpyra import: summarizing %d/%d", index, total)
 		if index == total {
 			fmt.Fprintln(os.Stderr)
 		}
@@ -101,7 +101,7 @@ func makeImportProgressHandler() func(int, int, string) {
 // makeImportWarningHandler returns a callback that logs summarization warnings.
 func makeImportWarningHandler() func(string, string) {
 	return func(path, message string) {
-		color.Yellow("memphis import: warning: %s: %s", path, message)
+		color.Yellow("pyra import: warning: %s: %s", path, message)
 	}
 }
 

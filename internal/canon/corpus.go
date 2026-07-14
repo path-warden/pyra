@@ -10,13 +10,13 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/chasedputnam/memphis/internal/canon/artifacts"
-	"github.com/chasedputnam/memphis/internal/canon/classify"
-	"github.com/chasedputnam/memphis/internal/canon/frontmatter"
-	"github.com/chasedputnam/memphis/internal/canon/identity"
-	"github.com/chasedputnam/memphis/internal/canon/model"
-	"github.com/chasedputnam/memphis/internal/canon/parse"
-	"github.com/chasedputnam/memphis/internal/config"
+	"github.com/chasedputnam/pyra/internal/canon/artifacts"
+	"github.com/chasedputnam/pyra/internal/canon/classify"
+	"github.com/chasedputnam/pyra/internal/canon/frontmatter"
+	"github.com/chasedputnam/pyra/internal/canon/identity"
+	"github.com/chasedputnam/pyra/internal/canon/model"
+	"github.com/chasedputnam/pyra/internal/canon/parse"
+	"github.com/chasedputnam/pyra/internal/config"
 )
 
 // Artifact is one loaded Canon artifact with its derived classification.

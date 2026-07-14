@@ -9,7 +9,7 @@
 //
 // The scoring model (feature standardization, the logistic formula, and its
 // learned constants in model_constants.go) is a faithful port of repowise's
-// change-risk model so Memphis is parity-testable against it; the constants are
+// change-risk model so Pyra is parity-testable against it; the constants are
 // confined to that one file so they can be replaced later.
 package changerisk
 

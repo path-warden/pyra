@@ -9,12 +9,12 @@ tags:
 ---
 # CLI Commands
 
-## memphis crawl
+## pyra crawl
 
 Crawl a documentation website and create an OKF bundle.
 
 ```bash
-memphis crawl <url> --out <dir> [options]
+pyra crawl <url> --out <dir> [options]
 ```
 
 ### Options
@@ -30,12 +30,12 @@ memphis crawl <url> --out <dir> [options]
 - `--force` - Overwrite output directory
 - `--dry-run` - List pages without crawling
 
-## memphis import
+## pyra import
 
 Import local files into an OKF bundle.
 
 ```bash
-memphis import <path> --out <dir> [options]
+pyra import <path> --out <dir> [options]
 ```
 
 ### Options
@@ -46,34 +46,34 @@ memphis import <path> --out <dir> [options]
 - `--exclude` - Exclude patterns
 - `--force` - Overwrite output directory
 
-## memphis validate
+## pyra validate
 
 Validate an OKF bundle.
 
 ```bash
-memphis validate <bundle> [--json]
+pyra validate <bundle> [--json]
 ```
 
-## memphis inspect
+## pyra inspect
 
 Display bundle statistics.
 
 ```bash
-memphis inspect <bundle>
+pyra inspect <bundle>
 ```
 
-## memphis serve
+## pyra serve
 
 Start an MCP server for a bundle.
 
 ```bash
-memphis serve <bundle> --mcp
+pyra serve <bundle> --mcp
 ```
 
-## memphis demo
+## pyra demo
 
 Run an offline demo with a bundled example.
 
 ```bash
-memphis demo [--serve]
+pyra demo [--serve]
 ```

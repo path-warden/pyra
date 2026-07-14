@@ -17,8 +17,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/chasedputnam/memphis/internal/canon/artifacts"
-	"github.com/chasedputnam/memphis/internal/canon/model"
+	"github.com/chasedputnam/pyra/internal/canon/artifacts"
+	"github.com/chasedputnam/pyra/internal/canon/model"
 )
 
 // Stable issue codes (part of the JSON contract, ported from rac-core).

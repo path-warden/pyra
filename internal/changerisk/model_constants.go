@@ -2,14 +2,14 @@ package changerisk
 
 // This file is the ONLY change-risk source ported from repowise, and the only
 // place its learned constants live. It is isolated so the constants can be
-// replaced (e.g. by Memphis-owned calibration) without touching features,
+// replaced (e.g. by Pyra-owned calibration) without touching features,
 // scoring math, ranking, directives, or integration.
 //
 // PORTED FROM repowise (AGPL-3.0):
 //   packages/core/src/repowise/core/analysis/change_risk/model.py  (_CONSTANTS)
 // Calibrated offline (2026-05-30) on a 7-repo, 5-language slice of repowise's
 // defect corpus (AG-SZZ bug-inducing commits as labels, leave-one-repo-out).
-// The parity test (model_parity_test.go) pins Memphis's ScoreChange output to
+// The parity test (model_parity_test.go) pins Pyra's ScoreChange output to
 // repowise's for these constants; if repowise recalibrates, regenerate both the
 // constants here AND the parity fixtures together.
 //

@@ -1,0 +1,38 @@
+Memphis
+Copyright (c) 2026 Memphis
+
+This product is licensed under the Business Source License 1.1 (see LICENSE),
+with a Change License of the Apache License, Version 2.0.
+
+================================================================================
+IMPORTANT — DISTRIBUTION IS GATED ON A THIRD-PARTY LICENSE CONFLICT
+================================================================================
+
+The change-risk model in `internal/changerisk/model_constants.go` currently
+contains constants and model logic PORTED VERBATIM from repowise
+(https://github.com/repowise-dev/repowise), which is licensed under AGPL-3.0.
+See `docs/REPOWISE_PARITY.md` (constraint #2) for the full account.
+
+AGPL-3.0 is a strong-copyleft license. While those ported constants remain in
+the tree, the work as a whole CANNOT be lawfully distributed under the Business
+Source License above (or any license that is not AGPL-compatible). Before
+Memphis is distributed under this LICENSE, the ported material must be replaced
+with an independent implementation derived from primary sources (e.g. the Kamei
+et al. just-in-time defect-prediction metrics) and the parity test updated
+accordingly. Until then, this LICENSE states the INTENDED terms; it does not
+authorize distribution of the current tree.
+
+================================================================================
+PROVISIONAL LICENSE PARAMETERS
+================================================================================
+
+The following Business Source License parameters are provisional defaults and
+should be confirmed by the Licensor before any public release:
+
+  - Licensor / copyright holder name ("Memphis" is a product/trade name, not a
+    legal entity).
+  - Additional Use Grant (currently permits production use except offering
+    Memphis as a competing hosted/managed service).
+  - Change Date (currently the fourth anniversary of each version's first public
+    availability).
+  - Change License (currently Apache License, Version 2.0).

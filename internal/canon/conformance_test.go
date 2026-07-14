@@ -5,13 +5,13 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/chasedputnam/memphis/internal/canon/model"
-	"github.com/chasedputnam/memphis/internal/canon/validate"
-	"github.com/chasedputnam/memphis/internal/config"
+	"github.com/chasedputnam/pyra/internal/canon/model"
+	"github.com/chasedputnam/pyra/internal/canon/validate"
+	"github.com/chasedputnam/pyra/internal/config"
 )
 
 // Conformance fixtures are verbatim copies of real rac-core artifacts under
-// testdata/conformance. These tests pin memphis's Canon engine to rac-core's
+// testdata/conformance. These tests pin pyra's Canon engine to rac-core's
 // actual on-disk format, guarding against semantic drift between the two
 // implementations (the largest risk identified in the design).
 

@@ -10,8 +10,8 @@ import (
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 
-	"github.com/chasedputnam/memphis/internal/canon/project"
-	"github.com/chasedputnam/memphis/internal/config"
+	"github.com/chasedputnam/pyra/internal/canon/project"
+	"github.com/chasedputnam/pyra/internal/config"
 )
 
 var projectCmd = &cobra.Command{

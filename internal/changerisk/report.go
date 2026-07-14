@@ -5,10 +5,10 @@ import (
 	"math"
 	"sort"
 
-	"github.com/chasedputnam/memphis/internal/canon/model"
-	"github.com/chasedputnam/memphis/internal/codeintel"
-	"github.com/chasedputnam/memphis/internal/gitint"
-	"github.com/chasedputnam/memphis/internal/store"
+	"github.com/chasedputnam/pyra/internal/canon/model"
+	"github.com/chasedputnam/pyra/internal/codeintel"
+	"github.com/chasedputnam/pyra/internal/gitint"
+	"github.com/chasedputnam/pyra/internal/store"
 )
 
 // Defaults for assessment.

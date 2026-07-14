@@ -7,8 +7,8 @@ import (
 
 	"github.com/mark3labs/mcp-go/mcp"
 
-	"github.com/chasedputnam/memphis/internal/codeintel"
-	"github.com/chasedputnam/memphis/internal/store"
+	"github.com/chasedputnam/pyra/internal/codeintel"
+	"github.com/chasedputnam/pyra/internal/store"
 )
 
 // registerCodeIntelTools adds the read-only structural code-intelligence tools

@@ -7,10 +7,10 @@ import (
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 
-	"github.com/chasedputnam/memphis/internal/changerisk"
-	"github.com/chasedputnam/memphis/internal/codeintel"
-	"github.com/chasedputnam/memphis/internal/config"
-	"github.com/chasedputnam/memphis/internal/store"
+	"github.com/chasedputnam/pyra/internal/changerisk"
+	"github.com/chasedputnam/pyra/internal/codeintel"
+	"github.com/chasedputnam/pyra/internal/config"
+	"github.com/chasedputnam/pyra/internal/store"
 )
 
 var riskCmd = &cobra.Command{
@@ -81,7 +81,7 @@ func runRisk(cmd *cobra.Command, args []string) error {
 }
 
 func printRiskText(rep changerisk.Report) {
-	fmt.Printf("memphis risk (%s)\n", rep.Ref)
+	fmt.Printf("pyra risk (%s)\n", rep.Ref)
 	switch rep.Priority {
 	case changerisk.PriorityElevated:
 		color.Red("Review priority: %s", rep.HeadlineText())

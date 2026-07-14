@@ -4,8 +4,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/chasedputnam/memphis/internal/config"
-	"github.com/chasedputnam/memphis/internal/store"
+	"github.com/chasedputnam/pyra/internal/config"
+	"github.com/chasedputnam/pyra/internal/store"
 )
 
 func loadStore(t *testing.T, root string) *store.Store {

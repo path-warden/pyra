@@ -4,7 +4,7 @@
       {
         "hooks": [
           {
-            "command": "memphis gate  # memphis-managed",
+            "command": "pyra gate  # pyra-managed",
             "type": "command"
           }
         ],

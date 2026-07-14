@@ -22,7 +22,7 @@ type Config struct {
 const ConfigFileName = "llm.config"
 
 // LoadConfig searches for llm.config in (1) the bundle directory, (2) the
-// user config directory (~/.config/memphis/), and parses the first one found.
+// user config directory (~/.config/pyra/), and parses the first one found.
 // If no config is found, an empty Config is returned (callers should treat
 // that as "use platform-native LLM").
 func LoadConfig(bundlePath string) (*Config, error) {
@@ -31,7 +31,7 @@ func LoadConfig(bundlePath string) (*Config, error) {
 		candidates = append(candidates, filepath.Join(bundlePath, ConfigFileName))
 	}
 	if home, err := os.UserHomeDir(); err == nil {
-		candidates = append(candidates, filepath.Join(home, ".config", "memphis", ConfigFileName))
+		candidates = append(candidates, filepath.Join(home, ".config", "pyra", ConfigFileName))
 	}
 
 	for _, path := range candidates {

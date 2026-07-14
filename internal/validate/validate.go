@@ -10,12 +10,12 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/chasedputnam/memphis/internal/graph"
-	"github.com/chasedputnam/memphis/internal/reader"
-	"github.com/chasedputnam/memphis/internal/scale"
-	"github.com/chasedputnam/memphis/internal/summarize"
-	"github.com/chasedputnam/memphis/internal/types"
-	"github.com/chasedputnam/memphis/internal/util"
+	"github.com/chasedputnam/pyra/internal/graph"
+	"github.com/chasedputnam/pyra/internal/reader"
+	"github.com/chasedputnam/pyra/internal/scale"
+	"github.com/chasedputnam/pyra/internal/summarize"
+	"github.com/chasedputnam/pyra/internal/types"
+	"github.com/chasedputnam/pyra/internal/util"
 	"gopkg.in/yaml.v3"
 )
 

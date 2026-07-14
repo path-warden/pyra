@@ -8,14 +8,14 @@ type: design
 
 ## Context
 
-Memphis is a single Go binary that turns a team's decisions into gate-enforced **Canon** and serves it to agents over MCP, but it cannot see real code — agents must leave Memphis and grep. **grove** is a Rust binary that provides byte-precise structural code search/navigation over tree-sitter, behind stable `symbol-id`s, as both a CLI and an MCP server. This design brings grove's capabilities *natively* into Memphis so one binary and one MCP server answer both "what did we decide?" and "what does the code do?", and can **ground** authoritative artifacts in real code.
+Pyra is a single Go binary that turns a team's decisions into gate-enforced **Canon** and serves it to agents over MCP, but it cannot see real code — agents must leave Pyra and grep. **grove** is a Rust binary that provides byte-precise structural code search/navigation over tree-sitter, behind stable `symbol-id`s, as both a CLI and an MCP server. This design brings grove's capabilities *natively* into Pyra so one binary and one MCP server answer both "what did we decide?" and "what does the code do?", and can **ground** authoritative artifacts in real code.
 
-The requirements phase fixed one decision: a **native Go re-implementation** — no Rust runtime, no separately-installed `grove`, no embedded/proxied grove binary (REQ-301, REQ-302, REQ-303). This document turns that mandate into an implementable design and resolves the central open question the requirements flagged: *how does a pure-Go binary parse 27 languages and obtain grammars without breaking Memphis's cross-compiled, offline, deterministic guarantees?*
+The requirements phase fixed one decision: a **native Go re-implementation** — no Rust runtime, no separately-installed `grove`, no embedded/proxied grove binary (REQ-301, REQ-302, REQ-303). This document turns that mandate into an implementable design and resolves the central open question the requirements flagged: *how does a pure-Go binary parse 27 languages and obtain grammars without breaking Pyra's cross-compiled, offline, deterministic guarantees?*
 
 ## User Need
 
-- An agent working through Memphis needs `outline`, `symbols`, `source`, `check`, `callers`, `map`, and `definition` over its codebase, returning stable `symbol-id`s it can pass between turns (REQ-101 … REQ-110), from one MCP server that also carries the authority tools (REQ-201 … REQ-206) and from CLI subcommands (REQ-401 … REQ-404).
-- The toolchain owner needs this delivered by the single `memphis` binary, cross-compilable to all five Makefile targets, with grammars available offline (REQ-301 … REQ-305, REQ-601 … REQ-605), and **without** disturbing the deterministic, network-free authority/gate path (REQ-501 … REQ-506).
+- An agent working through Pyra needs `outline`, `symbols`, `source`, `check`, `callers`, `map`, and `definition` over its codebase, returning stable `symbol-id`s it can pass between turns (REQ-101 … REQ-110), from one MCP server that also carries the authority tools (REQ-201 … REQ-206) and from CLI subcommands (REQ-401 … REQ-404).
+- The toolchain owner needs this delivered by the single `pyra` binary, cross-compilable to all five Makefile targets, with grammars available offline (REQ-301 … REQ-305, REQ-601 … REQ-605), and **without** disturbing the deterministic, network-free authority/gate path (REQ-501 … REQ-506).
 - An agent reasoning about a decision needs to resolve a Canon artifact to the real symbols it governs, and a `symbol-id` back to the artifacts that reference it — read-only (REQ-701 … REQ-704).
 
 ## Design
@@ -33,7 +33,7 @@ We add a self-contained `internal/codeintel` package that re-implements grove's 
 | Reuse grove `grammar.wasm` via custom wazero WasmStore | ✓ | ✓ | ✓ | **Rejected** — large bespoke runtime to re-build tree-sitter's wasm query engine in Go |
 | **`gotreesitter` (pure Go)** | **✓ zero cgo** | **✓** | **✓ embedded blobs** | **Chosen** |
 
-Rationale: Memphis's Makefile cross-compiles `linux/darwin/windows × amd64/arm64` with plain `go build` and no C toolchains; the only existing cgo touchpoint (Apple FM) is fenced behind the `applefm` tag with pure-Go fallbacks. A cgo tree-sitter would force that same fencing on the *core* code path and still break `go install` for downstream users. `gotreesitter` is pure Go (compiles anywhere Go targets), exposes the standard Query API with named captures and predicates (156 highlight + 69 tag queries validated upstream), loads the same parse-table format as the C runtime (ABI 15), and ships grammars as embedded blobs selectable by build tag. It is MIT-licensed and benchmarks at or above the C runtime for our workload. This single choice satisfies REQ-302/REQ-303 (native Go, no Rust/no proxy) and — because grammars embed with **no network at all** — trivially satisfies the offline/determinism requirements (REQ-504, REQ-505, REQ-604) and keeps the authority-path-purity risk near zero.
+Rationale: Pyra's Makefile cross-compiles `linux/darwin/windows × amd64/arm64` with plain `go build` and no C toolchains; the only existing cgo touchpoint (Apple FM) is fenced behind the `applefm` tag with pure-Go fallbacks. A cgo tree-sitter would force that same fencing on the *core* code path and still break `go install` for downstream users. `gotreesitter` is pure Go (compiles anywhere Go targets), exposes the standard Query API with named captures and predicates (156 highlight + 69 tag queries validated upstream), loads the same parse-table format as the C runtime (ABI 15), and ships grammars as embedded blobs selectable by build tag. It is MIT-licensed and benchmarks at or above the C runtime for our workload. This single choice satisfies REQ-302/REQ-303 (native Go, no Rust/no proxy) and — because grammars embed with **no network at all** — trivially satisfies the offline/determinism requirements (REQ-504, REQ-505, REQ-604) and keeps the authority-path-purity risk near zero.
 
 #### What we port from grove vs. what we take from gotreesitter
 
@@ -77,14 +77,14 @@ flowchart TB
   Gate -. no dependency .-> CI
 ```
 
-The dashed "no dependency" edge is load-bearing: `internal/codeintel` and its grounding bridge live **outside** `internal/canon/…`, so the archcheck test (`internal/canon/archcheck_test.go`, which forbids `net/http`, the summarizer, and the FM bridge in the authority path) is unaffected, and `memphis gate`'s dependency graph — hence its behavior and output — is unchanged (REQ-501, REQ-502, REQ-503).
+The dashed "no dependency" edge is load-bearing: `internal/codeintel` and its grounding bridge live **outside** `internal/canon/…`, so the archcheck test (`internal/canon/archcheck_test.go`, which forbids `net/http`, the summarizer, and the FM bridge in the authority path) is unaffected, and `pyra gate`'s dependency graph — hence its behavior and output — is unchanged (REQ-501, REQ-502, REQ-503).
 
 #### Request flow (one MCP call)
 
 ```mermaid
 sequenceDiagram
   participant A as Agent
-  participant S as memphis serve (one MCP server)
+  participant S as pyra serve (one MCP server)
   participant O as codeintel.Ops
   participant E as engine
   participant G as gotreesitter
@@ -143,10 +143,10 @@ func (o *Ops) Definition(name, at, dir string) (DefinitionResult, error)
 ```
 
 - **`symbolid.go`** — `Format(lang, rel, name string, line int) string` → `"<lang>:<rel>#<name>@<line>"` (1-based line); `ParseID(s) (path, name string, line int, ok bool)` splitting `lang:` at the **first** colon then `#` then `@` (line optional); and a **separate** `ParsePos(s) (path string, row, col int)` using last-3 `:` split to protect colon-bearing paths, converting 1-based input to 0-based. These are deliberately two parsers (grove gotcha).
-- **`registry.go`** — resolves per-language `Profile{FunctionKinds, Containers []NameField, IdentifierKinds, ImportResolution}` + the three `.scm` query texts from `//go:embed registry/*`. Extension→language map mirrors grove's manifests. No filesystem/network lookup in the default build (embedded); an **optional** external override dir (`MEMPHIS_CODEINTEL_REGISTRY` / `.memphis/grammars`) is a documented seam for REQ-604 but not required for core operation.
+- **`registry.go`** — resolves per-language `Profile{FunctionKinds, Containers []NameField, IdentifierKinds, ImportResolution}` + the three `.scm` query texts from `//go:embed registry/*`. Extension→language map mirrors grove's manifests. No filesystem/network lookup in the default build (embedded); an **optional** external override dir (`PYRA_CODEINTEL_REGISTRY` / `.pyra/grammars`) is a documented seam for REQ-604 but not required for core operation.
 - **`engine.go`** — `Extract` runs the `tags.scm` query via a `gotreesitter` `QueryCursor`, mapping `@definition.<kind>`/`@reference.<kind>`/`@name` captures exactly as grove does; widens function/method spans to the body via `function_kinds`; fills `parent` via `containers`; dedups overlapping matches by `(start_byte, end_byte, is_definition)`. `.scm` compile errors degrade the optional feature silently; queries containing `(a/b)` supertype syntax are refused (grove's segfault guard — port as a defensive check even though the pure-Go engine is memory-safe, to preserve identical capability semantics).
 
-**`internal/cli/codeintel.go` (new).** Seven cobra commands (plus `ground`) following the `gate.go`/`relationships.go` pattern: package-level `*cobra.Command`s, `init(){ rootCmd.AddCommand(...) }`, `--json` bool flag, human output via `fatih/color` by default. `memphis check` exits non-zero when defects exist (REQ-403) via `os.Exit(1)` like `gate.go`. Directory walks are gitignore-aware and exclude `*.d.ts`/`.d.cts`/`.d.mts` (REQ-103, REQ-802); traversal is rooted at the given path and never escapes it (REQ-803).
+**`internal/cli/codeintel.go` (new).** Seven cobra commands (plus `ground`) following the `gate.go`/`relationships.go` pattern: package-level `*cobra.Command`s, `init(){ rootCmd.AddCommand(...) }`, `--json` bool flag, human output via `fatih/color` by default. `pyra check` exits non-zero when defects exist (REQ-403) via `os.Exit(1)` like `gate.go`. Directory walks are gitignore-aware and exclude `*.d.ts`/`.d.cts`/`.d.mts` (REQ-103, REQ-802); traversal is rooted at the given path and never escapes it (REQ-803).
 
 **`internal/mcp/codeintel.go` (new).** Adds `func (s *Server) registerCodeIntelTools()` called from `NewServer` right after `s.registerCanonTools()` (`server.go:79`). Registers the seven tools with grove's exact names, descriptions, and flat `{type:object, properties, required}` input schemas (no top-level `anyOf`/`oneOf` — some clients drop such tools), plus two grounding tools. Handlers use the established signature `func (s *Server) handleX(_ context.Context, r mcp.CallToolRequest) (*mcp.CallToolResult, error)`, read args via `getArgString`/`getArgFloat`, return `s.jsonResult(...)` (indented JSON, truncated at `maxResultChars`), and encode domain failures as `{"error": ...}` with a nil Go error so the server never crashes (REQ-206). Because these tools don't need Canon, they function even when `s.store == nil` (REQ-204); the authority tools already function when the code dir is absent (REQ-205).
 
@@ -154,7 +154,7 @@ func (o *Ops) Definition(name, at, dir string) (DefinitionResult, error)
 - `code_for_artifact {id}` — load the Canon artifact via `s.store.ByID(id)`, scan its body for `symbol-id` tokens (regex `([\w-]+):([^#\s]+)#([^@\s]+)@(\d+)`) and for resolvable bare names, resolve each via `Ops.Source`/`Ops.Definition`. Unresolvable references (renamed/moved/deleted) are returned in an `unresolved: []` list rather than mismatched (REQ-704).
 - `artifacts_for_symbol {id|file}` — given a `symbol-id` or file path, `s.store.Discover(query)` over the unified index to surface Canon artifacts that mention it, filtered to `TierCanon`. Never writes Canon (REQ-703).
 
-**`internal/config` change.** Add `CodeRoots []string yaml:"code_roots"` (default `["."]`) so `memphis serve`/CLI know the default search scope when no explicit path is given. Backward-compatible (missing key → default), consistent with how `canon_roots`/`spec_roots` are loaded.
+**`internal/config` change.** Add `CodeRoots []string yaml:"code_roots"` (default `["."]`) so `pyra serve`/CLI know the default search scope when no explicit path is given. Backward-compatible (missing key → default), consistent with how `canon_roots`/`spec_roots` are loaded.
 
 #### CLI/MCP parity note (intentional deviation from grove)
 
@@ -179,7 +179,7 @@ Ported 1:1 from grove (field names/JSON preserved for parity, REQ-203 and the "e
 
 - **Unsupported/unprovisioned language** — `Extract` returns a typed `ErrUnsupportedLanguage(ext)`; directory ops skip the file and continue (REQ-602, REQ-206); single-file ops surface a clear message. MCP encodes it as `{"error":...}` with nil Go error (server stays up).
 - **Missing file / bad path** — wrapped `os` error; MCP → `{"error":...}`; CLI → non-zero exit with message.
-- **Syntax errors** — not errors: `check` returns a `Defect` list; CLI `memphis check` exits non-zero iff the list is non-empty (REQ-403, REQ-109).
+- **Syntax errors** — not errors: `check` returns a `Defect` list; CLI `pyra check` exits non-zero iff the list is non-empty (REQ-403, REQ-109).
 - **Malformed `symbol-id` / position** — `ParseID`/`ParsePos` return `ok=false`; op returns a descriptive error naming the expected form (`<lang>:<relpath>#<name>@<line>` or `file:line:col`).
 - **Optional-query compile failure** — the locals/imports feature degrades to "off" for that language; `definition --at` falls back to name lookup, so it is never worse than name mode (REQ-107/REQ-108).
 - **Unresolved grounding reference** — returned in `unresolved` rather than guessed (REQ-704).
@@ -188,10 +188,10 @@ Ported 1:1 from grove (field names/JSON preserved for parity, REQ-203 and the "e
 
 ### Testing Strategy
 
-- **Unit tests** (`internal/codeintel/*_test.go`, table-driven, colocated per Memphis convention): `symbolid` round-trip and the two-parser split gotchas; per-op extraction on small fixtures per language; outline detail tiers; overlapping-tag dedup order; caller structural/textual partition (and the "each file parsed once" guard); `definition --at` scope shadowing and import-edge resolution for `dotted_package` (Python) and `relative_path` (JS/TS).
-- **grove-parity conformance** (`internal/codeintel/testdata/parity/`): a corpus of source files with golden JSON captured from `grove <op> --json`. A test asserts Memphis's output matches, normalizing only the documented, intentional deviation (`definition` shape). This is the primary defense for the "equivalent to grove" success metric and the grammar-version parity risk.
+- **Unit tests** (`internal/codeintel/*_test.go`, table-driven, colocated per Pyra convention): `symbolid` round-trip and the two-parser split gotchas; per-op extraction on small fixtures per language; outline detail tiers; overlapping-tag dedup order; caller structural/textual partition (and the "each file parsed once" guard); `definition --at` scope shadowing and import-edge resolution for `dotted_package` (Python) and `relative_path` (JS/TS).
+- **grove-parity conformance** (`internal/codeintel/testdata/parity/`): a corpus of source files with golden JSON captured from `grove <op> --json`. A test asserts Pyra's output matches, normalizing only the documented, intentional deviation (`definition` shape). This is the primary defense for the "equivalent to grove" success metric and the grammar-version parity risk.
 - **Cross-compile guard** (CI / a `make` check): `CGO_ENABLED=0 make build-all` must succeed for all five targets — the executable proof of REQ-301/REQ-302 and that no cgo crept in.
-- **Authority-path regression:** the existing `internal/canon/archcheck_test.go` and `internal/canon/gate/determinism_test.go` must stay green, proving `memphis gate` is untouched (REQ-501/REQ-502/REQ-503). Add an assertion that `go list -deps .../internal/canon/...` does not include `internal/codeintel` or `gotreesitter`.
+- **Authority-path regression:** the existing `internal/canon/archcheck_test.go` and `internal/canon/gate/determinism_test.go` must stay green, proving `pyra gate` is untouched (REQ-501/REQ-502/REQ-503). Add an assertion that `go list -deps .../internal/canon/...` does not include `internal/codeintel` or `gotreesitter`.
 - **MCP tests:** `tools/list` includes the new tools with valid schemas (REQ-202); a code tool returns the same payload as the corresponding CLI op (REQ-203); tools function with `store == nil` (REQ-204); a failing tool returns `isError`/`{"error"}` without killing the server (REQ-206).
 - **CLI tests:** flag parsing and `--json` shape per op; `check` exit code; gitignore exclusion and root-confinement (REQ-802/REQ-803), following the existing `cli_test.go`/`project_test.go` patterns.
 - **Grounding tests:** artifact→code resolves embedded `symbol-id`s and lists `unresolved` for a deleted symbol; code→artifacts finds a Canon artifact that cites a `symbol-id`; both are read-only (REQ-701/REQ-702/REQ-703/REQ-704).
@@ -226,4 +226,3 @@ TODO
 ## Related Requirements
 
 - OKF-A9A05Q5BP012
-

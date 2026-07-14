@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# install_skills.sh — install the bundled memphis skills and gate hooks into
+# install_skills.sh — install the bundled pyra skills and gate hooks into
 # whichever agent toolchains are present on this machine.
 #
 # It auto-detects each supported tool by the presence of its folder, and only
@@ -12,13 +12,13 @@
 #
 # Claude Code and Kiro share the same SKILL.md format, so the same skill folders
 # install into both (~/.claude/skills and ~/.kiro/skills). Hooks are installed
-# via the `memphis` binary (which must be on PATH) and require the target store
-# to be a memphis store (a .okf/config.yaml exists).
+# via the `pyra` binary (which must be on PATH) and require the target store
+# to be a pyra store (a .okf/config.yaml exists).
 #
 # Usage:
 #   ./install_skills.sh [STORE_DIR]
 #
-#   STORE_DIR   memphis store to wire hooks into (default: current directory).
+#   STORE_DIR   pyra store to wire hooks into (default: current directory).
 #               Skills install to your personal ~/.claude/skills and ~/.kiro/skills.
 
 set -euo pipefail
@@ -42,10 +42,10 @@ skip() { printf "  %s–%s %s\n" "$DIM" "$RESET" "$*"; }
 die()  { printf "%s✗%s %s\n" "$RED" "$RESET" "$*" >&2; exit 1; }
 
 # --- preflight --------------------------------------------------------------
-[ -d "$SKILLS_SRC" ] || die "skills not found at $SKILLS_SRC — run this from a clone of the memphis repo"
+[ -d "$SKILLS_SRC" ] || die "skills not found at $SKILLS_SRC — run this from a clone of the pyra repo"
 
-HAVE_MEMPHIS=0
-command -v memphis >/dev/null 2>&1 && HAVE_MEMPHIS=1
+HAVE_PYRA=0
+command -v pyra >/dev/null 2>&1 && HAVE_PYRA=1
 
 IS_STORE=0
 [ -f "$STORE_DIR/.okf/config.yaml" ] && IS_STORE=1
@@ -60,15 +60,15 @@ KIRO_PRESENT=0
 # install_hooks <flag> <label> — install gate hooks for one target, with guards.
 install_hooks() {
 	local flag="$1" label="$2"
-	if [ "$HAVE_MEMPHIS" -ne 1 ]; then
-		warn "memphis not on PATH — skipping $label hooks (install memphis, then re-run)"
+	if [ "$HAVE_PYRA" -ne 1 ]; then
+		warn "pyra not on PATH — skipping $label hooks (install pyra, then re-run)"
 		return
 	fi
 	if [ "$IS_STORE" -ne 1 ]; then
-		warn "$STORE_DIR is not a memphis store (no .okf/config.yaml) — skipping $label hooks"
+		warn "$STORE_DIR is not a pyra store (no .okf/config.yaml) — skipping $label hooks"
 		return
 	fi
-	memphis hooks install "$flag" --store "$STORE_DIR" 2>&1 | sed 's/^/  /'
+	pyra hooks install "$flag" --store "$STORE_DIR" 2>&1 | sed 's/^/  /'
 }
 
 # install_skills_into <dest-dir> — copy every bundled skill into a skills dir.
@@ -89,7 +89,7 @@ install_skills_into() {
 }
 
 # --- run --------------------------------------------------------------------
-printf "%smemphis skills + hooks installer%s\n" "$BOLD" "$RESET"
+printf "%spyra skills + hooks installer%s\n" "$BOLD" "$RESET"
 printf "store: %s\n" "$STORE_DIR"
 
 # Claude Code: skills + hooks
@@ -125,9 +125,9 @@ if [ "$CLAUDE_PRESENT" -eq 0 ] && [ "$KIRO_PRESENT" -eq 0 ]; then
 else
 	head "Done"
 	{ [ "$CLAUDE_PRESENT" -eq 1 ] || [ "$KIRO_PRESENT" -eq 1 ]; } && ok "skills available as /spec, /dev, /code-review"
-	if [ "$HAVE_MEMPHIS" -ne 1 ]; then
-		warn "Install the memphis binary and re-run to finish wiring the gate hooks."
+	if [ "$HAVE_PYRA" -ne 1 ]; then
+		warn "Install the pyra binary and re-run to finish wiring the gate hooks."
 	elif [ "$IS_STORE" -ne 1 ]; then
-		warn "Run 'memphis init $STORE_DIR' then re-run to wire the gate hooks."
+		warn "Run 'pyra init $STORE_DIR' then re-run to wire the gate hooks."
 	fi
 fi

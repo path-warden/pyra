@@ -13,15 +13,15 @@ var testBinaryPath string
 
 func TestMain(m *testing.M) {
 	// Build the binary once for all tests
-	tmpDir, err := os.MkdirTemp("", "memphis-test-*")
+	tmpDir, err := os.MkdirTemp("", "pyra-test-*")
 	if err != nil {
 		_, _ = os.Stderr.WriteString("Failed to create temp dir: " + err.Error() + "\n")
 		os.Exit(1)
 	}
 	defer func() { _ = os.RemoveAll(tmpDir) }()
 
-	testBinaryPath = filepath.Join(tmpDir, "memphis")
-	cmd := exec.Command("go", "build", "-o", testBinaryPath, "./cmd/memphis")
+	testBinaryPath = filepath.Join(tmpDir, "pyra")
+	cmd := exec.Command("go", "build", "-o", testBinaryPath, "./cmd/pyra")
 	if out, err := cmd.CombinedOutput(); err != nil {
 		_, _ = os.Stderr.WriteString("Failed to build binary: " + err.Error() + "\n" + string(out))
 		os.Exit(1)
@@ -81,7 +81,7 @@ func TestE2EImportCommand(t *testing.T) {
 // TestE2EValidateCommand tests the validate workflow
 func TestE2EValidateCommand(t *testing.T) {
 	// Run validate on demo bundle
-	validateCmd := exec.Command(testBinaryPath, "validate", "examples/bundles/memphis-docs")
+	validateCmd := exec.Command(testBinaryPath, "validate", "examples/bundles/pyra-docs")
 	out, err := validateCmd.CombinedOutput()
 	if err != nil {
 		t.Fatalf("Validate failed: %v\n%s", err, out)
@@ -96,7 +96,7 @@ func TestE2EValidateCommand(t *testing.T) {
 // TestE2EValidateJSONOutput tests JSON output format
 func TestE2EValidateJSONOutput(t *testing.T) {
 	// Run validate with --json
-	validateCmd := exec.Command(testBinaryPath, "validate", "examples/bundles/memphis-docs", "--json")
+	validateCmd := exec.Command(testBinaryPath, "validate", "examples/bundles/pyra-docs", "--json")
 	out, err := validateCmd.CombinedOutput()
 	if err != nil {
 		t.Fatalf("Validate --json failed: %v\n%s", err, out)
@@ -119,7 +119,7 @@ func TestE2EValidateJSONOutput(t *testing.T) {
 // TestE2EInspectCommand tests the inspect workflow
 func TestE2EInspectCommand(t *testing.T) {
 	// Run inspect on demo bundle
-	inspectCmd := exec.Command(testBinaryPath, "inspect", "examples/bundles/memphis-docs")
+	inspectCmd := exec.Command(testBinaryPath, "inspect", "examples/bundles/pyra-docs")
 	out, err := inspectCmd.CombinedOutput()
 	if err != nil {
 		t.Fatalf("Inspect failed: %v\n%s", err, out)
@@ -144,8 +144,8 @@ func TestE2EDemoCommand(t *testing.T) {
 	}
 
 	output := string(out)
-	if !strings.Contains(output, "memphis demo") {
-		t.Errorf("Expected 'memphis demo' in output, got: %s", output)
+	if !strings.Contains(output, "pyra demo") {
+		t.Errorf("Expected 'pyra demo' in output, got: %s", output)
 	}
 	if !strings.Contains(output, "Bundle is valid") {
 		t.Errorf("Expected 'Bundle is valid' in output, got: %s", output)
@@ -505,7 +505,7 @@ func TestE2EImportGeneratesEnhancedIndex(t *testing.T) {
 // TestE2EInspectShowsScaleMetrics tests that inspect shows scale metrics
 func TestE2EInspectShowsScaleMetrics(t *testing.T) {
 	// Run inspect on demo bundle
-	inspectCmd := exec.Command(testBinaryPath, "inspect", "examples/bundles/memphis-docs")
+	inspectCmd := exec.Command(testBinaryPath, "inspect", "examples/bundles/pyra-docs")
 	out, err := inspectCmd.CombinedOutput()
 	if err != nil {
 		t.Fatalf("Inspect failed: %v\n%s", err, out)
@@ -632,7 +632,7 @@ func TestE2EProjectLifecycle(t *testing.T) {
 	}
 }
 
-// TestE2EHooksInstallUninstall proves hooks install writes the memphis marker to
+// TestE2EHooksInstallUninstall proves hooks install writes the pyra marker to
 // every selected surface and uninstall removes it.
 func TestE2EHooksInstallUninstall(t *testing.T) {
 	storeDir := filepath.Join(t.TempDir(), "store")
@@ -650,10 +650,10 @@ func TestE2EHooksInstallUninstall(t *testing.T) {
 		t.Fatalf("hooks install failed: %v\n%s", err, out)
 	}
 	surfaces := map[string]string{
-		filepath.Join(storeDir, ".git", "hooks", "pre-commit"):         "memphis gate",
-		filepath.Join(storeDir, ".claude", "settings.json"):            "memphis-managed",
-		filepath.Join(storeDir, ".kiro", "hooks", "memphis-gate.json"): "memphis gate",
-		filepath.Join(storeDir, ".kiro", "agents", "memphis.json"):     "memphis-managed",
+		filepath.Join(storeDir, ".git", "hooks", "pre-commit"):         "pyra gate",
+		filepath.Join(storeDir, ".claude", "settings.json"):            "pyra-managed",
+		filepath.Join(storeDir, ".kiro", "hooks", "pyra-gate.json"): "pyra gate",
+		filepath.Join(storeDir, ".kiro", "agents", "pyra.json"):     "pyra-managed",
 	}
 	for path, marker := range surfaces {
 		body, err := os.ReadFile(path)
@@ -670,10 +670,10 @@ func TestE2EHooksInstallUninstall(t *testing.T) {
 		t.Fatalf("hooks uninstall failed: %v\n%s", err, out)
 	}
 	// pre-commit: block removed; settings/agent: marker gone.
-	if body, _ := os.ReadFile(filepath.Join(storeDir, ".claude", "settings.json")); strings.Contains(string(body), "memphis-managed") {
-		t.Error("claude settings still contains memphis marker after uninstall")
+	if body, _ := os.ReadFile(filepath.Join(storeDir, ".claude", "settings.json")); strings.Contains(string(body), "pyra-managed") {
+		t.Error("claude settings still contains pyra marker after uninstall")
 	}
-	if _, err := os.Stat(filepath.Join(storeDir, ".kiro", "hooks", "memphis-gate.json")); !os.IsNotExist(err) {
+	if _, err := os.Stat(filepath.Join(storeDir, ".kiro", "hooks", "pyra-gate.json")); !os.IsNotExist(err) {
 		t.Error("kiro-ide hook file should be removed after uninstall")
 	}
 }

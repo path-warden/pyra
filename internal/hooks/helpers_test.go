@@ -8,11 +8,11 @@ import (
 
 func TestUpsertBlock_InsertAndPreserve(t *testing.T) {
 	existing := "#!/bin/sh\necho hi\n"
-	out := upsertBlock(existing, "memphis gate")
+	out := upsertBlock(existing, "pyra gate")
 	if !strings.Contains(out, "echo hi") {
 		t.Error("surrounding content must be preserved")
 	}
-	for _, want := range []string{BlockBegin, "memphis gate", BlockEnd} {
+	for _, want := range []string{BlockBegin, "pyra gate", BlockEnd} {
 		if !strings.Contains(out, want) {
 			t.Errorf("output missing %q\n%s", want, out)
 		}
@@ -20,8 +20,8 @@ func TestUpsertBlock_InsertAndPreserve(t *testing.T) {
 }
 
 func TestUpsertBlock_Idempotent(t *testing.T) {
-	a := upsertBlock("#!/bin/sh\n", "memphis gate")
-	b := upsertBlock(a, "memphis gate")
+	a := upsertBlock("#!/bin/sh\n", "pyra gate")
+	b := upsertBlock(a, "pyra gate")
 	if a != b {
 		t.Errorf("upsert not idempotent:\n--a--\n%q\n--b--\n%q", a, b)
 	}
@@ -42,9 +42,9 @@ func TestUpsertBlock_ReplaceUpdatesBody(t *testing.T) {
 }
 
 func TestRemoveBlock(t *testing.T) {
-	a := upsertBlock("#!/bin/sh\necho hi\n", "memphis gate")
+	a := upsertBlock("#!/bin/sh\necho hi\n", "pyra gate")
 	b := removeBlock(a)
-	if strings.Contains(b, BlockBegin) || strings.Contains(b, "memphis gate") {
+	if strings.Contains(b, BlockBegin) || strings.Contains(b, "pyra gate") {
 		t.Errorf("block not removed:\n%s", b)
 	}
 	if !strings.Contains(b, "echo hi") {

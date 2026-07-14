@@ -1,6 +1,6 @@
 package codehealth
 
-import "github.com/chasedputnam/memphis/internal/changegate"
+import "github.com/chasedputnam/pyra/internal/changegate"
 
 const staleGovernanceChurn = 5 // recent commits on a governed file that suggest a stale decision
 

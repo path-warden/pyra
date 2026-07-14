@@ -1,0 +1,11 @@
+{
+  "hooks": {
+    "postToolUse": [
+      {
+        "command": "pyra gate  # pyra-managed",
+        "matcher": "fs_write"
+      }
+    ]
+  },
+  "name": "pyra"
+}

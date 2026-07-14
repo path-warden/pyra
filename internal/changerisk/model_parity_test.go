@@ -9,7 +9,7 @@ func iptr(n int) *int { return &n }
 
 // goldenScores are ChangeFeatures → expected raw score, generated from repowise's
 // change_risk/model.py score_change() over the same _CONSTANTS this package ports
-// (see model_constants.go). This pins Memphis's ScoreChange to repowise's model:
+// (see model_constants.go). This pins Pyra's ScoreChange to repowise's model:
 // if either the port math or the constants drift, this fails.
 var goldenScores = []struct {
 	f    ChangeFeatures

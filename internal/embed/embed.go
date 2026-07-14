@@ -14,7 +14,7 @@ var demoBundleFS embed.FS
 // ExtractDemoBundle extracts the embedded demo bundle to a temporary directory.
 // Returns the path to the extracted bundle.
 func ExtractDemoBundle() (tmpDir string, err error) {
-	tmpDir, err = os.MkdirTemp("", "memphis-demo-*")
+	tmpDir, err = os.MkdirTemp("", "pyra-demo-*")
 	if err != nil {
 		return "", err
 	}

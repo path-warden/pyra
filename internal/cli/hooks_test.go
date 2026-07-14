@@ -10,7 +10,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 
-	"github.com/chasedputnam/memphis/internal/config"
+	"github.com/chasedputnam/pyra/internal/config"
 )
 
 func hooksStore(t *testing.T) string {
@@ -89,7 +89,7 @@ func TestHooksInstall_DefaultGitAlwaysPlusDetected(t *testing.T) {
 	if _, err := os.Stat(filepath.Join(dir, ".claude", "settings.json")); err != nil {
 		t.Error("detected Claude target should be installed")
 	}
-	if _, err := os.Stat(filepath.Join(dir, ".kiro", "hooks", "memphis-gate.json")); !os.IsNotExist(err) {
+	if _, err := os.Stat(filepath.Join(dir, ".kiro", "hooks", "pyra-gate.json")); !os.IsNotExist(err) {
 		t.Error("undetected Kiro IDE target should be skipped")
 	}
 }
@@ -121,8 +121,8 @@ func TestHooksUninstall_Reverses(t *testing.T) {
 		t.Fatal(err)
 	}
 	body, _ := os.ReadFile(filepath.Join(dir, ".git", "hooks", "pre-commit"))
-	if strings.Contains(string(body), "memphis gate") {
-		t.Errorf("uninstall should remove the memphis hook:\n%s", body)
+	if strings.Contains(string(body), "pyra gate") {
+		t.Errorf("uninstall should remove the pyra hook:\n%s", body)
 	}
 }
 

@@ -10,15 +10,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/chasedputnam/memphis/internal/changelog"
-	"github.com/chasedputnam/memphis/internal/crawler"
-	"github.com/chasedputnam/memphis/internal/differ"
-	"github.com/chasedputnam/memphis/internal/importer"
-	"github.com/chasedputnam/memphis/internal/normalize"
-	"github.com/chasedputnam/memphis/internal/summarize"
-	"github.com/chasedputnam/memphis/internal/types"
-	"github.com/chasedputnam/memphis/internal/util"
-	"github.com/chasedputnam/memphis/internal/writer"
+	"github.com/chasedputnam/pyra/internal/changelog"
+	"github.com/chasedputnam/pyra/internal/crawler"
+	"github.com/chasedputnam/pyra/internal/differ"
+	"github.com/chasedputnam/pyra/internal/importer"
+	"github.com/chasedputnam/pyra/internal/normalize"
+	"github.com/chasedputnam/pyra/internal/summarize"
+	"github.com/chasedputnam/pyra/internal/types"
+	"github.com/chasedputnam/pyra/internal/util"
+	"github.com/chasedputnam/pyra/internal/writer"
 )
 
 // UpdateOptions configures the update operation.

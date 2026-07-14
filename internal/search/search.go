@@ -8,9 +8,9 @@ import (
 	"github.com/blevesearch/bleve/v2/analysis/analyzer/standard"
 	"github.com/blevesearch/bleve/v2/mapping"
 	"github.com/blevesearch/bleve/v2/search/query"
-	"github.com/chasedputnam/memphis/internal/graph"
-	"github.com/chasedputnam/memphis/internal/reader"
-	"github.com/chasedputnam/memphis/internal/types"
+	"github.com/chasedputnam/pyra/internal/graph"
+	"github.com/chasedputnam/pyra/internal/reader"
+	"github.com/chasedputnam/pyra/internal/types"
 )
 
 // SearchOptions configures search behavior.

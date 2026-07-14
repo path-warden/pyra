@@ -1,4 +1,4 @@
-// Package types defines the core data structures used throughout memphis.
+// Package types defines the core data structures used throughout pyra.
 package types
 
 import "time"

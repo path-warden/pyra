@@ -3,10 +3,10 @@ package validate
 import (
 	"testing"
 
-	"github.com/chasedputnam/memphis/internal/canon/artifacts"
-	"github.com/chasedputnam/memphis/internal/canon/classify"
-	"github.com/chasedputnam/memphis/internal/canon/model"
-	"github.com/chasedputnam/memphis/internal/canon/parse"
+	"github.com/chasedputnam/pyra/internal/canon/artifacts"
+	"github.com/chasedputnam/pyra/internal/canon/classify"
+	"github.com/chasedputnam/pyra/internal/canon/model"
+	"github.com/chasedputnam/pyra/internal/canon/parse"
 )
 
 func check(src string) []model.Issue {

@@ -3,8 +3,8 @@ package gate
 import (
 	"testing"
 
-	"github.com/chasedputnam/memphis/internal/canon/model"
-	"github.com/chasedputnam/memphis/internal/config"
+	"github.com/chasedputnam/pyra/internal/canon/model"
+	"github.com/chasedputnam/pyra/internal/config"
 )
 
 func TestApplyPolicy_IntrinsicSeverity(t *testing.T) {

@@ -5,10 +5,10 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/chasedputnam/memphis/internal/changegate"
-	"github.com/chasedputnam/memphis/internal/codeintel"
-	"github.com/chasedputnam/memphis/internal/gitint"
-	"github.com/chasedputnam/memphis/internal/store"
+	"github.com/chasedputnam/pyra/internal/changegate"
+	"github.com/chasedputnam/pyra/internal/codeintel"
+	"github.com/chasedputnam/pyra/internal/gitint"
+	"github.com/chasedputnam/pyra/internal/store"
 )
 
 // Stable directive/finding codes. All advisory by default; escalatable via the

@@ -14,14 +14,14 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	"github.com/temoto/robotstxt"
 
-	"github.com/chasedputnam/memphis/internal/normalize"
-	"github.com/chasedputnam/memphis/internal/types"
-	"github.com/chasedputnam/memphis/internal/util"
-	"github.com/chasedputnam/memphis/internal/writer"
+	"github.com/chasedputnam/pyra/internal/normalize"
+	"github.com/chasedputnam/pyra/internal/types"
+	"github.com/chasedputnam/pyra/internal/util"
+	"github.com/chasedputnam/pyra/internal/writer"
 )
 
 const (
-	userAgent        = "okfy/0.1 (+https://github.com/chasedputnam/memphis)"
+	userAgent        = "okfy/0.1 (+https://github.com/chasedputnam/pyra)"
 	maxResponseBytes = 5 * 1024 * 1024 // 5MB
 	maxRedirects     = 10
 )

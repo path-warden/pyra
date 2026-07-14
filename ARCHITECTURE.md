@@ -1,11 +1,11 @@
 # Architecture
 
-Memphis is a **single Go binary** that gives AI coding agents an enforceable authority
+Pyra is a **single Go binary** that gives AI coding agents an enforceable authority
 layer over one substrate: plain Markdown plus YAML frontmatter, versioned in Git. It is
 built for spec-driven development, where the specs a workflow already produces become
 typed, gated **Canon** that agents are held to automatically.
 
-Memphis holds two kinds of memory:
+Pyra holds two kinds of memory:
 
 - **Canon**, the *authority* tier. Typed, validated, enforced normative artifacts
   (requirements, decisions, designs, roadmaps, prompts). This is the durable system of
@@ -15,7 +15,7 @@ Memphis holds two kinds of memory:
   sites, imported Markdown) rendered as a navigable Open Knowledge Format (OKF) bundle of
   abundant, summarized, fast-changing supporting material.
 
-Alongside these two memory tiers, Memphis exposes a third, non-memory capability:
+Alongside these two memory tiers, Pyra exposes a third, non-memory capability:
 
 - **Code intelligence**, a *live view of source*. Not stored memory — a read-only,
   structural read of the repository's code via a pure-Go tree-sitter runtime
@@ -53,7 +53,7 @@ assemble (under a token budget)**.
 4. **Type-conditional strictness.** Canon *blocks* (the gate); Reference *warns* (filing-
    cabinet health). One store holds both honestly.
 5. **Additive and backward compatible.** A store with no Canon behaves exactly like the
-   original Memphis; no gate is imposed on a pure-Reference store.
+   original Pyra; no gate is imposed on a pure-Reference store.
 6. **Writes happen outside the serve path.** All mutation is via CLI / Git PR review; the
    MCP server is read-only.
 7. **Code intelligence is read-only, pure-Go, and outside the authority path.**
@@ -63,7 +63,7 @@ assemble (under a token budget)**.
    cross-compiles with plain `go build`. It lives outside `internal/canon/...` and a
    dedicated boundary test proves the authority path never depends on it, so the gate stays
    deterministic and offline.
-8. **The gate evaluates change, not just Canon.** By default `memphis gate` checks that
+8. **The gate evaluates change, not just Canon.** By default `pyra gate` checks that
    *Canon* is well-formed; in change-aware mode (`--diff` / `--since` / `--changed`) it
    also reports which Accepted Canon governs each changed file and flags drift on touched
    code. This mapping needs `store` + `codeintel`, so it lives in `internal/changegate`,
@@ -77,7 +77,7 @@ assemble (under a token budget)**.
 
 ```mermaid
 flowchart TB
-    subgraph CLI["cmd/memphis (Cobra)"]
+    subgraph CLI["cmd/pyra (Cobra)"]
         ingest["crawl, import, update"]
         author["new, promote"]
         check["validate, gate, relationships, inspect"]
@@ -179,10 +179,10 @@ never depends on it.
 | `internal/sarif` | SARIF 2.1.0 emitter for CI |
 | `internal/changegate` | The **change-aware gate** (outside `internal/canon/...`): given a changed-file set (git staged / `--since` / explicit), resolve which Accepted Canon artifacts govern each file (literal path or symbol-id citation, deterministic full-corpus scan) and report drift on touched code. Emits ordinary `model.Issue`s classified by the shared `gate.ApplyPolicy` and merged into the corpus result. Depends on `store` + `codeintel`, so it is quarantined here and a boundary test forbids `internal/canon/...` from importing it. |
 | `internal/changerisk` | **Change-risk** (outside `internal/canon/...`): score a change (staged / commit / range) for defect risk from Kamei JIT diff metrics, lead with a repo-relative ranking, and emit PR directives (`risk-missing-tests`, `risk-missing-cochanges`, `risk-will-break`, `risk-governance` — the last reusing `changegate`). The scoring model + learned constants are a faithful **port of repowise** (AGPL-3.0) confined to `model_constants.go` (swappable) and pinned by a parity test. Emits `model.Issue`s merged via `gate.ApplyPolicy`. Depends on `gitint` + `codeintel` + `store`. |
-| `internal/deadcode` | **Dead-code detection** (outside `internal/canon/...`): a thin consumer of `codegraph.Reachability` — it takes the `Unreachable` set, tiers each symbol by confidence (high = no references · medium = has textual/dynamic references · low = test helper) via one whole-source scan, estimates cleanup impact (line count via `codeintel.Source`), and flags governed dead code (an unreachable symbol still cited by Canon, literal symbol-id match). Excludes `Test*`/`main`. Surfaced via `memphis dead-code` and `get_dead_code`. Depends on `codegraph` + `codeintel` + `store`. |
-| `internal/codehealth` | The **code-health layer** (outside `internal/canon/...`): scores every file across three independently-capped signals (defect / maintainability / performance) from a ~28-marker deterministic biomarker roster over `codeintel` (a new AST-**metrics** pass: cyclomatic complexity, nesting, LCOM4 field access, error patterns), `gitint`, `codegraph`, and Canon governance, plus LCOV/Cobertura coverage ingestion and a Rabin–Karp clone detector. The scoring **kernel + calibrated constants** are a faithful port of repowise (AGPL-3.0), confined to `kernel_constants.go` and pinned by a parity test. Surfaced via `memphis health` and `get_health`. Governance markers (`ungoverned_hotspot`/`stale_governance`/`contradictory_decision`) are the authority tie-in. The performance dimension is wired but present-but-empty (detectors deferred). Depends on `codeintel` + `gitint` + `codegraph` + `store` + `changegate`. |
-| `internal/codegraph` | The **code dependency graph** (outside `internal/canon/...`): from one `codeintel.Map` walk of the code roots it builds two-tier file+symbol nodes with containment, reference (name-resolved, edge-to-all-matches), and derived file→file edges, then runs standard self-contained analyses — PageRank centrality, deterministic label-propagation communities, Tarjan SCC cycles, and entry-point reachability (whose unreachable set feeds dead-code, #5). Surfaced via `memphis graph` and the `get_graph_centrality`/`get_communities`/`get_cycles` MCP tools (lazily built + cached on the server). No external graph library, no learned constants; betweenness + Leiden deferred. Depends on `codeintel` + `config`. See [`docs/REPOWISE_PARITY.md`](docs/REPOWISE_PARITY.md). |
-| `internal/gitint` | The **git-intelligence layer** (outside `internal/canon/...`): from one bounded `git log --numstat` walk it derives per-file metrics (commit windows, churn, age, temporal hotspot score, ownership %, recent owner, contributor count, bus factor, co-change), a repo-relative hotspot ranking (top-quartile churn + activity floors), and top-level-module rollups — all anchored to HEAD's commit time for byte-identical reruns. Pure git (no `codeintel` import; the "co-change minus import edges" join lives in `changerisk`). Surfaced via `memphis hotspots` / `memphis ownership` and the `get_hotspots` / `get_ownership` MCP tools; the `Churn`/`CoChangePartners`/`AuthorCommits` API is preserved for `changerisk`. Independent implementation, no learned constants — see [`docs/REPOWISE_PARITY.md`](docs/REPOWISE_PARITY.md). |
+| `internal/deadcode` | **Dead-code detection** (outside `internal/canon/...`): a thin consumer of `codegraph.Reachability` — it takes the `Unreachable` set, tiers each symbol by confidence (high = no references · medium = has textual/dynamic references · low = test helper) via one whole-source scan, estimates cleanup impact (line count via `codeintel.Source`), and flags governed dead code (an unreachable symbol still cited by Canon, literal symbol-id match). Excludes `Test*`/`main`. Surfaced via `pyra dead-code` and `get_dead_code`. Depends on `codegraph` + `codeintel` + `store`. |
+| `internal/codehealth` | The **code-health layer** (outside `internal/canon/...`): scores every file across three independently-capped signals (defect / maintainability / performance) from a ~28-marker deterministic biomarker roster over `codeintel` (a new AST-**metrics** pass: cyclomatic complexity, nesting, LCOM4 field access, error patterns), `gitint`, `codegraph`, and Canon governance, plus LCOV/Cobertura coverage ingestion and a Rabin–Karp clone detector. The scoring **kernel + calibrated constants** are a faithful port of repowise (AGPL-3.0), confined to `kernel_constants.go` and pinned by a parity test. Surfaced via `pyra health` and `get_health`. Governance markers (`ungoverned_hotspot`/`stale_governance`/`contradictory_decision`) are the authority tie-in. The performance dimension is wired but present-but-empty (detectors deferred). Depends on `codeintel` + `gitint` + `codegraph` + `store` + `changegate`. |
+| `internal/codegraph` | The **code dependency graph** (outside `internal/canon/...`): from one `codeintel.Map` walk of the code roots it builds two-tier file+symbol nodes with containment, reference (name-resolved, edge-to-all-matches), and derived file→file edges, then runs standard self-contained analyses — PageRank centrality, deterministic label-propagation communities, Tarjan SCC cycles, and entry-point reachability (whose unreachable set feeds dead-code, #5). Surfaced via `pyra graph` and the `get_graph_centrality`/`get_communities`/`get_cycles` MCP tools (lazily built + cached on the server). No external graph library, no learned constants; betweenness + Leiden deferred. Depends on `codeintel` + `config`. See [`docs/REPOWISE_PARITY.md`](docs/REPOWISE_PARITY.md). |
+| `internal/gitint` | The **git-intelligence layer** (outside `internal/canon/...`): from one bounded `git log --numstat` walk it derives per-file metrics (commit windows, churn, age, temporal hotspot score, ownership %, recent owner, contributor count, bus factor, co-change), a repo-relative hotspot ranking (top-quartile churn + activity floors), and top-level-module rollups — all anchored to HEAD's commit time for byte-identical reruns. Pure git (no `codeintel` import; the "co-change minus import edges" join lives in `changerisk`). Surfaced via `pyra hotspots` / `pyra ownership` and the `get_hotspots` / `get_ownership` MCP tools; the `Churn`/`CoChangePartners`/`AuthorCommits` API is preserved for `changerisk`. Independent implementation, no learned constants — see [`docs/REPOWISE_PARITY.md`](docs/REPOWISE_PARITY.md). |
 | `internal/mcp` | Read-only MCP server exposing Canon + discovery tools, the code-intelligence tools, and the two Canon↔code grounding tools |
 
 ### Code intelligence: `internal/codeintel` (pure-Go, read-only, offline)
@@ -204,7 +204,7 @@ the Makefile), so no operation performs any network access and the release binar
 lean. Both faces — CLI subcommands (`internal/cli/codeintel.go`) and MCP tools
 (`internal/mcp/codeintel.go`) — call the same `Ops`, so their results are equivalent.
 
-### Reference engine: existing Memphis packages (unchanged half)
+### Reference engine: existing Pyra packages (unchanged half)
 
 `crawler`, `importer`, `reader`, `normalize`, `writer` (ingestion → OKF bundle);
 `graph` (untyped backlinks); `search` (in-memory Bleve over both tiers); `context`
@@ -229,10 +229,10 @@ crawl/import → RawDocument → normalize → NormalizedDocument
 ### Authoring (Canon)
 
 ```
-memphis new <type> <path>      → scaffold typed artifact, mint ID  (CLI only)
-memphis promote <concept>      → seed a Canon draft from a Reference concept
+pyra new <type> <path>      → scaffold typed artifact, mint ID  (CLI only)
+pyra promote <concept>      → seed a Canon draft from a Reference concept
 human edits + Git PR review     → the trust boundary
-memphis gate                   → CI check; blocks bad Canon (exit 1 + SARIF)
+pyra gate                   → CI check; blocks bad Canon (exit 1 + SARIF)
 ```
 
 ### The gate pipeline (`canon/gate`)
@@ -321,7 +321,7 @@ identical repository state yields identical results.
 The bridge is the **symbol-id**. A Canon artifact names the code it governs by mentioning a
 symbol-id in its prose — the same literal-reference model used for `OKF-…` relationships
 between artifacts (no fuzzy matching). The `internal/mcp` grounding tools (and
-`memphis ground`) traverse it both ways, bridging `store.Store` and `codeintel.Ops`:
+`pyra ground`) traverse it both ways, bridging `store.Store` and `codeintel.Ops`:
 
 ```mermaid
 flowchart LR
@@ -378,7 +378,7 @@ behavior is pinned against rac-core's **real, dogfooded corpus**:
   SARIF rule IDs line up with rac-core's.
 
 When interoperating, the two tools meet at the Open Knowledge Format: rac-core can
-`export --okf`, and Memphis speaks OKF natively.
+`export --okf`, and Pyra speaks OKF natively.
 
 ---
 

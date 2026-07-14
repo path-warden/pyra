@@ -6,9 +6,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/chasedputnam/memphis/internal/codegraph"
-	"github.com/chasedputnam/memphis/internal/codeintel"
-	"github.com/chasedputnam/memphis/internal/config"
+	"github.com/chasedputnam/pyra/internal/codegraph"
+	"github.com/chasedputnam/pyra/internal/codeintel"
+	"github.com/chasedputnam/pyra/internal/config"
 )
 
 var graphCmd = &cobra.Command{
@@ -87,7 +87,7 @@ func runGraph(cmd *cobra.Command, args []string) error {
 }
 
 func graphHeader(g *codegraph.Graph) {
-	fmt.Printf("memphis graph — %d symbols\n", g.NodeCount())
+	fmt.Printf("pyra graph — %d symbols\n", g.NodeCount())
 	if g.Truncated {
 		fmt.Println("(graph truncated by --node-cap)")
 	}

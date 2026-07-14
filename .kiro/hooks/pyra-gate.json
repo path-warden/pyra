@@ -1,0 +1,11 @@
+{
+  "action": {
+    "command": "pyra gate",
+    "type": "command"
+  },
+  "description": "Gate Canon on save (pyra-managed)",
+  "enabled": true,
+  "matcher": "(^|/)(canon|specs|\\.kiro/specs)/.*\\.md$",
+  "name": "pyra-gate",
+  "trigger": "PostFileSave"
+}

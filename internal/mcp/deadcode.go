@@ -5,7 +5,7 @@ import (
 
 	"github.com/mark3labs/mcp-go/mcp"
 
-	"github.com/chasedputnam/memphis/internal/deadcode"
+	"github.com/chasedputnam/pyra/internal/deadcode"
 )
 
 func (s *Server) registerDeadCodeTools() {

@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/chasedputnam/memphis/internal/types"
+	"github.com/chasedputnam/pyra/internal/types"
 )
 
 func TestBundleSearch(t *testing.T) {

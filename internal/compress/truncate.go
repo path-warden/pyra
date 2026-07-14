@@ -3,7 +3,7 @@ package compress
 import (
 	"strings"
 
-	"github.com/chasedputnam/memphis/internal/tokens"
+	"github.com/chasedputnam/pyra/internal/tokens"
 )
 
 // TruncateOptions configures truncation behavior.

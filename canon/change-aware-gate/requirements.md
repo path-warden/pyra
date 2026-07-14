@@ -8,7 +8,7 @@ type: requirement
 
 ## Problem
 
-The Memphis gate today validates Canon's *internal* correctness — structure,
+The Pyra gate today validates Canon's *internal* correctness — structure,
 standards, and relationship integrity over the whole corpus. It never inspects a
 proposed **code change**, so its promise ("no agent silently violates a decision") is
 only enforced against edits to Canon itself, not against the code changes that are the
@@ -34,7 +34,7 @@ code"), never a semantic verdict ("you violated it").
 
 ### Scope
 
-**Must have:** a change-aware mode selected by a `--diff` flag on `memphis gate`,
+**Must have:** a change-aware mode selected by a `--diff` flag on `pyra gate`,
 sourcing changes from the git staged diff, resolving changed files to governing Canon at
 file granularity, emitting citations as findings classified by enforcement policy, with
 `--json` and SARIF output, while leaving the existing corpus gate behavior byte-for-byte
@@ -55,42 +55,42 @@ suggestions (a separate recommendation); mutating Canon or source.
 
 ### Requirement 1 — A change-aware evaluation mode on the gate
 
-- [REQ-101] WHEN `memphis gate --diff` runs with a set of changed files THEN Memphis SHALL resolve, for each changed file, the Canon artifacts that cite that file path or a symbol-id defined in it.
-- [REQ-102] WHEN a changed file maps to one or more governing Accepted Canon artifacts THEN Memphis SHALL emit one finding per governing artifact that cites the artifact ID, path, type, and lifecycle status alongside the changed file.
-- [REQ-103] WHEN a changed file maps to no governing Canon artifact THEN Memphis SHALL NOT emit a governance finding for that file.
-- [REQ-104] IF a governing artifact has a superseded lifecycle status THEN Memphis SHALL resolve to the current successor where one exists and SHALL cite the successor.
-- [REQ-105] WHERE `--diff` is not passed THEN `memphis gate` SHALL produce byte-identical output to today for identical repository state.
+- [REQ-101] WHEN `pyra gate --diff` runs with a set of changed files THEN Pyra SHALL resolve, for each changed file, the Canon artifacts that cite that file path or a symbol-id defined in it.
+- [REQ-102] WHEN a changed file maps to one or more governing Accepted Canon artifacts THEN Pyra SHALL emit one finding per governing artifact that cites the artifact ID, path, type, and lifecycle status alongside the changed file.
+- [REQ-103] WHEN a changed file maps to no governing Canon artifact THEN Pyra SHALL NOT emit a governance finding for that file.
+- [REQ-104] IF a governing artifact has a superseded lifecycle status THEN Pyra SHALL resolve to the current successor where one exists and SHALL cite the successor.
+- [REQ-105] WHERE `--diff` is not passed THEN `pyra gate` SHALL produce byte-identical output to today for identical repository state.
 
 ### Requirement 2 — Sourcing the set of changed files
 
-- [REQ-201] WHEN `--diff` is passed with no explicit file source THEN Memphis SHALL derive the changed files from the git staged index.
-- [REQ-202] WHEN a user passes `--changed` with an explicit file list THEN Memphis SHALL evaluate exactly that list without consulting git.
-- [REQ-203] WHEN a user passes `--since <ref>` THEN Memphis SHALL derive the changed files from the diff between that ref and the working state.
-- [REQ-204] IF the store is not inside a git repository and no explicit file list is given THEN Memphis SHALL report that the change source is unavailable rather than reporting zero governed changes.
-- [REQ-205] IF a changed file is deleted, renamed, or of an unsupported language THEN Memphis SHALL skip symbol extraction for it, still attempt file-path-level resolution, and continue the run.
+- [REQ-201] WHEN `--diff` is passed with no explicit file source THEN Pyra SHALL derive the changed files from the git staged index.
+- [REQ-202] WHEN a user passes `--changed` with an explicit file list THEN Pyra SHALL evaluate exactly that list without consulting git.
+- [REQ-203] WHEN a user passes `--since <ref>` THEN Pyra SHALL derive the changed files from the diff between that ref and the working state.
+- [REQ-204] IF the store is not inside a git repository and no explicit file list is given THEN Pyra SHALL report that the change source is unavailable rather than reporting zero governed changes.
+- [REQ-205] IF a changed file is deleted, renamed, or of an unsupported language THEN Pyra SHALL skip symbol extraction for it, still attempt file-path-level resolution, and continue the run.
 
 ### Requirement 3 — Classification and exit behavior via enforcement policy
 
-- [REQ-301] WHEN a governance finding is produced THEN Memphis SHALL classify it as advisory by default.
-- [REQ-302] WHEN the enforcement policy maps the governance finding code to blocking THEN Memphis SHALL classify matching findings as blocking.
-- [REQ-303] WHEN the enforcement policy maps the governance finding code to disabled THEN Memphis SHALL drop matching findings.
-- [REQ-304] WHEN any change-aware finding is classified as blocking THEN Memphis SHALL exit non-zero.
-- [REQ-305] WHERE the corpus gate and the change-aware evaluation run in one invocation THEN Memphis SHALL aggregate both finding sets into one result and exit non-zero if either has a blocking finding.
+- [REQ-301] WHEN a governance finding is produced THEN Pyra SHALL classify it as advisory by default.
+- [REQ-302] WHEN the enforcement policy maps the governance finding code to blocking THEN Pyra SHALL classify matching findings as blocking.
+- [REQ-303] WHEN the enforcement policy maps the governance finding code to disabled THEN Pyra SHALL drop matching findings.
+- [REQ-304] WHEN any change-aware finding is classified as blocking THEN Pyra SHALL exit non-zero.
+- [REQ-305] WHERE the corpus gate and the change-aware evaluation run in one invocation THEN Pyra SHALL aggregate both finding sets into one result and exit non-zero if either has a blocking finding.
 
 ### Requirement 4 — Output formats and CI integration
 
-- [REQ-401] WHEN `--diff` runs with the JSON flag THEN Memphis SHALL emit machine-parseable JSON including each governance finding's code, changed file, governing artifact ID, and severity.
-- [REQ-402] WHEN `--diff` runs with the SARIF flag THEN Memphis SHALL emit SARIF 2.1.0 in which each governance finding carries a stable rule ID and a location pointing at the changed file.
-- [REQ-403] WHEN `--diff` runs with neither format flag THEN Memphis SHALL render human-readable output listing each changed file with its governing artifacts and citations.
+- [REQ-401] WHEN `--diff` runs with the JSON flag THEN Pyra SHALL emit machine-parseable JSON including each governance finding's code, changed file, governing artifact ID, and severity.
+- [REQ-402] WHEN `--diff` runs with the SARIF flag THEN Pyra SHALL emit SARIF 2.1.0 in which each governance finding carries a stable rule ID and a location pointing at the changed file.
+- [REQ-403] WHEN `--diff` runs with neither format flag THEN Pyra SHALL render human-readable output listing each changed file with its governing artifacts and citations.
 - [REQ-404] WHERE a governance finding is emitted THEN its rule identifier SHALL be stable across runs on identical inputs.
 
 ### Requirement 5 — Preserve the deterministic, offline, AI-free authority path
 
 - [REQ-501] WHERE the change-aware evaluation is implemented THEN no package under `internal/canon/...` SHALL gain a dependency on `internal/codeintel`, the tree-sitter runtime, `net/http`, or any LLM dependency.
 - [REQ-502] WHEN the test suite runs THEN the existing `internal/canon` architecture and boundary tests SHALL continue to pass.
-- [REQ-503] WHEN the change-aware evaluation runs on identical repository state and identical changed-file input THEN Memphis SHALL produce identical findings.
+- [REQ-503] WHEN the change-aware evaluation runs on identical repository state and identical changed-file input THEN Pyra SHALL produce identical findings.
 - [REQ-504] WHEN the change-aware evaluation resolves governance THEN it SHALL rely only on literal symbol-id and file references in Canon prose, never fuzzy or LLM-based matching.
-- [REQ-505] IF the evaluation cannot resolve a symbol a Canon artifact cites THEN Memphis SHALL report it as unresolved rather than matching an incorrect symbol.
+- [REQ-505] IF the evaluation cannot resolve a symbol a Canon artifact cites THEN Pyra SHALL report it as unresolved rather than matching an incorrect symbol.
 
 ## Success Metrics
 

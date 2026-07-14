@@ -1,26 +1,26 @@
-# Memphis
+# Pyra
 
 <p align="center">
-<img width="704" alt="memphis_github" src="https://github.com/user-attachments/assets/851ab1f8-9412-497c-8194-0b4cb4c4ea61" />
+<img width="704" alt="pyra_github" src="https://github.com/user-attachments/assets/851ab1f8-9412-497c-8194-0b4cb4c4ea61" />
 </p>
 
-> "In Memphis was founded one of the most important monuments of the world, and the only surviving wonder of the ancient world, namely, the Great Pyramid of Giza."
+> **Ensure your codebases stand the test of time, just like the Great Pyramid of Giza.**
 
-**Memphis (MEM-phis) is an enforceable authority layer for AI coding agents.** It is a single Go binary that turns the decisions, requirements, and designs your team agrees to into **'Canon'**, which is: typed Markdown artifacts, validated against real standards, wired into a blocking **gate** sysetm, and served to agents over **MCP**. No decision goes unrecorded, and no agent silently violates one.
+**Pyra is an enforceable authority layer for AI coding agents.** It is a single Go binary that turns the decisions, requirements, and designs your team agrees to into **'Canon'**, which is: typed Markdown artifacts, validated against real standards, wired into a blocking **gate** system, and served to agents over **MCP**. No decision goes unrecorded, and no agent silently violates one.
 
-The problem Memphis solves is simple to state and expensive to ignore: an AI agent's only real constraint is its context window, and most "memory" tools conflate two very different properties. **Authority** asks whether something is the canonical truth the team agreed to. **Discoverability** asks whether the right piece can be found at the right moment. Vector stores optimize discoverability and have no concept of authority. Memphis makes authority a first-class, *enforced* property: Canon artifacts are typed, their relationships are integrity-checked, and a deterministic gate rejects malformed or conflicting authority before it lands, with no LLM and no network in that path.
+The problem Pyra solves is simple to state and expensive to ignore: an AI agent's only real constraint is its context window, and most "memory" tools conflate two very different properties. **Authority** asks whether something is the canonical truth the team agreed to. **Discoverability** asks whether the right piece can be found at the right moment. Vector stores optimize discoverability and have no concept of authority. Pyra makes authority a first-class, *enforced* property: Canon artifacts are typed, their relationships are integrity-checked, and a deterministic gate rejects malformed or conflicting authority before it lands, with no LLM and no network in that path.
 
-Memphis is built directly for **spec-driven development**. The specs your workflow already produces (`requirements.md`, `design.md`) become typed Canon with one command, and the agents that read them are held to that Canon automatically, whether you drive the `/spec → /dev → /code-review` skills in Claude Code or Kiro, or any MCP client.
+Pyra is built directly for **spec-driven development**. The specs your workflow already produces (`requirements.md`, `design.md`) become typed Canon with one command, and the agents that read them are held to that Canon automatically, whether you drive the `/spec → /dev → /code-review` skills in Claude Code or Kiro, or any MCP client.
 
 **Memory is Canon. Context is the *budgeted projection* of Canon (and optional Reference). AI lives only in the projection. The substrate is Git.**
 
 The Canon authority model conforms to the concept of **Requirements-as-Code (RaC)**.
 
-Memphis also speaks **code**. The same binary and the same MCP server expose **structural code intelligence** — byte-precise, token-cheap search and navigation over your source via tree-sitter (`outline`, `symbols`, go-to-`definition`, `callers`, and more) so one agent using one server can answer both *what the team decided* (Canon) and *what the code actually does*. The two connect: a Canon artifact can **ground** in real code, resolving an authoritative decision to the exact symbols it governs, and a symbol back to the decisions that constrain it. Authoritative decisions and real code search are centralized into a single binary and MCP server.
+Pyra also speaks **code**. The same binary and the same MCP server expose **structural code intelligence** — byte-precise, token-cheap search and navigation over your source via tree-sitter (`outline`, `symbols`, go-to-`definition`, `callers`, and more) so one agent using one server can answer both *what the team decided* (Canon) and *what the code actually does*. The two connect: a Canon artifact can **ground** in real code, resolving an authoritative decision to the exact symbols it governs, and a symbol back to the decisions that constrain it. Authoritative decisions and real code search are centralized into a single binary and MCP server.
 
 ---
 
-## Why Memphis? - A Common Use Case
+## Why Pyra? - A Common Use Case
 
 You make an architectural decision — "use Bleve for search" — while working a feature through the `/spec` skill. You don't file it anywhere by hand: when you approve the design, the skill records it as Canon and gates it for you.
 
@@ -29,11 +29,11 @@ You make an architectural decision — "use Bleve for search" — while working 
         → skill projects it into typed Canon and runs the gate   → the decision lands as authority
 ```
 
-Two weeks later, in a brand-new session with no memory of that conversation, an agent proposes ripping out Bleve for a vector database. Because Memphis is wired into the workflow through the same skills:
+Two weeks later, in a brand-new session with no memory of that conversation, an agent proposes ripping out Bleve for a vector database. Because Pyra is wired into the workflow through the same skills:
 
 - `/dev` **grounds on Canon over MCP** first. `find_decisions` surfaces the "Use Bleve for search" artifact with status **Accepted** and its consequences, so the agent argues *from* the decision instead of around it.
 - If a change still lands that contradicts Accepted Canon, the **gate blocks it** at commit time (git hook), inside `/code-review`, and in CI (`gate --sarif`), citing the exact artifact and rule.
-- When the decision genuinely *should* change, you mint a successor that `## Supersedes` the old one. Memphis follows the supersede chain so agents always see the current truth, never a stale one.
+- When the decision genuinely *should* change, you mint a successor that `## Supersedes` the old one. Pyra follows the supersede chain so agents always see the current truth, never a stale one.
 
 That is the whole point: **the decision is recorded once and respected thereafter**, by people and agents alike, without anyone having to remember it.
 
@@ -41,17 +41,17 @@ That is the whole point: **the decision is recorded once and respected thereafte
 
 ## The core model
 
-Memphis gives an agent two kinds of knowledge over one substrate, plain Markdown plus YAML frontmatter, versioned in Git:
+Pyra gives an agent two kinds of knowledge over one substrate, plain Markdown plus YAML frontmatter, versioned in Git:
 
 | | **Canon** (authority) | **Reference** (recall, optional) |
 |---|---|---|
 | Answers | **What is true**: what the team decided and what must hold | **How things work**: supporting documentation |
 | Content | Requirements, decisions, designs, roadmaps, prompts | Ingested docs (crawled sites, imported repos) |
-| Created by | `memphis new` / `memphis project` / `memphis promote` | `memphis crawl` / `memphis import` |
+| Created by | `pyra new` / `pyra project` / `pyra promote` | `pyra crawl` / `pyra import` |
 | Validation | Typed, standards-checked, relationship-integrity-checked, **gated in CI** | Permissive, abundant and searchable |
 | Determinism | Pure function of repo state, **no LLM, no network** | AI may summarize and rank in the discovery layer |
 
-A **store** is one directory in Git holding both tiers. The only thing separating them is `canon_roots` in `.okf/config.yaml`: files under those roots are Canon, and everything else is Reference. Canon is the hero of Memphis. Reference is an optional convenience for teams that also want a large docs corpus searchable as agent memory (see the [Appendix](#appendix-reference-tier-and-okf-format)).
+A **store** is one directory in Git holding both tiers. The only thing separating them is `canon_roots` in `.okf/config.yaml`: files under those roots are Canon, and everything else is Reference. Canon is the hero of Pyra. Reference is an optional convenience for teams that also want a large docs corpus searchable as agent memory (see the [Appendix](#appendix-reference-tier-and-okf-format)).
 
 ### The five Canon artifact types
 
@@ -67,11 +67,11 @@ Each is typed Markdown with required sections, a minted opaque ID (`<repository-
 
 ### The gate
 
-`memphis gate` is the enforcement mechanism and the heart of the authority model. It loads the corpus, validates every artifact, checks relationship integrity, applies your enforcement policy, and exits non-zero on any blocking finding, emitting SARIF for required-checks. It is **deterministic and offline** (a build-failing test forbids `net/http` or any LLM dependency in the authority path), so it is safe in pre-commit hooks and CI. Validation includes:
+`pyra gate` is the enforcement mechanism and the heart of the authority model. It loads the corpus, validates every artifact, checks relationship integrity, applies your enforcement policy, and exits non-zero on any blocking finding, emitting SARIF for required-checks. It is **deterministic and offline** (a build-failing test forbids `net/http` or any LLM dependency in the authority path), so it is safe in pre-commit hooks and CI. Validation includes:
 
 > **Change-aware mode (`--diff`).** By default the gate checks whether *Canon* is well-formed. Add `--diff` (staged diff), `--since <ref>`, or `--changed <files>` and the gate additionally reports which **Accepted Canon artifacts govern each changed file** — an artifact governs a file when its prose cites that file path or a symbol-id in it — so a change that touches governed code is surfaced with a citation, and drift (a cited symbol that no longer resolves) is flagged. These findings are **advisory by default**; escalate them to blocking via the enforcement rule codes `canon-governed-change` and `governed-symbol-unresolved`. The mode reuses the same policy, exit code, and SARIF output, and stays deterministic and offline (the mapping is purely structural — it lives in `internal/changegate`, outside the authority path).
 
-> **Change-risk (`--risk`).** Add `--risk` (or run `memphis risk`) and the gate also scores the change itself for **defect risk** from the shape of the diff (Kamei just-in-time metrics: lines ±, files, directories, subsystems, diffusion entropy, author experience). The headline is **repo-relative** — `Below typical` / `Typical` / `Elevated` plus a percentile against the repo's *own* recent commits (the portable signal; the raw 0–10 is shown only as a secondary, uncalibrated number). It emits PR **directives** as advisory findings: `risk-missing-tests` (changed source with no test in the diff), `risk-missing-cochanges` (files that usually change together but were omitted — hidden coupling, minus structural import links), `risk-will-break` (structural dependents of changed symbols), and `risk-governance` (the change touches Accepted Canon). All merge into the same result, exit code, JSON, and SARIF. Deterministic and offline — no LLM, no network — in `internal/changerisk` (with a minimal git-history substrate in `internal/gitint`), both outside the authority path. The scoring model is a **faithful port of [repowise](https://github.com/repowise-dev/repowise)'s change-risk model** (AGPL-3.0), isolated to one swappable file and pinned by a parity test; see [`docs/REPOWISE_PARITY.md`](docs/REPOWISE_PARITY.md).
+> **Change-risk (`--risk`).** Add `--risk` (or run `pyra risk`) and the gate also scores the change itself for **defect risk** from the shape of the diff (Kamei just-in-time metrics: lines ±, files, directories, subsystems, diffusion entropy, author experience). The headline is **repo-relative** — `Below typical` / `Typical` / `Elevated` plus a percentile against the repo's *own* recent commits (the portable signal; the raw 0–10 is shown only as a secondary, uncalibrated number). It emits PR **directives** as advisory findings: `risk-missing-tests` (changed source with no test in the diff), `risk-missing-cochanges` (files that usually change together but were omitted — hidden coupling, minus structural import links), `risk-will-break` (structural dependents of changed symbols), and `risk-governance` (the change touches Accepted Canon). All merge into the same result, exit code, JSON, and SARIF. Deterministic and offline — no LLM, no network — in `internal/changerisk` (with a minimal git-history substrate in `internal/gitint`), both outside the authority path. The scoring model is a **faithful port of [repowise](https://github.com/repowise-dev/repowise)'s change-risk model** (AGPL-3.0), isolated to one swappable file and pinned by a parity test; see [`docs/REPOWISE_PARITY.md`](docs/REPOWISE_PARITY.md).
 
 - **BCP-14 / RFC 8174**: only ALL-CAPS `MUST`/`SHALL`/`SHOULD` carry normative weight.
 - **ISO/IEC/IEEE 29148**: requirements should be singular and testable.
@@ -82,7 +82,7 @@ Each is typed Markdown with required sections, a minted opaque ID (`<repository-
 
 ## Code intelligence
 
-Beyond memory, Memphis reads code. The same `memphis` binary and MCP server expose seven **read-only, structural** operations built on a pure-Go tree-sitter runtime — no cgo, grammars embedded, fully offline:
+Beyond memory, Pyra reads code. The same `pyra` binary and MCP server expose seven **read-only, structural** operations built on a pure-Go tree-sitter runtime — no cgo, grammars embedded, fully offline:
 
 | Operation | Answers |
 |---|---|
@@ -102,7 +102,7 @@ Additional languages require building from source (see Instalation below).
 
 ### How Canon maps to code (grounding)
 
-Authority and code meet through the symbol-id. **A Canon artifact names the code it governs simply by mentioning a symbol-id in its prose** — the same way relationships between artifacts are inferred from literal `OKF-…` IDs, never fuzzy matching. Two read-only tools (and `memphis ground`) walk that bridge in both directions:
+Authority and code meet through the symbol-id. **A Canon artifact names the code it governs simply by mentioning a symbol-id in its prose** — the same way relationships between artifacts are inferred from literal `OKF-…` IDs, never fuzzy matching. Two read-only tools (and `pyra ground`) walk that bridge in both directions:
 
 - **Artifact → code** (`code_for_artifact`): given a Canon artifact ID, resolve every symbol-id in its body to the current source, and report any that no longer resolve (renamed, moved, or deleted) rather than returning an incorrect match.
 - **Code → artifacts** (`artifacts_for_symbol`): given a symbol-id or file path, find the Canon decisions, requirements, and designs that reference it.
@@ -120,19 +120,19 @@ So a decision can point at the exact function that implements it; an agent can a
 
 ### Download a binary
 
-Download the latest binary for your platform from the [releases page](https://github.com/chasedputnam/memphis/releases).
+Download the latest binary for your platform from the [releases page](https://github.com/chasedputnam/pyra/releases).
 
 ### Build from source
 
 ```bash
-go install github.com/chasedputnam/memphis/cmd/memphis@latest
+go install github.com/chasedputnam/pyra/cmd/pyra@latest
 ```
 
 Or clone and build (Go 1.25+):
 
 ```bash
-git clone https://github.com/chasedputnam/memphis.git
-cd memphis
+git clone https://github.com/chasedputnam/pyra.git
+cd pyra
 make build
 ```
 
@@ -140,19 +140,19 @@ make build
 
 The binary is **pure Go, no cgo**, and cross-compiles to every target with plain `go build`; code intelligence uses a pure-Go tree-sitter runtime to keep it that way. `make build` embeds only the grammars for the supported languages (via `grammar_subset` build tags) for a lean binary; a plain `go install`/`go build` without those tags embeds the runtime's full grammar set and produces a larger binary.
 
-> **Apple Intelligence (optional, Reference summaries only):** on macOS 26 Tahoe with Apple Silicon, Memphis can summarize Reference docs through Apple's on-device Foundation Models via the opt-in `applefm` build tag. See [docs/APPLE_INTELLIGENCE.md](docs/APPLE_INTELLIGENCE.md). This never touches the Canon authority path.
+> **Apple Intelligence (optional, Reference summaries only):** on macOS 26 Tahoe with Apple Silicon, Pyra can summarize Reference docs through Apple's on-device Foundation Models via the opt-in `applefm` build tag. See [docs/APPLE_INTELLIGENCE.md](docs/APPLE_INTELLIGENCE.md). This never touches the Canon authority path.
 
 ---
 
 ## Quick start
 
-Memphis is meant to be driven through your agent's **skills**, not by typing `memphis` commands by hand. Three bundled skills for Claude Code and Kiro — `/spec`, `/dev`, `/code-review` — run the right Memphis command at the right moment in the lifecycle. Set the store up once, then live in the skills.
+Pyra is meant to be driven through your agent's **skills**, not by typing `pyra` commands by hand. Three bundled skills for Claude Code and Kiro — `/spec`, `/dev`, `/code-review` — run the right Pyra command at the right moment in the lifecycle. Set the store up once, then live in the skills.
 
 ### One-time setup
 
 ```bash
 # 1. Scaffold a store (writes .okf/config.yaml + canon roots)
-memphis init my-store && cd my-store
+pyra init my-store && cd my-store
 git init
 
 # 2. Install the bundled skills + gate hooks into whatever tools you have.
@@ -160,36 +160,36 @@ git init
 ./install_skills.sh .               # run from a clone of this repo
 
 # 3. Serve Canon (and any Reference) to your agent over MCP
-memphis serve . --mcp
+pyra serve . --mcp
 ```
 
-`install_skills.sh` detects each supported toolchain by its folder (`~/.claude`, `~/.kiro`, `<store>/.git`) and, for the ones it finds, copies the skills into its skills dir (`~/.claude/skills` and/or `~/.kiro/skills`) and runs `memphis hooks install` for that target. Pass the store directory as its argument (defaults to `.`). If you'd rather do it by hand:
+`install_skills.sh` detects each supported toolchain by its folder (`~/.claude`, `~/.kiro`, `<store>/.git`) and, for the ones it finds, copies the skills into its skills dir (`~/.claude/skills` and/or `~/.kiro/skills`) and runs `pyra hooks install` for that target. Pass the store directory as its argument (defaults to `.`). If you'd rather do it by hand:
 
 ```bash
 cp -R .claude/skills/spec .claude/skills/dev .claude/skills/code-review ~/.claude/skills/
-memphis hooks install               # git + detected agent toolchains (Claude Code / Kiro)
+pyra hooks install               # git + detected agent toolchains (Claude Code / Kiro)
 ```
 
-> **Installed the binary only (`go install`)?** The bundled skills and `install_skills.sh` live in this repo, not in the binary. Clone it to get them: `git clone https://github.com/chasedputnam/memphis.git`, then run `./install_skills.sh` from the clone. You can also browse the skills on GitHub under [`.claude/skills/`](.claude/skills/).
+> **Installed the binary only (`go install`)?** The bundled skills and `install_skills.sh` live in this repo, not in the binary. Clone it to get them: `git clone https://github.com/chasedputnam/pyra.git`, then run `./install_skills.sh` from the clone. You can also browse the skills on GitHub under [`.claude/skills/`](.claude/skills/).
 
 ### The everyday loop (driven by skills)
 
 ```text
-/spec         plan a feature → requirements.md / design.md     (skill runs: memphis project + gate)
+/spec         plan a feature → requirements.md / design.md     (skill runs: pyra project + gate)
 /dev          implement it, grounded in Canon over MCP         (skill runs: find_decisions / get_context, then rebuild)
-/code-review  review against authority before committing        (skill runs: memphis gate --sarif + relationships)
+/code-review  review against authority before committing        (skill runs: pyra gate --sarif + relationships)
 ```
 
-Each skill detects a Memphis store (a `.okf/config.yaml`) and projects, gates, grounds, and rebuilds automatically — so authority is captured and enforced as a byproduct of the work you were already doing. The equivalent raw commands are shown in [Spec-driven development with Memphis](#spec-driven-development-with-memphis) for when you want to run them directly or wire them into another toolchain.
+Each skill detects a Pyra store (a `.okf/config.yaml`) and projects, gates, grounds, and rebuilds automatically — so authority is captured and enforced as a byproduct of the work you were already doing. The equivalent raw commands are shown in [Spec-driven development with Pyra](#spec-driven-development-with-pyra) for when you want to run them directly or wire them into another toolchain.
 
 ### Authoring Canon directly (optional)
 
 When you want to record a decision outside a spec, author it by hand and gate it:
 
 ```bash
-memphis new decision canon/adr-001-use-bleve.md --title "Use Bleve for search"
+pyra new decision canon/adr-001-use-bleve.md --title "Use Bleve for search"
 $EDITOR canon/adr-001-use-bleve.md      # fill ## Status (Accepted), ## Decision, ## Consequences
-memphis gate .                          # blocks on any structural, standards, or integrity failure
+pyra gate .                          # blocks on any structural, standards, or integrity failure
 ```
 
 Then point your MCP client at the **store root**:
@@ -198,7 +198,7 @@ Then point your MCP client at the **store root**:
 {
   "mcpServers": {
     "my-store": {
-      "command": "memphis",
+      "command": "pyra",
       "args": ["serve", "/abs/path/to/my-store", "--mcp"]
     }
   }
@@ -212,12 +212,12 @@ The generated `.okf/config.yaml` is self-documenting:
 repository_key: OKF
 
 # Canon roots: directories that hold the authoritative tier. Everything else
-# under the store is treated as Reference. Files here are validated by `memphis gate`.
+# under the store is treated as Reference. Files here are validated by `pyra gate`.
 canon_roots:
   - canon
 
 # Spec roots: directories scanned for spec documents (requirements.md,
-# design.md) that `memphis project` turns into typed Canon. Covers the local
+# design.md) that `pyra project` turns into typed Canon. Covers the local
 # specs/ layout and Kiro's .kiro/specs/ layout by default.
 spec_roots:
   - specs
@@ -240,9 +240,9 @@ enforcement: {}
 
 ---
 
-## Spec-driven development with Memphis
+## Spec-driven development with Pyra
 
-Memphis is the authoritative memory beneath your spec-driven workflow. The specs your agent already writes become Canon, the gate keeps that Canon honest, and MCP feeds it back to the agent on every task. The same flow works whether you drive **Claude Code** or **Kiro** — both run the `/spec → /dev → /code-review` skills and emit the same `requirements.md` / `design.md` contract, so one projector serves both.
+Pyra is the authoritative memory beneath your spec-driven workflow. The specs your agent already writes become Canon, the gate keeps that Canon honest, and MCP feeds it back to the agent on every task. The same flow works whether you drive **Claude Code** or **Kiro** — both run the `/spec → /dev → /code-review` skills and emit the same `requirements.md` / `design.md` contract, so one projector serves both.
 
 The recommended way to run this loop is through the bundled skills (see [Quick start](#quick-start)) — they invoke the commands below for you at each phase. The raw commands are documented here so you can run them directly or adapt them to another toolchain.
 
@@ -252,50 +252,50 @@ These are the commands the `/spec`, `/dev`, and `/code-review` skills run on you
 
 ```bash
 # 0. Once per repo
-memphis init . && memphis hooks install        # auto-gate on write, commit, and merge
+pyra init . && pyra hooks install        # auto-gate on write, commit, and merge
 
 # 1. Requirements: /spec writes specs/<feature>/requirements.md, then projects it into
 #    typed Canon (mints a stable ID, fills sections, infers relationships):
-memphis project specs/<feature>/requirements.md
+pyra project specs/<feature>/requirements.md
 #    Or project the whole spec directory at once (skips tasks.md):
-memphis project specs/<feature>/
+pyra project specs/<feature>/
 
 # 2. Design: /spec produces design.md; it projects that to a design artifact:
-memphis project specs/<feature>/design.md
+pyra project specs/<feature>/design.md
 
 # 3. Development: /dev grounds on Canon over MCP before writing code.
 #    find_decisions / get_artifact / get_context return the authoritative requirements
 #    and decisions the task must honor (Canon-first, with citations and live status).
 
 # 4. Code review: /code-review runs the gate as a required check and cites what changed:
-memphis gate . --sarif > memphis.sarif
-memphis gate . --diff                  # change-aware: which Accepted Canon governs the staged diff
-memphis relationships . --summary
+pyra gate . --sarif > pyra.sarif
+pyra gate . --diff                  # change-aware: which Accepted Canon governs the staged diff
+pyra relationships . --summary
 ```
 
-`memphis project` is **ratify-or-correct**: it never rewords your prose or silently overwrites. A new artifact is created, an existing one is only changed with `--write` (or interactive confirmation), and `--dry-run` previews the diff. Re-projecting reuses the artifact's ID, so identity is stable across iterations. Relationships are inferred only from **literal** `OKF-…` and alias references in the prose, for high precision and never fuzzy matching.
+`pyra project` is **ratify-or-correct**: it never rewords your prose or silently overwrites. A new artifact is created, an existing one is only changed with `--write` (or interactive confirmation), and `--dry-run` previews the diff. Re-projecting reuses the artifact's ID, so identity is stable across iterations. Relationships are inferred only from **literal** `OKF-…` and alias references in the prose, for high precision and never fuzzy matching.
 
 ### Bootstrap from existing docs
 
 If a decision already lives in ingested Reference, graduate it into Canon instead of retyping it:
 
 ```bash
-memphis promote <concept-id-or-path> --type decision
+pyra promote <concept-id-or-path> --type decision
 ```
 
 ### Integrating into your agent's skills
 
-Memphis is designed to disappear into your workflow. Each phase of spec-driven development emits authoritative memory as a natural byproduct of the work the agent is already doing: requirements become Canon the moment they're approved, decisions are captured as they're made, and the gate enforces all of it continuously. Drop these commands into the skill definitions you already use, and the loop runs itself. Every spec strengthens the memory, every task is grounded in it, and every review is checked against it.
+Pyra is designed to disappear into your workflow. Each phase of spec-driven development emits authoritative memory as a natural byproduct of the work the agent is already doing: requirements become Canon the moment they're approved, decisions are captured as they're made, and the gate enforces all of it continuously. Drop these commands into the skill definitions you already use, and the loop runs itself. Every spec strengthens the memory, every task is grounded in it, and every review is checked against it.
 
-**Ready-to-use skill examples ship in this repo.** You don't have to wire the commands below by hand — [`.claude/skills/`](.claude/skills/) contains three working skills (Claude Code and Kiro share the same `SKILL.md` format) that already integrate Memphis into each phase of the lifecycle:
+**Ready-to-use skill examples ship in this repo.** You don't have to wire the commands below by hand — [`.claude/skills/`](.claude/skills/) contains three working skills (Claude Code and Kiro share the same `SKILL.md` format) that already integrate Pyra into each phase of the lifecycle:
 
-| Skill | Phase | Memphis integration |
+| Skill | Phase | Pyra integration |
 |---|---|---|
 | [`spec`](.claude/skills/spec/SKILL.md) | Requirements → Design → Tasks | Projects each approved `requirements.md` / `design.md` into typed Canon and gates it. |
 | [`dev`](.claude/skills/dev/SKILL.md) | Implementation | Grounds the work in Canon over MCP (`find_decisions` / `get_artifact` / `get_context`) before writing code; rebuilds indexes after status changes. |
-| [`code-review`](.claude/skills/code-review/SKILL.md) | Review | Runs `memphis gate --sarif` as a required authority check and cites touched artifacts via `memphis relationships --summary`. |
+| [`code-review`](.claude/skills/code-review/SKILL.md) | Review | Runs `pyra gate --sarif` as a required authority check and cites touched artifacts via `pyra relationships --summary`. |
 
-Every Memphis step in these skills is guarded by an "if this is a Memphis store" check, so they also work unchanged in repositories that don't use Memphis. The quickest way to install them — along with the gate hooks for every toolchain you have — is the bundled installer:
+Every Pyra step in these skills is guarded by an "if this is a Pyra store" check, so they also work unchanged in repositories that don't use Pyra. The quickest way to install them — along with the gate hooks for every toolchain you have — is the bundled installer:
 
 ```bash
 ./install_skills.sh .     # auto-detects Claude Code / Kiro / git and wires up each one
@@ -313,22 +313,22 @@ Or leave them under `.claude/skills/` to scope them to this repository. See [`.c
 
 ```bash
 # /spec: at each approval gate, project the just-approved doc into Canon and enforce it
-memphis project "specs/${FEATURE}/requirements.md"
-memphis gate .            # block approval on a failing gate
+pyra project "specs/${FEATURE}/requirements.md"
+pyra gate .            # block approval on a failing gate
 
 # /dev: ground the implementation in authority before writing code (MCP, already running):
 #   find_decisions("<area>"), get_artifact("OKF-..."), get_context("<task>")
-memphis rebuild .         # refresh derived indexes after status changes
+pyra rebuild .         # refresh derived indexes after status changes
 
 # /code-review: make the gate a required check and cite touched authority
-memphis gate . --sarif > memphis.sarif
-memphis relationships . --summary
+pyra gate . --sarif > pyra.sarif
+pyra relationships . --summary
 ```
 
 Install the on-write hook so the gate runs inside the agent loop:
 
 ```bash
-memphis hooks install --claude     # PostToolUse hook → memphis gate after Write/Edit
+pyra hooks install --claude     # PostToolUse hook → pyra gate after Write/Edit
 ```
 
 **Kiro** (skills in `~/.kiro/skills/`, specs in `.kiro/specs/`, hooks in `.kiro/hooks/` for the IDE and `.kiro/agents/*.json` for the CLI):
@@ -336,11 +336,11 @@ memphis hooks install --claude     # PostToolUse hook → memphis gate after Wri
 Kiro reads the same `SKILL.md` format, so the three skills above install and run identically — just copy them into `~/.kiro/skills/` (the installer does this when it detects Kiro). The projector and hooks use Kiro's layout:
 
 ```bash
-memphis project .kiro/specs/${FEATURE}/    # same projector, Kiro layout
-memphis hooks install --kiro               # writes the Kiro IDE + CLI gate hooks
+pyra project .kiro/specs/${FEATURE}/    # same projector, Kiro layout
+pyra hooks install --kiro               # writes the Kiro IDE + CLI gate hooks
 ```
 
-**Any MCP client** (no skills required): run `memphis serve . --mcp`, point the client at the store root, and the agent gets the authority tools (`find_decisions`, `get_artifact`, `get_context`, and the rest) directly.
+**Any MCP client** (no skills required): run `pyra serve . --mcp`, point the client at the store root, and the agent gets the authority tools (`find_decisions`, `get_artifact`, `get_context`, and the rest) directly.
 
 The result is a compounding system. The more your team specs, decides, and ships, the richer and more authoritative the agent's memory becomes, while the gate guarantees it never drifts from what the team actually agreed to.
 
@@ -354,23 +354,23 @@ In rough order of use. Store-scoped commands default to the current directory (`
 
 | Command | Purpose |
 |---|---|
-| `memphis init [path]` | Scaffold a store: write `.okf/config.yaml` and create canon roots. Flags: `--repository-key`, `--canon-root` (repeatable), `--ticketing`, `--force`, `--quiet`. |
+| `pyra init [path]` | Scaffold a store: write `.okf/config.yaml` and create canon roots. Flags: `--repository-key`, `--canon-root` (repeatable), `--ticketing`, `--force`, `--quiet`. |
 
 ### Authoring Canon
 
 | Command | Purpose |
 |---|---|
-| `memphis new <type> <path>` | Scaffold a typed artifact with a minted ID and the type's sections. Flags: `--store`, `--title`. |
-| `memphis project <spec-doc-or-dir>` | Project an approved `requirements.md`/`design.md` (local `specs/` or Kiro `.kiro/specs/`) into typed Canon: reuse or mint a stable ID, fill sections from the prose, infer literal relationships, validate. Flags: `--store`, `--type`, `--dry-run`, `--write`/`--force`, `--kiro-agent`, `--json`, `--quiet`. |
-| `memphis promote <concept-id-or-path>` | Graduate an ingested Reference concept into a typed Canon draft. Flags: `--store`, `--type`, `--out`. |
+| `pyra new <type> <path>` | Scaffold a typed artifact with a minted ID and the type's sections. Flags: `--store`, `--title`. |
+| `pyra project <spec-doc-or-dir>` | Project an approved `requirements.md`/`design.md` (local `specs/` or Kiro `.kiro/specs/`) into typed Canon: reuse or mint a stable ID, fill sections from the prose, infer literal relationships, validate. Flags: `--store`, `--type`, `--dry-run`, `--write`/`--force`, `--kiro-agent`, `--json`, `--quiet`. |
+| `pyra promote <concept-id-or-path>` | Graduate an ingested Reference concept into a typed Canon draft. Flags: `--store`, `--type`, `--out`. |
 
 ### Authority
 
 | Command | Purpose |
 |---|---|
-| `memphis gate [store]` | Run the unified authority gate (validate + relationships + policy). Exits non-zero on any blocking finding. Flags: `--json`, `--sarif`; change-aware: `--diff` (staged), `--since <ref>`, `--changed <a,b>`; change-risk: `--risk`. |
-| `memphis risk [commit \| base..head]` | Score a change for defect risk (repo-relative ranking + PR directives). No arg scores the staged diff. Flags: `--store`, `--baseline`, `--ext`, `--json`. |
-| `memphis relationships [store]` | Report and validate the typed relationship graph. Flags: `--validate`, `--summary`, `--json`. |
+| `pyra gate [store]` | Run the unified authority gate (validate + relationships + policy). Exits non-zero on any blocking finding. Flags: `--json`, `--sarif`; change-aware: `--diff` (staged), `--since <ref>`, `--changed <a,b>`; change-risk: `--risk`. |
+| `pyra risk [commit \| base..head]` | Score a change for defect risk (repo-relative ranking + PR directives). No arg scores the staged diff. Flags: `--store`, `--baseline`, `--ext`, `--json`. |
+| `pyra relationships [store]` | Report and validate the typed relationship graph. Flags: `--validate`, `--summary`, `--json`. |
 
 ### Code intelligence
 
@@ -378,14 +378,14 @@ Read-only structural search and navigation over source. Every command takes `--j
 
 | Command | Purpose |
 |---|---|
-| `memphis outline <file>` | List a file's definitions as a skeleton. Flags: `--kind`, `--detail` (0/1/2), `--json`. |
-| `memphis symbols <dir>` | Find symbols across a directory. Flags: `--name`, `--name-contains`, `--kind`, `--refs`, `--json`. |
-| `memphis source <symbol-id>` | Print one symbol's source (or `--file` + `--name`). Flag: `--json`. |
-| `memphis check <file>` | Report syntax errors; exits non-zero if any. Flag: `--json`. |
-| `memphis callers <name>` | Find references, tagged `[S]`tructural / `[T]`extual. Flags: `--dir`, `--json`. |
-| `memphis map <dir>` | Directory dependency graph. Flags: `--kind`, `--name`, `--name-contains`, `--json`. |
-| `memphis definition [name]` | Go-to-definition by name or `--at file:line:col`. Flags: `--at`, `--dir`, `--json`. |
-| `memphis ground <artifact-id \| symbol-id>` | Bridge Canon and code: resolve an artifact's cited symbols, or find artifacts that cite a symbol. Flags: `--store`, `--json`. |
+| `pyra outline <file>` | List a file's definitions as a skeleton. Flags: `--kind`, `--detail` (0/1/2), `--json`. |
+| `pyra symbols <dir>` | Find symbols across a directory. Flags: `--name`, `--name-contains`, `--kind`, `--refs`, `--json`. |
+| `pyra source <symbol-id>` | Print one symbol's source (or `--file` + `--name`). Flag: `--json`. |
+| `pyra check <file>` | Report syntax errors; exits non-zero if any. Flag: `--json`. |
+| `pyra callers <name>` | Find references, tagged `[S]`tructural / `[T]`extual. Flags: `--dir`, `--json`. |
+| `pyra map <dir>` | Directory dependency graph. Flags: `--kind`, `--name`, `--name-contains`, `--json`. |
+| `pyra definition [name]` | Go-to-definition by name or `--at file:line:col`. Flags: `--at`, `--dir`, `--json`. |
+| `pyra ground <artifact-id \| symbol-id>` | Bridge Canon and code: resolve an artifact's cited symbols, or find artifacts that cite a symbol. Flags: `--store`, `--json`. |
 
 ### Git intelligence
 
@@ -393,8 +393,8 @@ Behavioral signals mined from git history — deterministic, offline, no LLM, an
 
 | Command | Purpose |
 |---|---|
-| `memphis hotspots [store]` | Rank files by temporally-decayed churn (top-quartile hotspots that clear activity floors), with churn %, commits, owner, and bus factor. Flags: `--limit`, `--window`, `--json`. |
-| `memphis ownership [path]` | Ownership %, recent owner, contributor count, and bus factor for a file; module (top-level directory) rollups for a directory or no path. Flags: `--store`, `--window`, `--json`. |
+| `pyra hotspots [store]` | Rank files by temporally-decayed churn (top-quartile hotspots that clear activity floors), with churn %, commits, owner, and bus factor. Flags: `--limit`, `--window`, `--json`. |
+| `pyra ownership [path]` | Ownership %, recent owner, contributor count, and bus factor for a file; module (top-level directory) rollups for a directory or no path. Flags: `--store`, `--window`, `--json`. |
 
 Metrics: per-file commit windows, line churn, age, temporal hotspot score (180-day half-life), primary/recent owner, contributor count, bus factor (min authors reaching 80% of commits), co-change partners; repo-level hotspot ranking; and per-module rollups. Ownership is by commit-author distribution (`git blame` line-ownership and the churn×complexity hotspot refinement arrive with code health). See [`docs/REPOWISE_PARITY.md`](docs/REPOWISE_PARITY.md).
 
@@ -404,15 +404,15 @@ A persistent two-tier (file + symbol) dependency graph built from code intellige
 
 | Command | Purpose |
 |---|---|
-| `memphis graph [store]` | Query the code dependency graph. Subviews: `--centrality` (PageRank hubs), `--communities` (logical modules via label propagation), `--cycles` (dependency cycles / SCCs), `--reachability` (reachable-from-entry-points vs. the unreachable rest). Flags: `--limit`, `--scope`, `--node-cap`, `--json`. |
+| `pyra graph [store]` | Query the code dependency graph. Subviews: `--centrality` (PageRank hubs), `--communities` (logical modules via label propagation), `--cycles` (dependency cycles / SCCs), `--reachability` (reachable-from-entry-points vs. the unreachable rest). Flags: `--limit`, `--scope`, `--node-cap`, `--json`. |
 
 Symbol nodes (keyed by symbol-id) + file nodes; reference edges resolved by the same honest name-matching `callers` uses (edge to every matching definition on a name collision, never a guessed target). Analyses are standard and self-contained — PageRank, deterministic label propagation, Tarjan SCC, and entry-point reachability (whose unreachable set feeds dead-code detection). Betweenness centrality and Leiden are intentionally deferred.
 
 | Command | Purpose |
 |---|---|
-| `memphis dead-code [store]` | Report likely-unreachable definitions (no path from entry points in the graph), ranked by cleanup impact, each with a confidence tier — **high** (no textual references, safe to delete), **medium** (has textual/possibly-dynamic references), **low** (a test-file helper) — and a `[governed]` marker when Accepted Canon still cites the now-unreachable code (drift). Flags: `--tier`, `--limit`, `--json`. |
+| `pyra dead-code [store]` | Report likely-unreachable definitions (no path from entry points in the graph), ranked by cleanup impact, each with a confidence tier — **high** (no textual references, safe to delete), **medium** (has textual/possibly-dynamic references), **low** (a test-file helper) — and a `[governed]` marker when Accepted Canon still cites the now-unreachable code (drift). Flags: `--tier`, `--limit`, `--json`. |
 
-Dead-code **consumes** the graph's reachability (no new analysis); it excludes `Test*`/`main` entry points and, because memphis has no framework route→handler edges, uses the conservative high tier to avoid flagging route-only handlers (which are usually exported, hence reachable). No auto-removal.
+Dead-code **consumes** the graph's reachability (no new analysis); it excludes `Test*`/`main` entry points and, because pyra has no framework route→handler edges, uses the conservative high tier to avoid flagging route-only handlers (which are usually exported, hence reachable). No auto-removal.
 
 ### Code health
 
@@ -420,28 +420,28 @@ Per-file **health scoring** across three signals — **defect risk · maintainab
 
 | Command | Purpose |
 |---|---|
-| `memphis health [store]` | Repo KPIs (NLOC-weighted average + hotspot health, worst performer) and the lowest-scoring files with their three dimension scores and top marker. Flags: `--file <path>` (per-file findings + impacts + refactoring suggestion), `--coverage <report>` (ingest LCOV/Cobertura), `--limit`, `--json`. |
+| `pyra health [store]` | Repo KPIs (NLOC-weighted average + hotspot health, worst performer) and the lowest-scoring files with their three dimension scores and top marker. Flags: `--file <path>` (per-file findings + impacts + refactoring suggestion), `--coverage <report>` (ingest LCOV/Cobertura), `--limit`, `--json`. |
 
-The roster (~28 markers) spans **structural** (cyclomatic complexity, nesting, `god_class`/`god_file`, LCOM4 cohesion, …), **organizational** (churn, change entropy, co-change scatter, ownership risk, prior defects, …), **duplication** (Rabin–Karp clone detection), **coverage** (when a report is supplied), and memphis-unique **governance** markers — `ungoverned_hotspot` (a churn hotspot with no governing Canon), `stale_governance`, and `contradictory_decision`. Each file starts at 10 and biomarkers deduct under per-category caps; the scoring kernel is a **faithful port of [repowise](https://github.com/repowise-dev/repowise)'s** (AGPL-3.0), isolated to one swappable file and pinned by a parity test. The **performance dimension ships present-but-empty** (its loop/dataflow detectors are a follow-up); see [`docs/REPOWISE_PARITY.md`](docs/REPOWISE_PARITY.md).
+The roster (~28 markers) spans **structural** (cyclomatic complexity, nesting, `god_class`/`god_file`, LCOM4 cohesion, …), **organizational** (churn, change entropy, co-change scatter, ownership risk, prior defects, …), **duplication** (Rabin–Karp clone detection), **coverage** (when a report is supplied), and pyra-unique **governance** markers — `ungoverned_hotspot` (a churn hotspot with no governing Canon), `stale_governance`, and `contradictory_decision`. Each file starts at 10 and biomarkers deduct under per-category caps; the scoring kernel is a **faithful port of [repowise](https://github.com/repowise-dev/repowise)'s** (AGPL-3.0), isolated to one swappable file and pinned by a parity test. The **performance dimension ships present-but-empty** (its loop/dataflow detectors are a follow-up); see [`docs/REPOWISE_PARITY.md`](docs/REPOWISE_PARITY.md).
 
 ### Automation (event hooks)
 
 | Command | Purpose |
 |---|---|
-| `memphis hooks install` | Install hooks that run the gate automatically. git is always installed (`pre-commit` runs the blocking gate, `post-merge` runs the integrity guard), and agent targets are auto-detected. Target flags: `--git`, `--claude`, `--kiro-ide`, `--kiro-cli`, `--kiro`, `--all`, plus `--kiro-agent`, `--store`. |
-| `memphis hooks uninstall` | Remove only Memphis-managed hook content, leaving other hooks intact. |
-| `memphis hooks status` | Show which Memphis hooks are installed per target. |
+| `pyra hooks install` | Install hooks that run the gate automatically. git is always installed (`pre-commit` runs the blocking gate, `post-merge` runs the integrity guard), and agent targets are auto-detected. Target flags: `--git`, `--claude`, `--kiro-ide`, `--kiro-cli`, `--kiro`, `--all`, plus `--kiro-agent`, `--store`. |
+| `pyra hooks uninstall` | Remove only Pyra-managed hook content, leaving other hooks intact. |
+| `pyra hooks status` | Show which Pyra hooks are installed per target. |
 
-Surfaces written: git (`.git/hooks/`), Claude Code (`.claude/settings.json` PostToolUse), Kiro IDE (`.kiro/hooks/memphis-gate.json`), and Kiro CLI (`.kiro/agents/<agent>.json` under `hooks.postToolUse`). Every install is marker-delimited and idempotent.
+Surfaces written: git (`.git/hooks/`), Claude Code (`.claude/settings.json` PostToolUse), Kiro IDE (`.kiro/hooks/pyra-gate.json`), and Kiro CLI (`.kiro/agents/<agent>.json` under `hooks.postToolUse`). Every install is marker-delimited and idempotent.
 
 ### Operating the store
 
 | Command | Purpose |
 |---|---|
-| `memphis rebuild [store]` | Regenerate derived indexes (full-text search + relationship graph) from the Markdown source of truth. |
-| `memphis serve <store>` | Serve the store over MCP. Flags: `--mcp` (default), `--name`, `--max-result-chars`. |
-| `memphis export [store]` | Export Reference knowledge for scale-out (documents/graph). |
-| `memphis demo` | Run an offline demo with a bundled example. |
+| `pyra rebuild [store]` | Regenerate derived indexes (full-text search + relationship graph) from the Markdown source of truth. |
+| `pyra serve <store>` | Serve the store over MCP. Flags: `--mcp` (default), `--name`, `--max-result-chars`. |
+| `pyra export [store]` | Export Reference knowledge for scale-out (documents/graph). |
+| `pyra demo` | Run an offline demo with a bundled example. |
 
 ### Optional: Reference ingestion (secondary)
 
@@ -449,17 +449,17 @@ For teams that also want a large docs corpus searchable as agent memory. These p
 
 | Command | Purpose |
 |---|---|
-| `memphis crawl <url>` | Crawl a documentation website into an OKF bundle. |
-| `memphis import <path>` | Import local Markdown into an OKF bundle. |
-| `memphis update <bundle>` | Update an existing bundle from its source. |
-| `memphis validate <bundle>` | Validate an OKF bundle. |
-| `memphis inspect <bundle>` | Inspect a bundle and show statistics. |
+| `pyra crawl <url>` | Crawl a documentation website into an OKF bundle. |
+| `pyra import <path>` | Import local Markdown into an OKF bundle. |
+| `pyra update <bundle>` | Update an existing bundle from its source. |
+| `pyra validate <bundle>` | Validate an OKF bundle. |
+| `pyra inspect <bundle>` | Inspect a bundle and show statistics. |
 
 ---
 
 ## MCP tools
 
-`memphis serve <store> --mcp` exposes the store to any MCP client. Tools are grouped by job.
+`pyra serve <store> --mcp` exposes the store to any MCP client. Tools are grouped by job.
 
 ### Authority (Canon)
 
@@ -533,12 +533,12 @@ For teams that also want a large docs corpus searchable as agent memory. These p
 |---|---|
 | `repository_key` | Prefix for minted Canon IDs (for example `OKF`). |
 | `canon_roots` | Directories that hold the authority tier; everything else is Reference. |
-| `spec_roots` | Directories `memphis project` scans for spec docs. Default: `["specs", ".kiro/specs"]`. |
+| `spec_roots` | Directories `pyra project` scans for spec docs. Default: `["specs", ".kiro/specs"]`. |
 | `code_roots` | Directories code-intelligence operations search by default when no path is given. Default: `["."]`. |
 | `ticketing.provider` | Format-lints `## Related Tickets` links. One of `github`, `jira`, `linear`, `azure-devops`, `servicenow`, `none`. |
 | `enforcement` | Reclassify gate findings by rule code into `blocking` / `advisory` / `disabled`. Empty means each rule keeps its default severity. |
 
-`config.yaml` is the only thing that separates the tiers, and the rendered output round-trips through load, so you can edit it by hand or regenerate it with `memphis init --force`.
+`config.yaml` is the only thing that separates the tiers, and the rendered output round-trips through load, so you can edit it by hand or regenerate it with `pyra init --force`.
 
 ---
 
@@ -550,11 +550,11 @@ The Reference tier is optional supporting material (abundant, summarized, search
 
 ```bash
 # Import a repo's Markdown into a self-contained bundle and serve it directly
-memphis import ~/repo/my-project --out ~/repo/my-project/.okf --source-name "My Project"
-memphis serve ~/repo/my-project/.okf --mcp
+pyra import ~/repo/my-project --out ~/repo/my-project/.okf --source-name "My Project"
+pyra serve ~/repo/my-project/.okf --mcp
 ```
 
-With no `canon_roots` populated, the bundle stays pure Reference and behaves like a standalone searchable knowledge base. `memphis promote` is the bridge when a Reference concept matures into a decision worth enforcing as Canon.
+With no `canon_roots` populated, the bundle stays pure Reference and behaves like a standalone searchable knowledge base. `pyra promote` is the bridge when a Reference concept matures into a decision worth enforcing as Canon.
 
 ### Concept format
 
@@ -579,4 +579,15 @@ Reference summaries can be generated by fast **extractive** algorithms (offline,
 
 ### Scale ceiling
 
-Summary-first navigation works well up to roughly **100 concepts / ~400K tokens**. Past that, graduate the fuzzy half to an external RAG system via `memphis export`, while Canon always stays canonical in the repo.
+Summary-first navigation works well up to roughly **100 concepts / ~400K tokens**. Past that, graduate the fuzzy half to an external RAG system via `pyra export`, while Canon always stays canonical in the repo.
+
+## License
+
+Pyra is released under the [Business Source License 1.1](./LICENSE) (`BUSL-1.1`), converting to the
+**Apache License, Version 2.0** four years after each version's release. BSL is source-available, **not**
+an OSI-approved "open source" license; please describe it as *source-available* until the Change Date.
+
+> **Distribution note:** Pyra's change-risk constants are currently ported from
+> [repowise](https://github.com/repowise-dev/repowise) (AGPL-3.0). See [`NOTICE`](./NOTICE) — that ported
+> material must be replaced with an independent implementation before Pyra can be distributed under
+> the BSL. The LICENSE states the intended terms; it does not authorize distributing the current tree.

@@ -5,9 +5,9 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/chasedputnam/memphis/internal/canon/model"
-	"github.com/chasedputnam/memphis/internal/codeintel"
-	"github.com/chasedputnam/memphis/internal/store"
+	"github.com/chasedputnam/pyra/internal/canon/model"
+	"github.com/chasedputnam/pyra/internal/codeintel"
+	"github.com/chasedputnam/pyra/internal/store"
 )
 
 // symbolIDRe matches a grove-style symbol-id embedded in prose, the same pattern

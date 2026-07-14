@@ -8,9 +8,9 @@ import (
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 
-	"github.com/chasedputnam/memphis/internal/embed"
-	"github.com/chasedputnam/memphis/internal/mcp"
-	"github.com/chasedputnam/memphis/internal/validate"
+	"github.com/chasedputnam/pyra/internal/embed"
+	"github.com/chasedputnam/pyra/internal/mcp"
+	"github.com/chasedputnam/pyra/internal/validate"
 )
 
 var demoCmd = &cobra.Command{
@@ -45,9 +45,9 @@ func runDemo(cmd *cobra.Command, args []string) error {
 	} else {
 		// Fall back to filesystem locations
 		demoPaths := []string{
-			"examples/bundles/memphis-docs",
-			"../examples/bundles/memphis-docs",
-			filepath.Join(os.Getenv("HOME"), ".memphis/demo-bundle"),
+			"examples/bundles/pyra-docs",
+			"../examples/bundles/pyra-docs",
+			filepath.Join(os.Getenv("HOME"), ".pyra/demo-bundle"),
 		}
 
 		for _, p := range demoPaths {
@@ -64,7 +64,7 @@ func runDemo(cmd *cobra.Command, args []string) error {
 				fmt.Printf("  %s\n", p)
 			}
 			fmt.Println("\nOr create one with:")
-			fmt.Println("  memphis crawl https://example.com/docs --out examples/bundles/memphis-docs")
+			fmt.Println("  pyra crawl https://example.com/docs --out examples/bundles/pyra-docs")
 			return fmt.Errorf("demo bundle not found")
 		}
 	}
@@ -76,7 +76,7 @@ func runDemo(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	fmt.Println("memphis demo")
+	fmt.Println("pyra demo")
 	fmt.Printf("Bundle: %s\n", bundleDir)
 	if cleanup != nil {
 		fmt.Println("(temporary - extracted from embedded bundle)")
@@ -113,8 +113,8 @@ func runDemo(cmd *cobra.Command, args []string) error {
 	fmt.Println()
 	fmt.Printf(`{
   "mcpServers": {
-    "memphis-demo": {
-      "command": "memphis",
+    "pyra-demo": {
+      "command": "pyra",
       "args": ["serve", "%s", "--mcp"]
     }
   }
@@ -133,7 +133,7 @@ func runDemo(cmd *cobra.Command, args []string) error {
 		fmt.Println("Starting MCP server...")
 		server, err := mcp.NewServer(mcp.ServerOptions{
 			BundleDir: bundleDir,
-			Name:      "memphis-demo",
+			Name:      "pyra-demo",
 		})
 		if err != nil {
 			if cleanup != nil {

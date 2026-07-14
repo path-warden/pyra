@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/chasedputnam/memphis/internal/config"
+	"github.com/chasedputnam/pyra/internal/config"
 )
 
 func TestRun_PureReferenceBundlePasses(t *testing.T) {

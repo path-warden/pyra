@@ -11,8 +11,8 @@ package classify
 import (
 	"math"
 
-	"github.com/chasedputnam/memphis/internal/canon/artifacts"
-	"github.com/chasedputnam/memphis/internal/canon/model"
+	"github.com/chasedputnam/pyra/internal/canon/artifacts"
+	"github.com/chasedputnam/pyra/internal/canon/model"
 )
 
 // ConfidenceThreshold mirrors rac-core CONFIDENCE_THRESHOLD.

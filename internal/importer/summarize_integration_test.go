@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/chasedputnam/memphis/internal/changelog"
+	"github.com/chasedputnam/pyra/internal/changelog"
 )
 
 func writeSampleInputs(t *testing.T, dir string) {
@@ -111,7 +111,7 @@ func TestImport_ExplicitAlgorithmRecordsConfig(t *testing.T) {
 func writeUserConfig(t *testing.T, contents string) {
 	t.Helper()
 	home := t.TempDir()
-	cfgDir := filepath.Join(home, ".config", "memphis")
+	cfgDir := filepath.Join(home, ".config", "pyra")
 	if err := os.MkdirAll(cfgDir, 0755); err != nil {
 		t.Fatalf("mkdir config: %v", err)
 	}
@@ -183,7 +183,7 @@ func TestImport_EdmundsonWithExplicitConfig(t *testing.T) {
 		t.Fatalf("write cfg: %v", err)
 	}
 
-	// Set HOME to an empty dir so no ambient ~/.config/memphis interferes.
+	// Set HOME to an empty dir so no ambient ~/.config/pyra interferes.
 	t.Setenv("HOME", t.TempDir())
 
 	out := filepath.Join(t.TempDir(), "bundle")
@@ -224,7 +224,7 @@ func TestImport_EdmundsonAutoDiscoversHomeConfig(t *testing.T) {
 	}
 
 	home := t.TempDir()
-	cfgDir := filepath.Join(home, ".config", "memphis")
+	cfgDir := filepath.Join(home, ".config", "pyra")
 	if err := os.MkdirAll(cfgDir, 0755); err != nil {
 		t.Fatalf("mkdir: %v", err)
 	}

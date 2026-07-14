@@ -11,12 +11,12 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/chasedputnam/memphis/internal/changelog"
-	"github.com/chasedputnam/memphis/internal/normalize"
-	"github.com/chasedputnam/memphis/internal/summarize"
-	"github.com/chasedputnam/memphis/internal/tokens"
-	"github.com/chasedputnam/memphis/internal/types"
-	"github.com/chasedputnam/memphis/internal/util"
+	"github.com/chasedputnam/pyra/internal/changelog"
+	"github.com/chasedputnam/pyra/internal/normalize"
+	"github.com/chasedputnam/pyra/internal/summarize"
+	"github.com/chasedputnam/pyra/internal/tokens"
+	"github.com/chasedputnam/pyra/internal/types"
+	"github.com/chasedputnam/pyra/internal/util"
 )
 
 // WriteOptions configures bundle writing.

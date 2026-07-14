@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/chasedputnam/memphis/internal/canon/model"
+	"github.com/chasedputnam/pyra/internal/canon/model"
 )
 
 func TestCodesAreStable(t *testing.T) {

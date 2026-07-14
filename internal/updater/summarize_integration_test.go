@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/chasedputnam/memphis/internal/changelog"
-	"github.com/chasedputnam/memphis/internal/importer"
+	"github.com/chasedputnam/pyra/internal/changelog"
+	"github.com/chasedputnam/pyra/internal/importer"
 )
 
 // TestUpdate_UsesChangelogPreferences verifies that when no flags are

@@ -4,9 +4,9 @@ package context
 import (
 	"sort"
 
-	"github.com/chasedputnam/memphis/internal/compress"
-	"github.com/chasedputnam/memphis/internal/search"
-	"github.com/chasedputnam/memphis/internal/tokens"
+	"github.com/chasedputnam/pyra/internal/compress"
+	"github.com/chasedputnam/pyra/internal/search"
+	"github.com/chasedputnam/pyra/internal/tokens"
 )
 
 // AssemblyOptions configures context assembly.

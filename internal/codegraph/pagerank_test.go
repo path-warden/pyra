@@ -3,7 +3,7 @@ package codegraph
 import (
 	"testing"
 
-	"github.com/chasedputnam/memphis/internal/codeintel"
+	"github.com/chasedputnam/pyra/internal/codeintel"
 )
 
 func scoreOfName(c []Centrality, g *Graph, name string) float64 {

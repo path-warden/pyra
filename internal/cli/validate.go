@@ -8,8 +8,8 @@ import (
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 
-	"github.com/chasedputnam/memphis/internal/types"
-	"github.com/chasedputnam/memphis/internal/validate"
+	"github.com/chasedputnam/pyra/internal/types"
+	"github.com/chasedputnam/pyra/internal/validate"
 )
 
 var validateCmd = &cobra.Command{
@@ -65,7 +65,7 @@ func printValidationJSON(report *types.ValidationReport, err error) {
 }
 
 func printValidationText(report *types.ValidationReport) {
-	fmt.Println("memphis validate")
+	fmt.Println("pyra validate")
 	fmt.Printf("Concepts: %d\n", report.ConceptCount)
 	fmt.Printf("Reserved files: %d\n", report.ReservedFileCount)
 

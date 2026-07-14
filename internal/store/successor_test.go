@@ -3,7 +3,7 @@ package store
 import (
 	"testing"
 
-	"github.com/chasedputnam/memphis/internal/config"
+	"github.com/chasedputnam/pyra/internal/config"
 )
 
 // supersededDecision renders a superseded decision whose ## Supersedes section

@@ -7,7 +7,7 @@
 // both internal/store and internal/codeintel, and the authority-path invariant
 // forbids any package under internal/canon from importing code intelligence, the
 // tree-sitter runtime, net/http, or an LLM. Quarantining this logic here — the
-// same way internal/codeintel is quarantined — keeps `memphis gate`'s corpus
+// same way internal/codeintel is quarantined — keeps `pyra gate`'s corpus
 // path deterministic, offline, and AI-free. A boundary test enforces that
 // internal/canon never depends on this package.
 //

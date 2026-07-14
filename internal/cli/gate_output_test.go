@@ -5,9 +5,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/chasedputnam/memphis/internal/changegate"
-	"github.com/chasedputnam/memphis/internal/config"
-	"github.com/chasedputnam/memphis/internal/sarif"
+	"github.com/chasedputnam/pyra/internal/changegate"
+	"github.com/chasedputnam/pyra/internal/config"
+	"github.com/chasedputnam/pyra/internal/sarif"
 )
 
 func TestGateOutput_JSONIncludesGovernanceFields(t *testing.T) {
@@ -46,7 +46,7 @@ func TestGateOutput_SARIFLocationAndRuleID(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	doc := sarif.FromIssues("memphis", "test", res.Issues)
+	doc := sarif.FromIssues("pyra", "test", res.Issues)
 	var found bool
 	for _, run := range doc.Runs {
 		for _, r := range run.Results {

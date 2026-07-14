@@ -40,7 +40,7 @@ var ticketValidators = map[string]ticketValidator{
 // KnownProviders returns the recognized ticketing provider keys, sorted. The
 // special values "none" and "" are always accepted by callers but are not part
 // of this vocabulary, so they are not returned. This is the single source of
-// truth for the provider set (reused by `memphis init` so it never drifts from
+// truth for the provider set (reused by `pyra init` so it never drifts from
 // the gate's linting).
 func KnownProviders() []string {
 	keys := make([]string, 0, len(ticketValidators))

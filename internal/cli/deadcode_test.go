@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/chasedputnam/memphis/internal/deadcode"
+	"github.com/chasedputnam/pyra/internal/deadcode"
 )
 
 func writeDC(t *testing.T, root, rel, content string) {

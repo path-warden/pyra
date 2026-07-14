@@ -33,7 +33,7 @@ type Config struct {
 	// bundle, and by Edmundson to locate edmundson.config.
 	BundlePath string
 	// EdmundsonConfigPath optionally overrides the standard search for
-	// edmundson.config (bundle dir → ~/.config/memphis/).
+	// edmundson.config (bundle dir → ~/.config/pyra/).
 	EdmundsonConfigPath string
 }
 

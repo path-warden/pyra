@@ -3,10 +3,10 @@ package codehealth
 import (
 	"fmt"
 
-	"github.com/chasedputnam/memphis/internal/codeintel"
+	"github.com/chasedputnam/pyra/internal/codeintel"
 )
 
-// Documented structural thresholds (memphis-owned, tunable).
+// Documented structural thresholds (pyra-owned, tunable).
 const (
 	largeMethodNLOC      = 60 // with ≥2 CCN
 	complexMethodCCN     = 9

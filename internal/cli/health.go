@@ -7,12 +7,12 @@ import (
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 
-	"github.com/chasedputnam/memphis/internal/codegraph"
-	"github.com/chasedputnam/memphis/internal/codehealth"
-	"github.com/chasedputnam/memphis/internal/codeintel"
-	"github.com/chasedputnam/memphis/internal/config"
-	"github.com/chasedputnam/memphis/internal/gitint"
-	"github.com/chasedputnam/memphis/internal/store"
+	"github.com/chasedputnam/pyra/internal/codegraph"
+	"github.com/chasedputnam/pyra/internal/codehealth"
+	"github.com/chasedputnam/pyra/internal/codeintel"
+	"github.com/chasedputnam/pyra/internal/config"
+	"github.com/chasedputnam/pyra/internal/gitint"
+	"github.com/chasedputnam/pyra/internal/store"
 )
 
 var healthCmd = &cobra.Command{
@@ -90,7 +90,7 @@ func runHealth(cmd *cobra.Command, args []string) error {
 }
 
 func printHealthText(rep codehealth.Report, limit int) {
-	fmt.Println("memphis health")
+	fmt.Println("pyra health")
 	fmt.Printf("Files: %d · average health: %.2f · hotspot health: %.2f\n",
 		rep.FileCount, rep.AverageHealth, rep.HotspotHealth)
 	if rep.Worst != nil {

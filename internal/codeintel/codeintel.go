@@ -78,7 +78,7 @@ type MapEntry struct {
 
 // DefinitionResult is the unified shape returned by Definition for both name
 // and position (--at) modes. grove diverges here between its CLI and MCP faces;
-// memphis standardizes on this single shape so CLI and MCP are equivalent.
+// pyra standardizes on this single shape so CLI and MCP are equivalent.
 type DefinitionResult struct {
 	Resolved    string   `json:"resolved"`
 	Definitions []Symbol `json:"definitions"`

@@ -2,13 +2,13 @@ package codehealth
 
 // This file is the ONLY code-health source ported from repowise, and the only
 // place its calibrated scoring constants live. It is isolated so the constants
-// can be replaced (e.g. by memphis-owned calibration) without touching the
+// can be replaced (e.g. by pyra-owned calibration) without touching the
 // biomarkers, composition, or surfaces.
 //
 // PORTED FROM repowise (AGPL-3.0):
 //   packages/core/src/repowise/core/analysis/health/scoring.py
 // Calibrated offline against repowise's defect corpus. The parity test
-// (kernel_parity_test.go) pins Memphis's ScoreFile to repowise's score_file for
+// (kernel_parity_test.go) pins Pyra's ScoreFile to repowise's score_file for
 // these constants; regenerate both together if repowise recalibrates.
 
 // Severity deduction table (base deduction before the per-biomarker multiplier).
@@ -69,7 +69,7 @@ var defectCategory = map[string]string{
 	"complex_method":             "size_and_complexity",
 	"large_method":               "size_and_complexity",
 	"primitive_obsession":        "size_and_complexity",
-	"god_file":                   "size_and_complexity", // memphis-specific (documented)
+	"god_file":                   "size_and_complexity", // pyra-specific (documented)
 	"dry_violation":              "duplication",
 	"untested_hotspot":           "test_coverage",
 	"coverage_gap":               "test_coverage",

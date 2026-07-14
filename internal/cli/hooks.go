@@ -7,14 +7,14 @@ import (
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 
-	"github.com/chasedputnam/memphis/internal/config"
-	"github.com/chasedputnam/memphis/internal/hooks"
+	"github.com/chasedputnam/pyra/internal/config"
+	"github.com/chasedputnam/pyra/internal/hooks"
 )
 
 var hooksCmd = &cobra.Command{
 	Use:   "hooks",
 	Short: "Install event hooks that run the gate automatically",
-	Long: `Manage memphis event hooks across the supported toolchains: git (pre-commit
+	Long: `Manage pyra event hooks across the supported toolchains: git (pre-commit
 and post-merge), Claude Code (PostToolUse), the Kiro IDE (.kiro/hooks), and the
 Kiro CLI (.kiro/agents). Hooks run the deterministic gate when artifacts change,
 so malformed authority is caught without anyone running a command by hand.`,
@@ -22,7 +22,7 @@ so malformed authority is caught without anyone running a command by hand.`,
 
 var hooksInstallCmd = &cobra.Command{
 	Use:           "install",
-	Short:         "Install memphis hooks (git always; agent targets auto-detected)",
+	Short:         "Install pyra hooks (git always; agent targets auto-detected)",
 	Args:          cobra.NoArgs,
 	SilenceUsage:  true,
 	SilenceErrors: true,
@@ -31,7 +31,7 @@ var hooksInstallCmd = &cobra.Command{
 
 var hooksUninstallCmd = &cobra.Command{
 	Use:           "uninstall",
-	Short:         "Remove memphis-managed hooks (leaves other content intact)",
+	Short:         "Remove pyra-managed hooks (leaves other content intact)",
 	Args:          cobra.NoArgs,
 	SilenceUsage:  true,
 	SilenceErrors: true,
@@ -40,7 +40,7 @@ var hooksUninstallCmd = &cobra.Command{
 
 var hooksStatusCmd = &cobra.Command{
 	Use:           "status",
-	Short:         "Show which memphis hooks are installed per target",
+	Short:         "Show which pyra hooks are installed per target",
 	Args:          cobra.NoArgs,
 	SilenceUsage:  true,
 	SilenceErrors: true,
@@ -65,11 +65,11 @@ func init() {
 }
 
 // hooksContext validates the store and builds the installer context, or returns
-// an error if the path is not a memphis store (Requirement 5.2).
+// an error if the path is not a pyra store (Requirement 5.2).
 func hooksContext(cmd *cobra.Command) (hooks.Context, error) {
 	storeRoot, _ := cmd.Flags().GetString("store")
 	if _, err := os.Stat(config.Path(storeRoot)); err != nil {
-		return hooks.Context{}, fmt.Errorf("not a memphis store: %s has no .okf/config.yaml (run `memphis init` first)", storeRoot)
+		return hooks.Context{}, fmt.Errorf("not a pyra store: %s has no .okf/config.yaml (run `pyra init` first)", storeRoot)
 	}
 	cfg, err := config.Load(storeRoot)
 	if err != nil {

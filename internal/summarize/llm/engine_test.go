@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/chasedputnam/memphis/internal/tokens"
+	"github.com/chasedputnam/pyra/internal/tokens"
 )
 
 func TestEngine_SelectsAPIProvider(t *testing.T) {

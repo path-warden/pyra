@@ -3,7 +3,7 @@ package changegate
 import (
 	"fmt"
 
-	"github.com/chasedputnam/memphis/internal/canon/model"
+	"github.com/chasedputnam/pyra/internal/canon/model"
 )
 
 // Stable finding codes (rule IDs) emitted by the change-aware gate. They are

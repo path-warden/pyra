@@ -12,13 +12,13 @@ import (
 // summarizer, an HTTP client, or an on-device LLM bridge.
 func TestCanonHasNoAIorNetworkDependencies(t *testing.T) {
 	out, err := exec.Command("go", "list", "-deps",
-		"github.com/chasedputnam/memphis/internal/canon/...").Output()
+		"github.com/chasedputnam/pyra/internal/canon/...").Output()
 	if err != nil {
 		t.Skipf("go list unavailable: %v", err)
 	}
 	forbidden := []string{
 		"net/http",
-		"github.com/chasedputnam/memphis/internal/summarize",
+		"github.com/chasedputnam/pyra/internal/summarize",
 		"github.com/blacktop/go-foundationmodels",
 	}
 	deps := strings.Split(strings.TrimSpace(string(out)), "\n")

@@ -3,7 +3,7 @@ package codegraph
 import (
 	"sort"
 
-	"github.com/chasedputnam/memphis/internal/codeintel"
+	"github.com/chasedputnam/pyra/internal/codeintel"
 )
 
 // Build constructs the code graph from one codeintel Map walk per root (or the

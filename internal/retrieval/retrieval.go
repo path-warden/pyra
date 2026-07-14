@@ -13,9 +13,9 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/chasedputnam/memphis/internal/compress"
-	"github.com/chasedputnam/memphis/internal/store"
-	"github.com/chasedputnam/memphis/internal/tokens"
+	"github.com/chasedputnam/pyra/internal/compress"
+	"github.com/chasedputnam/pyra/internal/store"
+	"github.com/chasedputnam/pyra/internal/tokens"
 )
 
 const (

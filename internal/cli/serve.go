@@ -6,7 +6,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 
-	"github.com/chasedputnam/memphis/internal/mcp"
+	"github.com/chasedputnam/pyra/internal/mcp"
 )
 
 var serveCmd = &cobra.Command{

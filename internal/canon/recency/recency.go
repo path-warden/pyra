@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/chasedputnam/memphis/internal/canon/model"
+	"github.com/chasedputnam/pyra/internal/canon/model"
 )
 
 // Provider returns last-modified times for artifact paths.

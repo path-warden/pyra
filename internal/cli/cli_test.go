@@ -28,8 +28,8 @@ func TestRootCommand(t *testing.T) {
 		t.Fatalf("Expected no error, got %v", err)
 	}
 
-	if !strings.Contains(output, "memphis") {
-		t.Errorf("Expected help to contain 'memphis', got %s", output)
+	if !strings.Contains(output, "pyra") {
+		t.Errorf("Expected help to contain 'pyra', got %s", output)
 	}
 
 	if !strings.Contains(output, "crawl") {

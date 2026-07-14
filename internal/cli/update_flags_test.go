@@ -9,8 +9,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/chasedputnam/memphis/internal/importer"
-	"github.com/chasedputnam/memphis/internal/updater"
+	"github.com/chasedputnam/pyra/internal/importer"
+	"github.com/chasedputnam/pyra/internal/updater"
 )
 
 // captureStdout runs fn with os.Stdout redirected and returns whatever was

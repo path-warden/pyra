@@ -32,7 +32,7 @@ Add to your MCP client config:
 {
   "mcpServers": {
     "my-docs": {
-      "command": "memphis",
+      "command": "pyra",
       "args": ["serve", "./my-bundle", "--mcp"]
     }
   }

@@ -4,10 +4,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/chasedputnam/memphis/internal/canon/artifacts"
-	"github.com/chasedputnam/memphis/internal/canon/classify"
-	"github.com/chasedputnam/memphis/internal/canon/parse"
-	"github.com/chasedputnam/memphis/internal/canon/validate"
+	"github.com/chasedputnam/pyra/internal/canon/artifacts"
+	"github.com/chasedputnam/pyra/internal/canon/classify"
+	"github.com/chasedputnam/pyra/internal/canon/parse"
+	"github.com/chasedputnam/pyra/internal/canon/validate"
 )
 
 func TestScaffold_RoundTripsCleanForEveryType(t *testing.T) {

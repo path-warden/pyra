@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/chasedputnam/memphis/internal/codegraph"
-	"github.com/chasedputnam/memphis/internal/codeintel"
+	"github.com/chasedputnam/pyra/internal/codegraph"
+	"github.com/chasedputnam/pyra/internal/codeintel"
 )
 
 func write(t *testing.T, root, rel, content string) {

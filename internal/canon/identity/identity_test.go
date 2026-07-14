@@ -3,7 +3,7 @@ package identity
 import (
 	"testing"
 
-	"github.com/chasedputnam/memphis/internal/canon/model"
+	"github.com/chasedputnam/pyra/internal/canon/model"
 )
 
 func TestMint_FormatAndDeterminism(t *testing.T) {

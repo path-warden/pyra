@@ -8,10 +8,10 @@ import (
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 
-	"github.com/chasedputnam/memphis/internal/canon"
-	"github.com/chasedputnam/memphis/internal/canon/model"
-	"github.com/chasedputnam/memphis/internal/canon/relate"
-	"github.com/chasedputnam/memphis/internal/config"
+	"github.com/chasedputnam/pyra/internal/canon"
+	"github.com/chasedputnam/pyra/internal/canon/model"
+	"github.com/chasedputnam/pyra/internal/canon/relate"
+	"github.com/chasedputnam/pyra/internal/config"
 )
 
 var relationshipsCmd = &cobra.Command{
@@ -72,7 +72,7 @@ func runRelationships(cmd *cobra.Command, args []string) error {
 		data, _ := json.MarshalIndent(out, "", "  ")
 		fmt.Println(string(data))
 	} else {
-		fmt.Println("memphis relationships")
+		fmt.Println("pyra relationships")
 		fmt.Printf("Artifacts: %d\n", len(arts))
 		edgeCount := 0
 		for _, es := range graph.Edges {

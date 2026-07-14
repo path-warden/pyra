@@ -1,6 +1,6 @@
 // Package deadcode turns the code graph's reachability result into an actionable
 // dead-code report: unreachable symbols, tiered by confidence, with a cleanup-
-// impact estimate and a memphis-unique "governed dead code" flag (an unreachable
+// impact estimate and a pyra-unique "governed dead code" flag (an unreachable
 // symbol still cited by Accepted Canon).
 //
 // It does no new graph work — it consumes codegraph.Reachability. It lives
@@ -15,8 +15,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/chasedputnam/memphis/internal/codegraph"
-	"github.com/chasedputnam/memphis/internal/codeintel"
+	"github.com/chasedputnam/pyra/internal/codegraph"
+	"github.com/chasedputnam/pyra/internal/codeintel"
 )
 
 // Confidence tiers.

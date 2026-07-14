@@ -11,13 +11,13 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/chasedputnam/memphis/internal/canon"
-	"github.com/chasedputnam/memphis/internal/canon/model"
-	"github.com/chasedputnam/memphis/internal/canon/relate"
-	"github.com/chasedputnam/memphis/internal/config"
-	"github.com/chasedputnam/memphis/internal/reader"
-	"github.com/chasedputnam/memphis/internal/search"
-	"github.com/chasedputnam/memphis/internal/types"
+	"github.com/chasedputnam/pyra/internal/canon"
+	"github.com/chasedputnam/pyra/internal/canon/model"
+	"github.com/chasedputnam/pyra/internal/canon/relate"
+	"github.com/chasedputnam/pyra/internal/config"
+	"github.com/chasedputnam/pyra/internal/reader"
+	"github.com/chasedputnam/pyra/internal/search"
+	"github.com/chasedputnam/pyra/internal/types"
 )
 
 // Tier distinguishes authoritative Canon from supporting Reference knowledge.
@@ -83,7 +83,7 @@ func Load(storeRoot string, cfg config.Config) (*Store, error) {
 }
 
 // HasCanon reports whether any Canon artifacts exist. A store without Canon
-// behaves exactly like the legacy memphis (no authority gate is imposed).
+// behaves exactly like the legacy pyra (no authority gate is imposed).
 func (s *Store) HasCanon() bool { return len(s.Canon) > 0 }
 
 // Rebuild regenerates all derived indexes from the on-disk Markdown.

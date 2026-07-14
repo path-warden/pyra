@@ -1,4 +1,4 @@
-// Package cli implements the memphis command-line interface.
+// Package cli implements the pyra command-line interface.
 package cli
 
 import (
@@ -9,8 +9,8 @@ import (
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 
-	"github.com/chasedputnam/memphis/internal/crawler"
-	"github.com/chasedputnam/memphis/internal/types"
+	"github.com/chasedputnam/pyra/internal/crawler"
+	"github.com/chasedputnam/pyra/internal/types"
 )
 
 var crawlCmd = &cobra.Command{
@@ -91,21 +91,21 @@ func runCrawl(cmd *cobra.Command, args []string) error {
 	}
 
 	if dryRun {
-		fmt.Println("memphis crawl dry run")
+		fmt.Println("pyra crawl dry run")
 		for _, page := range result.DryRunPages {
 			fmt.Println(page)
 		}
 		return nil
 	}
 
-	fmt.Println("memphis crawl")
+	fmt.Println("pyra crawl")
 	fmt.Printf("Seed: %s\n", url)
 	fmt.Printf("Pages: %d fetched, %d skipped, %d failed\n", result.PagesFetched, result.Skipped, result.Failed)
 	fmt.Printf("Concepts: %d written\n", len(result.Documents))
 	fmt.Printf("Output: %s\n", outDir)
 	fmt.Println("\nNext:")
-	fmt.Printf("  memphis validate %s\n", outDir)
-	fmt.Printf("  memphis serve %s --mcp\n", outDir)
+	fmt.Printf("  pyra validate %s\n", outDir)
+	fmt.Printf("  pyra serve %s --mcp\n", outDir)
 
 	return nil
 }
@@ -119,20 +119,20 @@ func makeCrawlProgressHandler(isTTY bool) func(types.CrawlProgressEvent) {
 
 		switch event.Type {
 		case "start":
-			fmt.Fprintf(os.Stderr, "memphis crawl: starting %s (max %d pages, depth %d)\n", event.Seed, event.MaxPages, event.MaxDepth)
+			fmt.Fprintf(os.Stderr, "pyra crawl: starting %s (max %d pages, depth %d)\n", event.Seed, event.MaxPages, event.MaxDepth)
 		case "fetch":
-			fmt.Fprintf(os.Stderr, "%smemphis crawl: fetching %d/%d, queued %d: %s", clear, event.Fetched, event.MaxPages, event.Queued, event.URL)
+			fmt.Fprintf(os.Stderr, "%spyra crawl: fetching %d/%d, queued %d: %s", clear, event.Fetched, event.MaxPages, event.Queued, event.URL)
 			if !isTTY {
 				fmt.Fprintln(os.Stderr)
 			}
 		case "fetched":
-			fmt.Fprintf(os.Stderr, "%smemphis crawl: fetched %d/%d, queued %d, discovered +%d: %s\n", clear, event.Fetched, event.MaxPages, event.Queued, event.Discovered, event.URL)
+			fmt.Fprintf(os.Stderr, "%spyra crawl: fetched %d/%d, queued %d, discovered +%d: %s\n", clear, event.Fetched, event.MaxPages, event.Queued, event.Discovered, event.URL)
 		case "skipped":
-			fmt.Fprintf(os.Stderr, "%smemphis crawl: skipped %d/%d, queued %d: %s\n", clear, event.Fetched, event.MaxPages, event.Queued, event.URL)
+			fmt.Fprintf(os.Stderr, "%spyra crawl: skipped %d/%d, queued %d: %s\n", clear, event.Fetched, event.MaxPages, event.Queued, event.URL)
 		case "failed":
-			fmt.Fprintf(os.Stderr, "%smemphis crawl: failed %d/%d, queued %d: %s\n", clear, event.Fetched, event.MaxPages, event.Queued, event.URL)
+			fmt.Fprintf(os.Stderr, "%spyra crawl: failed %d/%d, queued %d: %s\n", clear, event.Fetched, event.MaxPages, event.Queued, event.URL)
 		case "writing":
-			fmt.Fprintf(os.Stderr, "%smemphis crawl: writing %d concepts to %s\n", clear, event.Concepts, event.OutDir)
+			fmt.Fprintf(os.Stderr, "%spyra crawl: writing %d concepts to %s\n", clear, event.Concepts, event.OutDir)
 		}
 	}
 }

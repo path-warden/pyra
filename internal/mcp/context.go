@@ -3,8 +3,8 @@ package mcp
 import (
 	"context"
 
-	"github.com/chasedputnam/memphis/internal/compress"
-	ctxpkg "github.com/chasedputnam/memphis/internal/context"
+	"github.com/chasedputnam/pyra/internal/compress"
+	ctxpkg "github.com/chasedputnam/pyra/internal/context"
 	"github.com/mark3labs/mcp-go/mcp"
 )
 

@@ -1,21 +1,21 @@
 // Package codehealth scores every source file by running deterministic biomarker
-// detectors over the layers memphis already owns (codeintel, gitint, codegraph,
+// detectors over the layers pyra already owns (codeintel, gitint, codegraph,
 // canon) and aggregating findings with a ported repowise scoring kernel into
 // three independently-capped dimensions.
 //
 // It lives outside internal/canon/...; the authority path may not depend on it
 // (a boundary test enforces this). The scoring kernel constants are a faithful
 // port of repowise (AGPL-3.0), confined to kernel_constants.go; the biomarkers
-// are memphis's own deterministic detectors.
+// are pyra's own deterministic detectors.
 package codehealth
 
 import (
 	"sort"
 
-	"github.com/chasedputnam/memphis/internal/codegraph"
-	"github.com/chasedputnam/memphis/internal/codeintel"
-	"github.com/chasedputnam/memphis/internal/gitint"
-	"github.com/chasedputnam/memphis/internal/store"
+	"github.com/chasedputnam/pyra/internal/codegraph"
+	"github.com/chasedputnam/pyra/internal/codeintel"
+	"github.com/chasedputnam/pyra/internal/gitint"
+	"github.com/chasedputnam/pyra/internal/store"
 )
 
 // FileContext is the per-file input a biomarker detector reads.

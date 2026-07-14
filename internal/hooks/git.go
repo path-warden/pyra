@@ -19,25 +19,25 @@ type gitHook struct {
 }
 
 // gitHooks defines the managed-block body for each git hook. Each body checks
-// that memphis is on PATH before invoking it (Requirement 6.4).
+// that pyra is on PATH before invoking it (Requirement 6.4).
 func gitHooks() []gitHook {
 	return []gitHook{
 		{
 			name: "pre-commit",
 			body: "# " + ManagedMarker + ": block the commit on Canon gate failure.\n" +
-				"if ! command -v memphis >/dev/null 2>&1; then\n" +
-				"  echo \"memphis: not found on PATH; install memphis or remove this hook\" >&2\n" +
+				"if ! command -v pyra >/dev/null 2>&1; then\n" +
+				"  echo \"pyra: not found on PATH; install pyra or remove this hook\" >&2\n" +
 				"  exit 1\n" +
 				"fi\n" +
-				"memphis gate || exit 1",
+				"pyra gate || exit 1",
 		},
 		{
 			name: "post-merge",
 			body: "# " + ManagedMarker + ": store integrity guard (report-only; never aborts a merge).\n" +
-				"if ! command -v memphis >/dev/null 2>&1; then\n" +
-				"  echo \"memphis: not found on PATH; skipping store integrity check\" >&2\n" +
+				"if ! command -v pyra >/dev/null 2>&1; then\n" +
+				"  echo \"pyra: not found on PATH; skipping store integrity check\" >&2\n" +
 				"else\n" +
-				"  memphis rebuild || echo \"memphis: store integrity check reported issues (merge already applied)\" >&2\n" +
+				"  pyra rebuild || echo \"pyra: store integrity check reported issues (merge already applied)\" >&2\n" +
 				"fi",
 		},
 	}

@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/chasedputnam/memphis/internal/config"
-	"github.com/chasedputnam/memphis/internal/store"
+	"github.com/chasedputnam/pyra/internal/config"
+	"github.com/chasedputnam/pyra/internal/store"
 )
 
 func write(t *testing.T, root, rel, content string) {

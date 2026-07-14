@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/chasedputnam/memphis/internal/codegraph"
+	"github.com/chasedputnam/pyra/internal/codegraph"
 )
 
 func writeGraphFile(t *testing.T, root, rel, content string) {

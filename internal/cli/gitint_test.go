@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/chasedputnam/memphis/internal/gitint"
+	"github.com/chasedputnam/pyra/internal/gitint"
 )
 
 func gitAt(t *testing.T, root string, ts int64, args ...string) {

@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/chasedputnam/memphis/internal/codehealth"
+	"github.com/chasedputnam/pyra/internal/codehealth"
 )
 
 func writeHealthFile(t *testing.T, root, rel, content string) {

@@ -1,12 +1,12 @@
-// Package hooks installs memphis's deterministic checks onto the event surfaces
+// Package hooks installs pyra's deterministic checks onto the event surfaces
 // of the surrounding toolchains — git, Claude Code, the Kiro IDE, and the Kiro
-// CLI — so that `memphis gate` (and a store-integrity guard) run automatically
+// CLI — so that `pyra gate` (and a store-integrity guard) run automatically
 // when artifacts change. Every installer writes only its toolchain's documented
 // integration point, marks its content with a stable marker for idempotent
 // install/uninstall, and never disturbs unrelated content in those files.
 package hooks
 
-import "github.com/chasedputnam/memphis/internal/config"
+import "github.com/chasedputnam/pyra/internal/config"
 
 // Target identifies a hook surface.
 type Target string
@@ -18,14 +18,14 @@ const (
 	TargetKiroCLI Target = "kiro-cli"
 )
 
-// ManagedMarker is embedded in every memphis-authored hook command/entry so that
-// install/uninstall can find and replace exactly memphis's content.
-const ManagedMarker = "memphis-managed"
+// ManagedMarker is embedded in every pyra-authored hook command/entry so that
+// install/uninstall can find and replace exactly pyra's content.
+const ManagedMarker = "pyra-managed"
 
-// Delimiters bracket the memphis-managed block in line-oriented hook files (git).
+// Delimiters bracket the pyra-managed block in line-oriented hook files (git).
 const (
-	BlockBegin = "# >>> memphis (managed) >>>"
-	BlockEnd   = "# <<< memphis (managed) <<<"
+	BlockBegin = "# >>> pyra (managed) >>>"
+	BlockEnd   = "# <<< pyra (managed) <<<"
 )
 
 // Action is what an installer did (or found) for a target.
@@ -78,7 +78,7 @@ type Result struct {
 	Detail string   // human explanation (e.g. why skipped/ambiguous)
 }
 
-// Installer manages memphis hooks for one toolchain surface.
+// Installer manages pyra hooks for one toolchain surface.
 type Installer interface {
 	Target() Target
 	Detect(ctx Context) bool

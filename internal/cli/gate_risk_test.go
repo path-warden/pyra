@@ -4,9 +4,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/chasedputnam/memphis/internal/changegate"
-	"github.com/chasedputnam/memphis/internal/changerisk"
-	"github.com/chasedputnam/memphis/internal/config"
+	"github.com/chasedputnam/pyra/internal/changegate"
+	"github.com/chasedputnam/pyra/internal/changerisk"
+	"github.com/chasedputnam/pyra/internal/config"
 )
 
 // stageRiskRepo builds a git repo with a baseline commit, a dependent file, a

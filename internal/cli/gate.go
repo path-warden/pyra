@@ -9,14 +9,14 @@ import (
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 
-	"github.com/chasedputnam/memphis/internal/canon/gate"
-	"github.com/chasedputnam/memphis/internal/canon/model"
-	"github.com/chasedputnam/memphis/internal/changegate"
-	"github.com/chasedputnam/memphis/internal/changerisk"
-	"github.com/chasedputnam/memphis/internal/codeintel"
-	"github.com/chasedputnam/memphis/internal/config"
-	"github.com/chasedputnam/memphis/internal/sarif"
-	"github.com/chasedputnam/memphis/internal/store"
+	"github.com/chasedputnam/pyra/internal/canon/gate"
+	"github.com/chasedputnam/pyra/internal/canon/model"
+	"github.com/chasedputnam/pyra/internal/changegate"
+	"github.com/chasedputnam/pyra/internal/changerisk"
+	"github.com/chasedputnam/pyra/internal/codeintel"
+	"github.com/chasedputnam/pyra/internal/config"
+	"github.com/chasedputnam/pyra/internal/sarif"
+	"github.com/chasedputnam/pyra/internal/store"
 )
 
 var gateCmd = &cobra.Command{
@@ -36,7 +36,7 @@ rule codes "canon-governed-change" and "governed-symbol-unresolved".
 directives: missing_tests, missing_cochanges, will_break, governance_risk) and
 merges those findings into the same result and exit code. Rule codes:
 "change-risk", "risk-missing-tests", "risk-missing-cochanges", "risk-will-break",
-"risk-governance". See "memphis risk" for the standalone report.`,
+"risk-governance". See "pyra risk" for the standalone report.`,
 	Args: cobra.MaximumNArgs(1),
 	RunE: runGate,
 }
@@ -105,7 +105,7 @@ func runGate(cmd *cobra.Command, args []string) error {
 
 	switch {
 	case sarifOut:
-		doc := sarif.FromIssues("memphis", version, res.Issues)
+		doc := sarif.FromIssues("pyra", version, res.Issues)
 		data, _ := json.MarshalIndent(doc, "", "  ")
 		fmt.Println(string(data))
 	case jsonOut:
@@ -168,7 +168,7 @@ func riskChange(src changegate.Source) changerisk.Change {
 }
 
 func printGateText(res gate.Result, changedCount int) {
-	fmt.Println("memphis gate")
+	fmt.Println("pyra gate")
 	fmt.Printf("Artifacts: %d\n", res.ArtifactCount)
 	if changedCount >= 0 {
 		fmt.Printf("Changed files: %d\n", changedCount)

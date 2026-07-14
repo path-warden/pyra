@@ -12,7 +12,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
-	"github.com/chasedputnam/memphis/internal/changelog"
+	"github.com/chasedputnam/pyra/internal/changelog"
 )
 
 // resetCommandFlags returns a cobra command's flags to their declared defaults
@@ -121,7 +121,7 @@ func TestImportCLI_ForwardsLanguageFlag(t *testing.T) {
 
 // TestImportCLI_LLMMode_EndToEnd verifies that --summarize=llm at the CLI
 // layer reaches the importer, picks the API provider configured in
-// ~/.config/memphis/llm.config (under a test HOME), and the LLM-produced text
+// ~/.config/pyra/llm.config (under a test HOME), and the LLM-produced text
 // lands in the bundle. This is the only test that exercises the full
 // CLI → importer → summarize/llm → provider stack.
 func TestImportCLI_LLMMode_EndToEnd(t *testing.T) {
@@ -145,7 +145,7 @@ func TestImportCLI_LLMMode_EndToEnd(t *testing.T) {
 	// Place llm.config under a fake HOME so the writer doesn't wipe it
 	// during bundle cleanup (it wipes only OutDir).
 	home := t.TempDir()
-	cfgDir := filepath.Join(home, ".config", "memphis")
+	cfgDir := filepath.Join(home, ".config", "pyra")
 	if err := os.MkdirAll(cfgDir, 0755); err != nil {
 		t.Fatalf("mkdir: %v", err)
 	}

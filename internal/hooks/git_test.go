@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/chasedputnam/memphis/internal/config"
+	"github.com/chasedputnam/pyra/internal/config"
 )
 
 func gitStore(t *testing.T) Context {
@@ -20,13 +20,13 @@ func gitStore(t *testing.T) Context {
 	return Context{StoreRoot: store, Config: config.Default()}
 }
 
-// runHookScript runs a generated hook with a stub `memphis` on PATH that exits
-// with memphisExit, returning the script's exit code.
-func runHookScript(t *testing.T, scriptPath string, memphisExit int) int {
+// runHookScript runs a generated hook with a stub `pyra` on PATH that exits
+// with pyraExit, returning the script's exit code.
+func runHookScript(t *testing.T, scriptPath string, pyraExit int) int {
 	t.Helper()
 	bin := t.TempDir()
-	stub := filepath.Join(bin, "memphis")
-	if err := os.WriteFile(stub, []byte("#!/bin/sh\nexit "+strconv.Itoa(memphisExit)+"\n"), 0o755); err != nil {
+	stub := filepath.Join(bin, "pyra")
+	if err := os.WriteFile(stub, []byte("#!/bin/sh\nexit "+strconv.Itoa(pyraExit)+"\n"), 0o755); err != nil {
 		t.Fatal(err)
 	}
 	cmd := exec.Command("sh", scriptPath)
@@ -61,16 +61,16 @@ func TestGit_FreshCreate(t *testing.T) {
 			t.Errorf("%s is not executable: %v", name, fi.Mode())
 		}
 		body, _ := os.ReadFile(p)
-		if !strings.Contains(string(body), "command -v memphis") {
+		if !strings.Contains(string(body), "command -v pyra") {
 			t.Errorf("%s missing PATH check:\n%s", name, body)
 		}
 	}
 	pre, _ := os.ReadFile(filepath.Join(ctx.StoreRoot, ".git", "hooks", "pre-commit"))
-	if !strings.Contains(string(pre), "memphis gate") {
+	if !strings.Contains(string(pre), "pyra gate") {
 		t.Errorf("pre-commit should run gate:\n%s", pre)
 	}
 	post, _ := os.ReadFile(filepath.Join(ctx.StoreRoot, ".git", "hooks", "post-merge"))
-	if !strings.Contains(string(post), "memphis rebuild") {
+	if !strings.Contains(string(post), "pyra rebuild") {
 		t.Errorf("post-merge should run rebuild:\n%s", post)
 	}
 }
@@ -89,7 +89,7 @@ func TestGit_AppendPreservesUserScript(t *testing.T) {
 		t.Errorf("user hook content lost:\n%s", body)
 	}
 	if !hasBlock(string(body)) {
-		t.Errorf("memphis block not added:\n%s", body)
+		t.Errorf("pyra block not added:\n%s", body)
 	}
 }
 
@@ -128,7 +128,7 @@ func TestGit_Uninstall(t *testing.T) {
 	}
 	body, _ := os.ReadFile(pre)
 	if hasBlock(string(body)) {
-		t.Errorf("uninstall left the memphis block:\n%s", body)
+		t.Errorf("uninstall left the pyra block:\n%s", body)
 	}
 	if !strings.Contains(string(body), "echo user-hook") {
 		t.Errorf("uninstall removed user content:\n%s", body)

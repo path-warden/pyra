@@ -6,11 +6,11 @@
 package gate
 
 import (
-	"github.com/chasedputnam/memphis/internal/canon"
-	"github.com/chasedputnam/memphis/internal/canon/model"
-	"github.com/chasedputnam/memphis/internal/canon/relate"
-	"github.com/chasedputnam/memphis/internal/canon/validate"
-	"github.com/chasedputnam/memphis/internal/config"
+	"github.com/chasedputnam/pyra/internal/canon"
+	"github.com/chasedputnam/pyra/internal/canon/model"
+	"github.com/chasedputnam/pyra/internal/canon/relate"
+	"github.com/chasedputnam/pyra/internal/canon/validate"
+	"github.com/chasedputnam/pyra/internal/config"
 )
 
 // Result aggregates all gate findings.

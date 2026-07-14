@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/chasedputnam/memphis/internal/config"
+	"github.com/chasedputnam/pyra/internal/config"
 )
 
 func claudeStore(t *testing.T, withDir bool) Context {
@@ -64,11 +64,11 @@ func TestClaude_MergePreservesExisting(t *testing.T) {
 		t.Errorf("unrelated key lost: %v", obj["model"])
 	}
 	if n := len(postToolUse(t, claudeSettings(ctx))); n != 2 {
-		t.Errorf("expected 2 PostToolUse entries (other + memphis), got %d", n)
+		t.Errorf("expected 2 PostToolUse entries (other + pyra), got %d", n)
 	}
 	body, _ := os.ReadFile(claudeSettings(ctx))
 	if !strings.Contains(string(body), ManagedMarker) {
-		t.Error("memphis entry missing marker")
+		t.Error("pyra entry missing marker")
 	}
 	if !strings.Contains(string(body), "echo other") {
 		t.Error("unrelated PostToolUse entry lost")
@@ -98,7 +98,7 @@ func TestClaude_AbsentFileCreated(t *testing.T) {
 	}
 }
 
-func TestClaude_UninstallRemovesOnlyMemphis(t *testing.T) {
+func TestClaude_UninstallRemovesOnlyPyra(t *testing.T) {
 	ctx := claudeStore(t, true)
 	pre := `{ "hooks": { "PostToolUse": [ { "matcher": "Bash", "hooks": [ { "type": "command", "command": "echo other" } ] } ] } }`
 	if err := os.WriteFile(claudeSettings(ctx), []byte(pre), 0o644); err != nil {
@@ -111,13 +111,13 @@ func TestClaude_UninstallRemovesOnlyMemphis(t *testing.T) {
 		t.Fatal(err)
 	}
 	if n := len(postToolUse(t, claudeSettings(ctx))); n != 1 {
-		t.Errorf("expected only the non-memphis entry to remain, got %d", n)
+		t.Errorf("expected only the non-pyra entry to remain, got %d", n)
 	}
 	body, _ := os.ReadFile(claudeSettings(ctx))
 	if strings.Contains(string(body), ManagedMarker) {
-		t.Error("memphis entry not removed")
+		t.Error("pyra entry not removed")
 	}
 	if !strings.Contains(string(body), "echo other") {
-		t.Error("non-memphis entry was removed")
+		t.Error("non-pyra entry was removed")
 	}
 }

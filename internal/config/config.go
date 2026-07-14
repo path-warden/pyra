@@ -1,4 +1,4 @@
-// Package config loads memphis store configuration from .okf/config.yaml.
+// Package config loads pyra store configuration from .okf/config.yaml.
 //
 // Configuration governs the Canon authority tier: which directories hold Canon
 // artifacts, the repository key used to mint artifact IDs, the ticketing

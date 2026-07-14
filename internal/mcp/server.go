@@ -10,17 +10,17 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/chasedputnam/memphis/internal/codegraph"
-	"github.com/chasedputnam/memphis/internal/codehealth"
-	"github.com/chasedputnam/memphis/internal/codeintel"
-	"github.com/chasedputnam/memphis/internal/compress"
-	"github.com/chasedputnam/memphis/internal/config"
-	"github.com/chasedputnam/memphis/internal/gitint"
-	"github.com/chasedputnam/memphis/internal/scale"
-	"github.com/chasedputnam/memphis/internal/search"
-	"github.com/chasedputnam/memphis/internal/store"
-	"github.com/chasedputnam/memphis/internal/tokens"
-	"github.com/chasedputnam/memphis/internal/validate"
+	"github.com/chasedputnam/pyra/internal/codegraph"
+	"github.com/chasedputnam/pyra/internal/codehealth"
+	"github.com/chasedputnam/pyra/internal/codeintel"
+	"github.com/chasedputnam/pyra/internal/compress"
+	"github.com/chasedputnam/pyra/internal/config"
+	"github.com/chasedputnam/pyra/internal/gitint"
+	"github.com/chasedputnam/pyra/internal/scale"
+	"github.com/chasedputnam/pyra/internal/search"
+	"github.com/chasedputnam/pyra/internal/store"
+	"github.com/chasedputnam/pyra/internal/tokens"
+	"github.com/chasedputnam/pyra/internal/validate"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 )
@@ -62,7 +62,7 @@ func NewServer(opts ServerOptions) (*Server, error) {
 
 	name := opts.Name
 	if name == "" {
-		name = "memphis"
+		name = "pyra"
 	}
 
 	maxResultChars := opts.MaxResultChars

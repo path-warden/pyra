@@ -13,7 +13,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/chasedputnam/memphis/internal/canon/model"
+	"github.com/chasedputnam/pyra/internal/canon/model"
 )
 
 // crockford is the Crockford base32 alphabet (no I, L, O, U).

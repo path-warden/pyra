@@ -6,10 +6,10 @@ import (
 
 	"github.com/mark3labs/mcp-go/mcp"
 
-	"github.com/chasedputnam/memphis/internal/codegraph"
-	"github.com/chasedputnam/memphis/internal/codehealth"
-	"github.com/chasedputnam/memphis/internal/config"
-	"github.com/chasedputnam/memphis/internal/gitint"
+	"github.com/chasedputnam/pyra/internal/codegraph"
+	"github.com/chasedputnam/pyra/internal/codehealth"
+	"github.com/chasedputnam/pyra/internal/config"
+	"github.com/chasedputnam/pyra/internal/gitint"
 )
 
 // healthReport lazily builds and caches the code-health report over the bundle.

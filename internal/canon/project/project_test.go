@@ -6,9 +6,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/chasedputnam/memphis/internal/canon/artifacts"
-	"github.com/chasedputnam/memphis/internal/canon/identity"
-	"github.com/chasedputnam/memphis/internal/config"
+	"github.com/chasedputnam/pyra/internal/canon/artifacts"
+	"github.com/chasedputnam/pyra/internal/canon/identity"
+	"github.com/chasedputnam/pyra/internal/config"
 )
 
 func writeSrc(t *testing.T, path, content string) {

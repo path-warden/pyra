@@ -3,8 +3,8 @@ package classify
 import (
 	"testing"
 
-	"github.com/chasedputnam/memphis/internal/canon/artifacts"
-	"github.com/chasedputnam/memphis/internal/canon/model"
+	"github.com/chasedputnam/pyra/internal/canon/artifacts"
+	"github.com/chasedputnam/pyra/internal/canon/model"
 )
 
 func product(sections ...string) *model.Product {

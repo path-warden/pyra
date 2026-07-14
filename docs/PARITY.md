@@ -56,10 +56,10 @@ To verify parity between implementations:
 1. **Import the same folder**:
    ```bash
    # TypeScript
-   npx memphis import ./docs --out ./bundle-ts
+   npx pyra import ./docs --out ./bundle-ts
    
    # Go
-   memphis import ./docs --out ./bundle-go
+   pyra import ./docs --out ./bundle-go
    ```
 
 2. **Compare bundle structure**:
@@ -69,8 +69,8 @@ To verify parity between implementations:
 
 3. **Validate both bundles**:
    ```bash
-   memphis validate ./bundle-ts
-   memphis validate ./bundle-go
+   pyra validate ./bundle-ts
+   pyra validate ./bundle-go
    ```
 
 4. **Test MCP tools**:

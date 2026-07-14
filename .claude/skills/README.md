@@ -1,18 +1,18 @@
-# Memphis agent skills
+# Pyra agent skills
 
-These three skills implement the spec-driven development lifecycle that Memphis is built for, with the `memphis project` / `gate` / `hooks` / MCP grounding steps wired directly into each phase. They use the `SKILL.md` format shared by **Claude Code** ([docs](https://code.claude.com/docs/en/skills)) and **Kiro** ([docs](https://kiro.dev/docs/cli/skills/)), so the same folders install into both:
+These three skills implement the spec-driven development lifecycle that Pyra is built for, with the `pyra project` / `gate` / `hooks` / MCP grounding steps wired directly into each phase. They use the `SKILL.md` format shared by **Claude Code** ([docs](https://code.claude.com/docs/en/skills)) and **Kiro** ([docs](https://kiro.dev/docs/cli/skills/)), so the same folders install into both:
 
-| Skill | Phase | Memphis integration |
+| Skill | Phase | Pyra integration |
 |---|---|---|
 | `spec` | Requirements -> Design -> Tasks | Projects each approved `requirements.md` / `design.md` into typed Canon and gates it. |
 | `dev` | Implementation | Grounds the work in Canon over MCP (`find_decisions` / `get_artifact` / `get_context`) before writing code; rebuilds indexes after status changes. |
-| `code-review` | Review | Runs `memphis gate --sarif` as a required authority check and cites touched artifacts via `memphis relationships --summary`. |
+| `code-review` | Review | Runs `pyra gate --sarif` as a required authority check and cites touched artifacts via `pyra relationships --summary`. |
 
-Every Memphis step is guarded by "if this is a Memphis store (a `.okf/config.yaml` exists)", so the skills also work unchanged in repositories that don't use Memphis.
+Every Pyra step is guarded by "if this is a Pyra store (a `.okf/config.yaml` exists)", so the skills also work unchanged in repositories that don't use Pyra.
 
 ## Install
 
-The quickest way is the bundled installer at the repo root. It auto-detects each toolchain you have (Claude Code, Kiro, git) by its folder and, for the ones it finds, copies the skills into its skills dir (`~/.claude/skills` and/or `~/.kiro/skills`) and runs `memphis hooks install` for that target:
+The quickest way is the bundled installer at the repo root. It auto-detects each toolchain you have (Claude Code, Kiro, git) by its folder and, for the ones it finds, copies the skills into its skills dir (`~/.claude/skills` and/or `~/.kiro/skills`) and runs `pyra hooks install` for that target:
 
 ```bash
 ./install_skills.sh .        # pass the store dir; defaults to .
@@ -30,9 +30,9 @@ They become available as `/spec`, `/dev`, and `/code-review`. To use them only w
 ## The loop
 
 ```
-/spec         requirements.md / design.md  ->  memphis project  ->  Canon (gated)
-/dev          read Canon over MCP          ->  implement (TDD)   ->  memphis rebuild
-/code-review  memphis gate --sarif         ->  findings cite the Canon they touch
+/spec         requirements.md / design.md  ->  pyra project  ->  Canon (gated)
+/dev          read Canon over MCP          ->  implement (TDD)   ->  pyra rebuild
+/code-review  pyra gate --sarif         ->  findings cite the Canon they touch
 ```
 
-Run `memphis hooks install` once in the repo so the gate also fires automatically on write, commit, and merge across git, Claude Code, and Kiro. See the project [README](../../README.md) for the full command set.
+Run `pyra hooks install` once in the repo so the gate also fires automatically on write, commit, and merge across git, Claude Code, and Kiro. See the project [README](../../README.md) for the full command set.

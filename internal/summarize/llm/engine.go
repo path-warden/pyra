@@ -9,7 +9,7 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/chasedputnam/memphis/internal/tokens"
+	"github.com/chasedputnam/pyra/internal/tokens"
 )
 
 // DefaultTimeout is the per-file timeout for LLM summarization.
