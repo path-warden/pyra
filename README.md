@@ -1,10 +1,10 @@
-# Pyra
-
 <p align="center">
-<img width="704" alt="pyra_github" src="https://github.com/user-attachments/assets/851ab1f8-9412-497c-8194-0b4cb4c4ea61" />
+<img width="1280" height="640" alt="pyra-banner" src="https://github.com/user-attachments/assets/395821b6-f392-4a89-b6b9-256b356af405" />
 </p>
 
 > **Ensure your codebases stand the test of time, just like the Great Pyramid of Giza.**
+
+# Pyra
 
 **Pyra is an enforceable authority layer for AI coding agents.** It is a single Go binary that turns the decisions, requirements, and designs your team agrees to into **'Canon'**, which is: typed Markdown artifacts, validated against real standards, wired into a blocking **gate** system, and served to agents over **MCP**. No decision goes unrecorded, and no agent silently violates one.
 
