@@ -25,16 +25,16 @@ Capture the current timestamp by running `date +%Y_%m_%d_%H_%M_%S`. The output f
 
 ---
 
-## Authority check (memphis stores)
+## Authority check (pyra stores)
 
-If the repository is a memphis store (a `.okf/config.yaml` exists), run the Canon gate as a required check and surface the authority the change touches:
+If the repository is a pyra store (a `.okf/config.yaml` exists), run the Canon gate as a required check and surface the authority the change touches:
 
 ```bash
-memphis gate . --sarif > memphis.sarif     # blocking authority check; must pass to approve
-memphis relationships . --summary          # coverage, orphan, and broken-edge report across Canon
+pyra gate . --sarif > pyra.sarif     # blocking authority check; must pass to approve
+pyra relationships . --summary          # coverage, orphan, and broken-edge report across Canon
 ```
 
-Treat any gate-blocking finding as a `[BLOCKING]` review item in the output file. When a change touches behavior governed by Canon, cite the relevant artifact ID on the finding's `References:` line (the requirement or decision it implements or violates). If the repository is not a memphis store, skip this section.
+Treat any gate-blocking finding as a `[BLOCKING]` review item in the output file. When a change touches behavior governed by Canon, cite the relevant artifact ID on the finding's `References:` line (the requirement or decision it implements or violates). If the repository is not a pyra store, skip this section.
 
 ---
 

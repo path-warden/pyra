@@ -175,6 +175,30 @@ func TestServeCommandHelp(t *testing.T) {
 	}
 }
 
+func TestInitCommandHelpListsLocalAgentSetup(t *testing.T) {
+	old := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
+
+	rootCmd.SetArgs([]string{"init", "--help"})
+	err := rootCmd.Execute()
+
+	_ = w.Close()
+	os.Stdout = old
+	var buf bytes.Buffer
+	_, _ = buf.ReadFrom(r)
+	output := buf.String()
+
+	if err != nil {
+		t.Fatalf("init help failed: %v", err)
+	}
+	for _, want := range []string{"--agent", "--kiro-agent", "--list-agents", "AGENTS.md", "MCP configuration"} {
+		if !strings.Contains(output, want) {
+			t.Errorf("init help missing %q:\n%s", want, output)
+		}
+	}
+}
+
 func TestInspectCommandHelp(t *testing.T) {
 	old := os.Stdout
 	r, w, _ := os.Pipe()

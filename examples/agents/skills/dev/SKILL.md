@@ -12,15 +12,15 @@ You are implementing a feature from an approved spec. Before doing anything, rea
 
 If the feature name is not clear from context, ask the user which spec to work from.
 
-## Ground in Canon first (memphis stores)
+## Ground in Canon first (pyra stores)
 
-If the repository is a memphis store (a `.okf/config.yaml` exists) served over MCP, ground the work in authoritative memory before exploring code. Retrieve the requirements and decisions this task must honor and treat them as binding:
+If the repository is a pyra store (a `.okf/config.yaml` exists) served over MCP, ground the work in authoritative memory before exploring code. Retrieve the requirements and decisions this task must honor and treat them as binding:
 
 - `find_decisions("<feature or area>")` returns the decisions and requirements relevant to this task, authority-first, with lifecycle status.
 - `get_artifact("OKF-...")` returns the full text of a specific artifact (superseded artifacts resolve to their successor).
 - `get_context("<task>")` returns a budgeted, Canon-first context pack with normative requirement text preserved verbatim.
 
-If no MCP server is running, start one with `memphis serve . --mcp` (or rely on the project's configured server). Build *to* the Canon, never around it: if a task appears to conflict with Accepted Canon, stop and surface the conflict before writing code. If the repository is not a memphis store, skip this section.
+If no MCP server is running, start one with `pyra serve . --mcp` (or rely on the project's configured server). Build *to* the Canon, never around it: if a task appears to conflict with Accepted Canon, stop and surface the conflict before writing code. If the repository is not a pyra store, skip this section.
 
 ## Codebase Exploration
 **Think Systemically, Not Locally**
@@ -138,7 +138,7 @@ Ask the user: "How would you like to proceed: one task at a time (I'll stop afte
 - Verify each implementation against the acceptance criteria referenced in the task
 - Write the minimal code needed, with no speculative abstractions or future-proofing
 - Run any available tests after each task to catch regressions
-- In a memphis store, if a task changes a Canon artifact's status or relationships, run `memphis rebuild .` so search and MCP grounding reflect the change
+- In a pyra store, if a task changes a Canon artifact's status or relationships, run `pyra rebuild .` so search and MCP grounding reflect the change
 
 ---
 

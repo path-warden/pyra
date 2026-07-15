@@ -1,6 +1,7 @@
 package hooks
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -41,8 +42,15 @@ func (c claudeInstaller) Install(ctx Context) (Result, error) {
 	if err != nil {
 		return Result{}, err
 	}
-	hooksObj := asObject(obj["hooks"])
-	ptu := filterOutPyraEntries(asArray(hooksObj["PostToolUse"]))
+	hooksObj, err := objectField(obj, "hooks")
+	if err != nil {
+		return Result{}, fmt.Errorf("%s: %w", path, err)
+	}
+	entries, err := arrayField(hooksObj, "PostToolUse")
+	if err != nil {
+		return Result{}, fmt.Errorf("%s: hooks.%w", path, err)
+	}
+	ptu := filterOutPyraEntries(entries)
 	ptu = append(ptu, pyraClaudeEntry())
 	hooksObj["PostToolUse"] = ptu
 	obj["hooks"] = hooksObj
@@ -66,8 +74,14 @@ func (c claudeInstaller) Uninstall(ctx Context) (Result, error) {
 	if err != nil {
 		return Result{}, err
 	}
-	hooksObj := asObject(obj["hooks"])
-	before := asArray(hooksObj["PostToolUse"])
+	hooksObj, err := objectField(obj, "hooks")
+	if err != nil {
+		return Result{}, fmt.Errorf("%s: %w", path, err)
+	}
+	before, err := arrayField(hooksObj, "PostToolUse")
+	if err != nil {
+		return Result{}, fmt.Errorf("%s: hooks.%w", path, err)
+	}
 	after := filterOutPyraEntries(before)
 	if len(after) == len(before) {
 		return Result{Target: TargetClaude, Action: ActionUnchanged, Paths: []string{path}}, nil
@@ -94,8 +108,15 @@ func (c claudeInstaller) Status(ctx Context) (Result, error) {
 	if err != nil {
 		return Result{}, err
 	}
-	hooksObj := asObject(obj["hooks"])
-	for _, e := range asArray(hooksObj["PostToolUse"]) {
+	hooksObj, err := objectField(obj, "hooks")
+	if err != nil {
+		return Result{}, fmt.Errorf("%s: %w", path, err)
+	}
+	entries, err := arrayField(hooksObj, "PostToolUse")
+	if err != nil {
+		return Result{}, fmt.Errorf("%s: hooks.%w", path, err)
+	}
+	for _, e := range entries {
 		if isPyraEntry(e) {
 			return Result{Target: TargetClaude, Action: ActionPresent, Paths: []string{path}}, nil
 		}

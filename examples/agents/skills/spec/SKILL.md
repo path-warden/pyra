@@ -62,16 +62,16 @@ After writing the file, ask the user: "Do the requirements look good? If so, we 
 - Make any requested changes and ask again after each revision
 - Do not proceed to Phase 2 until the user explicitly approves (e.g. "yes", "looks good", "approved")
 
-#### Capture to Canon (memphis stores)
+#### Capture to Canon (pyra stores)
 
-If the repository is a memphis store (a `.okf/config.yaml` exists at its root), capture the approved requirements as authoritative Canon the moment they are approved, so design, implementation, and review are all grounded in and gated against them:
+If the repository is a pyra store (a `.okf/config.yaml` exists at its root), capture the approved requirements as authoritative Canon the moment they are approved, so design, implementation, and review are all grounded in and gated against them:
 
 ```bash
-memphis project specs/{feature_name}/requirements.md   # project requirements.md into a typed Canon requirement
-memphis gate .                                          # enforce structure, BCP-14/EARS, and relationship integrity
+pyra project specs/{feature_name}/requirements.md   # project requirements.md into a typed Canon requirement
+pyra gate .                                          # enforce structure, BCP-14/EARS, and relationship integrity
 ```
 
-`memphis project` reuses a stable artifact ID on every run and never rewords your prose. If the gate reports a blocking issue, fix the wording it names and re-run. If the repository is not a memphis store, skip this step.
+`pyra project` reuses a stable artifact ID on every run and never rewords your prose. If the gate reports a blocking issue, fix the wording it names and re-run. If the repository is not a pyra store, skip this step.
 
 ---
 
@@ -104,13 +104,13 @@ After writing the file, ask the user: "Does the design look good? If so, we can 
 - Return to Phase 1 if gaps in requirements are identified
 - Do not proceed to Phase 3 until the user explicitly approves
 
-#### Capture to Canon (memphis stores)
+#### Capture to Canon (pyra stores)
 
-If this is a memphis store, project the approved design into Canon alongside the requirement, then gate:
+If this is a pyra store, project the approved design into Canon alongside the requirement, then gate:
 
 ```bash
-memphis project specs/{feature_name}/design.md   # project design.md into a typed Canon design artifact
-memphis gate .
+pyra project specs/{feature_name}/design.md   # project design.md into a typed Canon design artifact
+pyra gate .
 ```
 
 Relationships are inferred from literal artifact IDs mentioned in the prose, so referencing a requirement's `OKF-…` ID in the design links them automatically.

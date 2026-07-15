@@ -2,6 +2,7 @@ package hooks
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -69,9 +70,33 @@ func readJSONObject(path string) (map[string]any, error) {
 		return nil, err
 	}
 	if obj == nil {
-		obj = map[string]any{}
+		return nil, fmt.Errorf("root must be a JSON object")
 	}
 	return obj, nil
+}
+
+func objectField(obj map[string]any, key string) (map[string]any, error) {
+	value, ok := obj[key]
+	if !ok || value == nil {
+		return map[string]any{}, nil
+	}
+	field, ok := value.(map[string]any)
+	if !ok {
+		return nil, fmt.Errorf("%s must be an object", key)
+	}
+	return field, nil
+}
+
+func arrayField(obj map[string]any, key string) ([]any, error) {
+	value, ok := obj[key]
+	if !ok || value == nil {
+		return nil, nil
+	}
+	field, ok := value.([]any)
+	if !ok {
+		return nil, fmt.Errorf("%s must be an array", key)
+	}
+	return field, nil
 }
 
 // writeJSONObject writes obj as indented JSON, creating parent directories.

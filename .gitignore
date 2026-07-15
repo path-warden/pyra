@@ -2,6 +2,7 @@ pyra
 
 specs/
 .okf/
+docs/
 
 .DS_Store
 .crush

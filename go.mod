@@ -22,7 +22,11 @@ require (
 	github.com/yuin/goldmark v1.7.1
 )
 
-require github.com/odvcencio/gotreesitter v0.20.7
+require (
+	github.com/odvcencio/gotreesitter v0.20.7
+	github.com/pelletier/go-toml/v2 v2.2.4
+	github.com/tailscale/hujson v0.0.0-20260302212456-ecc657c15afd
+)
 
 require (
 	github.com/RoaringBitmap/roaring/v2 v2.14.5 // indirect

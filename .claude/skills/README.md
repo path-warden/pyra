@@ -10,22 +10,15 @@ These three skills implement the spec-driven development lifecycle that Pyra is 
 
 Every Pyra step is guarded by "if this is a Pyra store (a `.okf/config.yaml` exists)", so the skills also work unchanged in repositories that don't use Pyra.
 
-## Install
+## Repository setup
 
-The quickest way is the bundled installer at the repo root. It auto-detects each toolchain you have (Claude Code, Kiro, git) by its folder and, for the ones it finds, copies the skills into its skills dir (`~/.claude/skills` and/or `~/.kiro/skills`) and runs `pyra hooks install` for that target:
-
-```bash
-./install_skills.sh .        # pass the store dir; defaults to .
-```
-
-Or copy the skill folders into your personal skills directory by hand — `~/.claude/skills` for Claude Code, `~/.kiro/skills` for Kiro:
+Use the Pyra binary to generate repository-local activity guidance, MCP configuration, and applicable gate hooks. Select every tool used in the repository; the flag is repeatable:
 
 ```bash
-cp -R .claude/skills/spec .claude/skills/dev .claude/skills/code-review ~/.claude/skills/   # Claude Code
-cp -R .claude/skills/spec .claude/skills/dev .claude/skills/code-review ~/.kiro/skills/     # Kiro
+pyra init . --agent claude --agent kiro
 ```
 
-They become available as `/spec`, `/dev`, and `/code-review`. To use them only within a single repository instead, place them under that repo's `.claude/skills/` (Claude Code) or `.kiro/skills/` (Kiro); both load project-scoped skills automatically.
+These folders remain examples of `/spec`, `/dev`, and `/code-review` workflows. The generated `AGENTS.md` maps equivalent requirements, design, implementation, and review activities to the same Pyra operations without requiring a particular skill name or global installation.
 
 ## The loop
 
@@ -35,4 +28,4 @@ They become available as `/spec`, `/dev`, and `/code-review`. To use them only w
 /code-review  pyra gate --sarif         ->  findings cite the Canon they touch
 ```
 
-Run `pyra hooks install` once in the repo so the gate also fires automatically on write, commit, and merge across git, Claude Code, and Kiro. See the project [README](../../README.md) for the full command set.
+`pyra init` installs applicable local hooks so the gate also fires automatically on write, commit, and merge across git, Claude Code, Codex, and Kiro. See the project [README](../../README.md) for the full command set.

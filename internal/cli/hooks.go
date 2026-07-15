@@ -15,9 +15,9 @@ var hooksCmd = &cobra.Command{
 	Use:   "hooks",
 	Short: "Install event hooks that run the gate automatically",
 	Long: `Manage pyra event hooks across the supported toolchains: git (pre-commit
-and post-merge), Claude Code (PostToolUse), the Kiro IDE (.kiro/hooks), and the
-Kiro CLI (.kiro/agents). Hooks run the deterministic gate when artifacts change,
-so malformed authority is caught without anyone running a command by hand.`,
+and post-merge), Claude Code and Codex (PostToolUse), the Kiro IDE (.kiro/hooks),
+and the Kiro CLI (.kiro/agents). Hooks run the deterministic gate when artifacts
+change, so malformed authority is caught without a manual command.`,
 }
 
 var hooksInstallCmd = &cobra.Command{
@@ -55,6 +55,7 @@ func init() {
 		c.Flags().String("store", ".", "Store root")
 		c.Flags().Bool("git", false, "Target git hooks")
 		c.Flags().Bool("claude", false, "Target Claude Code")
+		c.Flags().Bool("codex", false, "Target Codex")
 		c.Flags().Bool("kiro-ide", false, "Target Kiro IDE hooks")
 		c.Flags().Bool("kiro-cli", false, "Target Kiro CLI hooks")
 		c.Flags().Bool("kiro", false, "Target both Kiro surfaces")
@@ -85,12 +86,13 @@ func selectInstallers(cmd *cobra.Command, ctx hooks.Context) []hooks.Installer {
 	all, _ := cmd.Flags().GetBool("all")
 	git, _ := cmd.Flags().GetBool("git")
 	claude, _ := cmd.Flags().GetBool("claude")
+	codex, _ := cmd.Flags().GetBool("codex")
 	kiroIDE, _ := cmd.Flags().GetBool("kiro-ide")
 	kiroCLI, _ := cmd.Flags().GetBool("kiro-cli")
 	kiro, _ := cmd.Flags().GetBool("kiro")
 
 	installers := hooks.Installers()
-	explicit := all || git || claude || kiroIDE || kiroCLI || kiro
+	explicit := all || git || claude || codex || kiroIDE || kiroCLI || kiro
 	if !explicit {
 		var out []hooks.Installer
 		for _, ins := range installers {
@@ -105,6 +107,7 @@ func selectInstallers(cmd *cobra.Command, ctx hooks.Context) []hooks.Installer {
 	if all {
 		want[hooks.TargetGit] = true
 		want[hooks.TargetClaude] = true
+		want[hooks.TargetCodex] = true
 		want[hooks.TargetKiroIDE] = true
 		want[hooks.TargetKiroCLI] = true
 	}
@@ -113,6 +116,9 @@ func selectInstallers(cmd *cobra.Command, ctx hooks.Context) []hooks.Installer {
 	}
 	if claude {
 		want[hooks.TargetClaude] = true
+	}
+	if codex {
+		want[hooks.TargetCodex] = true
 	}
 	if kiroIDE || kiro {
 		want[hooks.TargetKiroIDE] = true

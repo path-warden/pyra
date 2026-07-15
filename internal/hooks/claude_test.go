@@ -98,6 +98,16 @@ func TestClaude_AbsentFileCreated(t *testing.T) {
 	}
 }
 
+func TestClaude_StatusRejectsIncompatibleHookShape(t *testing.T) {
+	ctx := claudeStore(t, true)
+	if err := os.WriteFile(claudeSettings(ctx), []byte(`{"hooks":"keep"}`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := (claudeInstaller{}).Status(ctx); err == nil || !strings.Contains(err.Error(), "hooks must be an object") {
+		t.Fatalf("expected incompatible hook shape error, got %v", err)
+	}
+}
+
 func TestClaude_UninstallRemovesOnlyPyra(t *testing.T) {
 	ctx := claudeStore(t, true)
 	pre := `{ "hooks": { "PostToolUse": [ { "matcher": "Bash", "hooks": [ { "type": "command", "command": "echo other" } ] } ] } }`

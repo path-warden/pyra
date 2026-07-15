@@ -1,6 +1,7 @@
 package hooks
 
 import (
+	"fmt"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -39,25 +40,31 @@ func pyraCLIEntry() map[string]any {
 }
 
 // selectAgent resolves which agent config to edit, or reports ambiguity.
-func (k kiroCLIInstaller) selectAgent(ctx Context) (path string, ambiguous bool) {
+func (k kiroCLIInstaller) selectAgent(ctx Context) (path string, ambiguous bool, err error) {
 	dir := k.agentsDir(ctx)
 	if strings.TrimSpace(ctx.KiroAgent) != "" {
-		name := strings.TrimSuffix(ctx.KiroAgent, ".json")
-		return filepath.Join(dir, name+".json"), false
+		name := strings.TrimSuffix(strings.TrimSpace(ctx.KiroAgent), ".json")
+		if name == "" || name == "." || name == ".." || filepath.Base(name) != name {
+			return "", false, fmt.Errorf("invalid Kiro agent name %q", ctx.KiroAgent)
+		}
+		return filepath.Join(dir, name+".json"), false, nil
 	}
 	agents := k.listAgents(ctx)
 	switch len(agents) {
 	case 0:
-		return filepath.Join(dir, "pyra.json"), false
+		return filepath.Join(dir, "pyra.json"), false, nil
 	case 1:
-		return agents[0], false
+		return agents[0], false, nil
 	default:
-		return "", true
+		return "", true, nil
 	}
 }
 
 func (k kiroCLIInstaller) Install(ctx Context) (Result, error) {
-	path, ambiguous := k.selectAgent(ctx)
+	path, ambiguous, err := k.selectAgent(ctx)
+	if err != nil {
+		return Result{}, err
+	}
 	if ambiguous {
 		return Result{
 			Target: TargetKiroCLI, Action: ActionAmbiguous,
@@ -70,8 +77,15 @@ func (k kiroCLIInstaller) Install(ctx Context) (Result, error) {
 	if err != nil {
 		return Result{}, err
 	}
-	hooksObj := asObject(obj["hooks"])
-	ptu := filterOutPyraCLI(asArray(hooksObj["postToolUse"]))
+	hooksObj, err := objectField(obj, "hooks")
+	if err != nil {
+		return Result{}, fmt.Errorf("%s: %w", path, err)
+	}
+	entries, err := arrayField(hooksObj, "postToolUse")
+	if err != nil {
+		return Result{}, fmt.Errorf("%s: hooks.%w", path, err)
+	}
+	ptu := filterOutPyraCLI(entries)
 	ptu = append(ptu, pyraCLIEntry())
 	hooksObj["postToolUse"] = ptu
 	obj["hooks"] = hooksObj
@@ -97,8 +111,14 @@ func (k kiroCLIInstaller) Uninstall(ctx Context) (Result, error) {
 		if err != nil {
 			return Result{}, err
 		}
-		hooksObj := asObject(obj["hooks"])
-		before := asArray(hooksObj["postToolUse"])
+		hooksObj, err := objectField(obj, "hooks")
+		if err != nil {
+			return Result{}, fmt.Errorf("%s: %w", path, err)
+		}
+		before, err := arrayField(hooksObj, "postToolUse")
+		if err != nil {
+			return Result{}, fmt.Errorf("%s: hooks.%w", path, err)
+		}
 		after := filterOutPyraCLI(before)
 		if len(after) == len(before) {
 			continue
@@ -123,21 +143,32 @@ func (k kiroCLIInstaller) Uninstall(ctx Context) (Result, error) {
 }
 
 func (k kiroCLIInstaller) Status(ctx Context) (Result, error) {
-	res := Result{Target: TargetKiroCLI, Action: ActionAbsent}
-	for _, path := range k.listAgents(ctx) {
-		obj, err := readJSONObject(path)
-		if err != nil {
-			return Result{}, err
-		}
-		hooksObj := asObject(obj["hooks"])
-		for _, e := range asArray(hooksObj["postToolUse"]) {
-			if isPyraCLIEntry(e) {
-				res.Paths = append(res.Paths, path)
-				res.Action = ActionPresent
-			}
+	path, ambiguous, err := k.selectAgent(ctx)
+	if err != nil {
+		return Result{}, err
+	}
+	if ambiguous {
+		return Result{Target: TargetKiroCLI, Action: ActionAmbiguous,
+			Detail: "multiple agent configs in .kiro/agents; select one with --kiro-agent <name>"}, nil
+	}
+	obj, err := readJSONObject(path)
+	if err != nil {
+		return Result{}, err
+	}
+	hooksObj, err := objectField(obj, "hooks")
+	if err != nil {
+		return Result{}, fmt.Errorf("%s: %w", path, err)
+	}
+	entries, err := arrayField(hooksObj, "postToolUse")
+	if err != nil {
+		return Result{}, fmt.Errorf("%s: hooks.%w", path, err)
+	}
+	for _, entry := range entries {
+		if isPyraCLIEntry(entry) {
+			return Result{Target: TargetKiroCLI, Action: ActionPresent, Paths: []string{path}}, nil
 		}
 	}
-	return res, nil
+	return Result{Target: TargetKiroCLI, Action: ActionAbsent}, nil
 }
 
 func filterOutPyraCLI(entries []any) []any {

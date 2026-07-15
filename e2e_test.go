@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/pelletier/go-toml/v2"
 )
 
 var testBinaryPath string
@@ -588,6 +590,113 @@ func TestE2EInitNewGate(t *testing.T) {
 	}
 }
 
+// TestE2EInitAgentSetup proves repository initialization can configure every
+// supported agent without erasing existing repository-specific content, and
+// that the generated MCP command exposes the authority tools named in AGENTS.md.
+func TestE2EInitAgentSetup(t *testing.T) {
+	storeDir := filepath.Join(t.TempDir(), "store")
+	for _, dir := range []string{".git/hooks", ".codex"} {
+		if err := os.MkdirAll(filepath.Join(storeDir, dir), 0o755); err != nil {
+			t.Fatal(err)
+		}
+	}
+	fixtures := map[string]string{
+		"AGENTS.md":          "# Repository rules\n\nKeep this guidance.\n",
+		".mcp.json":          "{\"mcpServers\":{\"other\":{\"command\":\"other\"}},\"keep\":true}\n",
+		"opencode.json":      "{\"mcp\":{\"other\":{\"type\":\"local\",\"command\":[\"other\"]}},\"keep\":true}\n",
+		".codex/config.toml": "# retain this comment\nmodel = \"example\"\n",
+	}
+	for name, body := range fixtures {
+		path := filepath.Join(storeDir, name)
+		if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(path, []byte(body), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	args := []string{"init", storeDir,
+		"--agent", "claude", "--agent", "codex", "--agent", "opencode",
+		"--agent", "pi", "--agent", "kiro"}
+	if out, err := exec.Command(testBinaryPath, args...).CombinedOutput(); err != nil {
+		t.Fatalf("init with all agents failed: %v\n%s", err, out)
+	}
+
+	for _, name := range []string{".mcp.json", "opencode.json", ".pi/settings.json", ".kiro/settings/mcp.json"} {
+		body, err := os.ReadFile(filepath.Join(storeDir, name))
+		if err != nil {
+			t.Fatalf("read %s: %v", name, err)
+		}
+		var value any
+		if err := json.Unmarshal(body, &value); err != nil {
+			t.Errorf("generated %s is not valid JSON: %v", name, err)
+		}
+	}
+	codexBody, err := os.ReadFile(filepath.Join(storeDir, ".codex", "config.toml"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var codexConfig map[string]any
+	if err := toml.Unmarshal(codexBody, &codexConfig); err != nil {
+		t.Fatalf("generated Codex config is not valid TOML: %v", err)
+	}
+
+	agentsBody, err := os.ReadFile(filepath.Join(storeDir, "AGENTS.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, retained := range []string{"Keep this guidance.", "other", "retain this comment", "model = \"example\""} {
+		found := strings.Contains(string(agentsBody), retained) ||
+			strings.Contains(string(codexBody), retained)
+		if !found && retained == "other" {
+			mcpBody, _ := os.ReadFile(filepath.Join(storeDir, ".mcp.json"))
+			opencodeBody, _ := os.ReadFile(filepath.Join(storeDir, "opencode.json"))
+			found = strings.Contains(string(mcpBody), retained) && strings.Contains(string(opencodeBody), retained)
+		}
+		if !found {
+			t.Errorf("existing fixture content %q was not preserved", retained)
+		}
+	}
+
+	mcpBody, err := os.ReadFile(filepath.Join(storeDir, ".mcp.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var mcpConfig struct {
+		MCPServers map[string]struct {
+			Command string   `json:"command"`
+			Args    []string `json:"args"`
+		} `json:"mcpServers"`
+	}
+	if err := json.Unmarshal(mcpBody, &mcpConfig); err != nil {
+		t.Fatal(err)
+	}
+	generated := mcpConfig.MCPServers["pyra"]
+	if generated.Command != "pyra" || len(generated.Args) != 3 || generated.Args[1] != storeDir {
+		t.Fatalf("unexpected generated MCP command: %#v", generated)
+	}
+
+	request := strings.Join([]string{
+		`{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"e2e","version":"1"}}}`,
+		`{"jsonrpc":"2.0","method":"notifications/initialized","params":{}}`,
+		`{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}`,
+	}, "\n") + "\n"
+	// Invoke the generated argv with the just-built test binary standing in for
+	// the `pyra` executable that init expects on PATH.
+	mcpCmd := exec.Command(testBinaryPath, generated.Args...)
+	mcpCmd.Stdin = strings.NewReader(request)
+	out, err := mcpCmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("generated MCP command failed: %v\n%s", err, out)
+	}
+	for _, tool := range []string{"find_decisions", "get_artifact", "get_context"} {
+		if !strings.Contains(string(out), `"name":"`+tool+`"`) {
+			t.Errorf("MCP tools/list did not advertise %s:\n%s", tool, out)
+		}
+	}
+}
+
 // TestE2EProjectLifecycle proves the projection path: init a store, author a
 // spec requirements.md, project it into Canon, and gate. Re-projecting reuses
 // the same ID and yields byte-identical output (determinism via ID reuse).
@@ -650,8 +759,8 @@ func TestE2EHooksInstallUninstall(t *testing.T) {
 		t.Fatalf("hooks install failed: %v\n%s", err, out)
 	}
 	surfaces := map[string]string{
-		filepath.Join(storeDir, ".git", "hooks", "pre-commit"):         "pyra gate",
-		filepath.Join(storeDir, ".claude", "settings.json"):            "pyra-managed",
+		filepath.Join(storeDir, ".git", "hooks", "pre-commit"):      "pyra gate",
+		filepath.Join(storeDir, ".claude", "settings.json"):         "pyra-managed",
 		filepath.Join(storeDir, ".kiro", "hooks", "pyra-gate.json"): "pyra gate",
 		filepath.Join(storeDir, ".kiro", "agents", "pyra.json"):     "pyra-managed",
 	}

@@ -135,6 +135,20 @@ func TestKiroCLI_KiroAgentSelects(t *testing.T) {
 	}
 }
 
+func TestKiroCLI_RejectsInvalidAgentNameAndHookShape(t *testing.T) {
+	ctx, dir := kiroCLIStore(t)
+	ctx.KiroAgent = "../outside"
+	if _, err := (kiroCLIInstaller{}).Status(ctx); err == nil || !strings.Contains(err.Error(), "invalid Kiro agent name") {
+		t.Fatalf("expected invalid agent name error, got %v", err)
+	}
+
+	ctx.KiroAgent = "dev"
+	writeAgent(t, dir, "dev", `{"name":"dev","hooks":"keep"}`)
+	if _, err := (kiroCLIInstaller{}).Status(ctx); err == nil || !strings.Contains(err.Error(), "hooks must be an object") {
+		t.Fatalf("expected incompatible hook shape error, got %v", err)
+	}
+}
+
 func TestKiroCLI_Idempotent(t *testing.T) {
 	ctx, dir := kiroCLIStore(t)
 	g := kiroCLIInstaller{}

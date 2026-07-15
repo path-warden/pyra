@@ -14,6 +14,7 @@ type Target string
 const (
 	TargetGit     Target = "git"
 	TargetClaude  Target = "claude"
+	TargetCodex   Target = "codex"
 	TargetKiroIDE Target = "kiro-ide"
 	TargetKiroCLI Target = "kiro-cli"
 )
@@ -93,6 +94,7 @@ func Installers() []Installer {
 	return []Installer{
 		gitInstaller{},
 		claudeInstaller{},
+		codexInstaller{},
 		kiroIDEInstaller{},
 		kiroCLIInstaller{},
 	}
