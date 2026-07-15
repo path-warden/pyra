@@ -33,11 +33,15 @@ func graphRepo(t *testing.T) string {
 func TestRunGraph_CentralityJSON(t *testing.T) {
 	root := graphRepo(t)
 	out := captureStdout(t, func() {
-		graphCmd.Flags().Set("json", "true")
+		if err := graphCmd.Flags().Set("json", "true"); err != nil {
+			t.Fatal(err)
+		}
 		if err := runGraph(graphCmd, []string{root}); err != nil {
 			t.Fatal(err)
 		}
-		graphCmd.Flags().Set("json", "false")
+		if err := graphCmd.Flags().Set("json", "false"); err != nil {
+			t.Fatal(err)
+		}
 	})
 	var payload struct {
 		Total      int                    `json:"total"`
@@ -54,11 +58,15 @@ func TestRunGraph_CentralityJSON(t *testing.T) {
 func TestRunGraph_ReachabilityText(t *testing.T) {
 	root := graphRepo(t)
 	out := captureStdout(t, func() {
-		graphCmd.Flags().Set("reachability", "true")
+		if err := graphCmd.Flags().Set("reachability", "true"); err != nil {
+			t.Fatal(err)
+		}
 		if err := runGraph(graphCmd, []string{root}); err != nil {
 			t.Fatal(err)
 		}
-		graphCmd.Flags().Set("reachability", "false")
+		if err := graphCmd.Flags().Set("reachability", "false"); err != nil {
+			t.Fatal(err)
+		}
 	})
 	// helper is private + unreferenced → reported unreachable.
 	if !strings.Contains(out, "unreachable") || !strings.Contains(out, "helper") {
@@ -69,11 +77,15 @@ func TestRunGraph_ReachabilityText(t *testing.T) {
 func TestRunGraph_NodeCapTruncationSignalled(t *testing.T) {
 	root := graphRepo(t)
 	out := captureStdout(t, func() {
-		graphCmd.Flags().Set("node-cap", "1")
+		if err := graphCmd.Flags().Set("node-cap", "1"); err != nil {
+			t.Fatal(err)
+		}
 		if err := runGraph(graphCmd, []string{root}); err != nil {
 			t.Fatal(err)
 		}
-		graphCmd.Flags().Set("node-cap", "0")
+		if err := graphCmd.Flags().Set("node-cap", "0"); err != nil {
+			t.Fatal(err)
+		}
 	})
 	if !strings.Contains(out, "truncated") {
 		t.Errorf("node-cap truncation should be signalled:\n%s", out)

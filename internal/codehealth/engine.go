@@ -28,7 +28,6 @@ type FileContext struct {
 	IsHotspot bool
 	Governed  bool
 	Coverage  *FileCoverage
-	graphNode bool // reserved for graph-derived detectors
 }
 
 // Inputs bundles the whole-run analysis inputs.

@@ -60,7 +60,7 @@ func runRisk(cmd *cobra.Command, args []string) error {
 	var st *store.Store
 	if s, err := store.Load(storeRoot, cfg); err == nil {
 		st = s
-		defer st.Close()
+		defer func() { _ = st.Close() }()
 	}
 	ops := codeintel.NewOps(nil, storeRoot)
 

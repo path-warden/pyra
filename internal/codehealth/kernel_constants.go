@@ -141,9 +141,3 @@ var maintCaps = map[string]float64{
 var perfWeight = map[string]float64{}
 var perfCategory = map[string]string{}
 var perfCaps = map[string]float64{"performance": 1.0}
-
-// homeDimension is the finding's primary display bucket.
-var maintenanceHome = map[string]bool{
-	"low_cohesion": true, "brain_method": true, "primitive_obsession": true,
-	"dry_violation": true, "error_handling": true,
-}

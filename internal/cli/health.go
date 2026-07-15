@@ -65,7 +65,7 @@ func runHealth(cmd *cobra.Command, args []string) error {
 	}
 	if s, err := store.Load(storeRoot, cfg); err == nil {
 		in.Store = s
-		defer s.Close()
+		defer func() { _ = s.Close() }()
 	}
 	if covPath != "" {
 		if cov, err := codehealth.ParseCoverage(covPath); err == nil {

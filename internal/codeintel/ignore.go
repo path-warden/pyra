@@ -49,7 +49,7 @@ func loadIgnorePatterns(file string) []ignorePattern {
 	if err != nil {
 		return nil
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 	var patterns []ignorePattern
 	sc := bufio.NewScanner(f)
 	for sc.Scan() {

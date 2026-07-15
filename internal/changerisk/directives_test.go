@@ -85,7 +85,7 @@ func TestWillBreak_And_ImportLinkedCoChange(t *testing.T) {
 		t.Error("store.go and user.go should be import-linked")
 	}
 	if g.importLinked("cache/store.go", "cache/store.go") {
-		// a file trivially "links" to itself via defs∩refs? defs=Put, refs of store.go empty → false.
+		t.Error("a file without self-references should not be import-linked to itself")
 	}
 }
 
@@ -119,7 +119,7 @@ Fast.
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer st.Close()
+	defer func() { _ = st.Close() }()
 
 	got := governanceDirectives(st, nil, []string{"internal/cache/store.go"})
 	if len(got) != 1 || got[0].Code != CodeGovernanceRisk {

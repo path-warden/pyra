@@ -66,7 +66,7 @@ func runDeadCode(cmd *cobra.Command, args []string) error {
 		for _, it := range s.Canon {
 			canonBodies = append(canonBodies, it.Body)
 		}
-		defer s.Close()
+		defer func() { _ = s.Close() }()
 	}
 
 	rep := deadcode.Analyze(g, ops, storeRoot, canonBodies)

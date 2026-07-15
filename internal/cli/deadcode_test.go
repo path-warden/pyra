@@ -30,11 +30,15 @@ func deadCodeRepo(t *testing.T) string {
 func TestRunDeadCode_JSON(t *testing.T) {
 	root := deadCodeRepo(t)
 	out := captureStdout(t, func() {
-		deadCodeCmd.Flags().Set("json", "true")
+		if err := deadCodeCmd.Flags().Set("json", "true"); err != nil {
+			t.Fatal(err)
+		}
 		if err := runDeadCode(deadCodeCmd, []string{root}); err != nil {
 			t.Fatal(err)
 		}
-		deadCodeCmd.Flags().Set("json", "false")
+		if err := deadCodeCmd.Flags().Set("json", "false"); err != nil {
+			t.Fatal(err)
+		}
 	})
 	var payload struct {
 		Candidates  []deadcode.Candidate `json:"candidates"`
@@ -60,18 +64,28 @@ func TestRunDeadCode_JSON(t *testing.T) {
 func TestRunDeadCode_TierFilter(t *testing.T) {
 	root := deadCodeRepo(t)
 	out := captureStdout(t, func() {
-		deadCodeCmd.Flags().Set("tier", "low")
-		deadCodeCmd.Flags().Set("json", "true")
+		if err := deadCodeCmd.Flags().Set("tier", "low"); err != nil {
+			t.Fatal(err)
+		}
+		if err := deadCodeCmd.Flags().Set("json", "true"); err != nil {
+			t.Fatal(err)
+		}
 		if err := runDeadCode(deadCodeCmd, []string{root}); err != nil {
 			t.Fatal(err)
 		}
-		deadCodeCmd.Flags().Set("tier", "")
-		deadCodeCmd.Flags().Set("json", "false")
+		if err := deadCodeCmd.Flags().Set("tier", ""); err != nil {
+			t.Fatal(err)
+		}
+		if err := deadCodeCmd.Flags().Set("json", "false"); err != nil {
+			t.Fatal(err)
+		}
 	})
 	var payload struct {
 		Candidates []deadcode.Candidate `json:"candidates"`
 	}
-	json.Unmarshal([]byte(out), &payload)
+	if err := json.Unmarshal([]byte(out), &payload); err != nil {
+		t.Fatalf("dead-code JSON did not parse: %v\n%s", err, out)
+	}
 	// orphan is high-tier, so a low filter excludes it.
 	for _, c := range payload.Candidates {
 		if c.Tier != "low" {

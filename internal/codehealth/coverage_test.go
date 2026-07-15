@@ -10,7 +10,9 @@ import (
 func TestParseCoverage_LCOV(t *testing.T) {
 	dir := t.TempDir()
 	p := filepath.Join(dir, "cov.info")
-	os.WriteFile(p, []byte("SF:a.go\nDA:1,3\nDA:2,0\nDA:3,1\nend_of_record\nSF:b.go\nDA:1,0\nend_of_record\n"), 0o644)
+	if err := os.WriteFile(p, []byte("SF:a.go\nDA:1,3\nDA:2,0\nDA:3,1\nend_of_record\nSF:b.go\nDA:1,0\nend_of_record\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
 	cov, err := ParseCoverage(p)
 	if err != nil {
 		t.Fatal(err)
@@ -26,7 +28,9 @@ func TestParseCoverage_LCOV(t *testing.T) {
 func TestParseCoverage_Cobertura(t *testing.T) {
 	dir := t.TempDir()
 	p := filepath.Join(dir, "cobertura.xml")
-	os.WriteFile(p, []byte(`<?xml version="1.0"?><coverage><classes><class filename="x.go" line-rate="0.8"></class></classes></coverage>`), 0o644)
+	if err := os.WriteFile(p, []byte(`<?xml version="1.0"?><coverage><classes><class filename="x.go" line-rate="0.8"></class></classes></coverage>`), 0o644); err != nil {
+		t.Fatal(err)
+	}
 	cov, err := ParseCoverage(p)
 	if err != nil {
 		t.Fatal(err)

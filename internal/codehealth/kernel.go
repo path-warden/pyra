@@ -107,14 +107,6 @@ func inDimension(biomarker, dim string) bool {
 	return false
 }
 
-// homeDimension is a finding's primary display bucket.
-func homeDimension(biomarker string) string {
-	if maintenanceHome[biomarker] {
-		return "maintainability"
-	}
-	return "defect"
-}
-
 func clamp(v, lo, hi float64) float64 {
 	if v < lo {
 		return lo

@@ -215,7 +215,7 @@ var fixWords = map[string]bool{
 // convention (documented, not learned): a whole-word "fix"/"bug"/"hotfix"/... token.
 func isFixCommit(subject string) bool {
 	for _, w := range strings.FieldsFunc(strings.ToLower(subject), func(r rune) bool {
-		return !(r >= 'a' && r <= 'z')
+		return r < 'a' || r > 'z'
 	}) {
 		if fixWords[w] {
 			return true

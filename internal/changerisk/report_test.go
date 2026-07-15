@@ -48,7 +48,7 @@ Fast.
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer st.Close()
+	defer func() { _ = st.Close() }()
 	ops := codeintel.NewOps(nil, root)
 
 	rep, err := Assess(root, root, Change{Mode: ModeStaged}, st, ops, Options{Baseline: 50})

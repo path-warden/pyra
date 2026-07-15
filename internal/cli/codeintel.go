@@ -245,7 +245,7 @@ symbol-id, it finds the Canon artifacts that reference that symbol. Read-only.`,
 		if err != nil {
 			return err
 		}
-		defer st.Close()
+		defer func() { _ = st.Close() }()
 		ops := codeintel.NewOps(nil, storeRoot)
 
 		arg := args[0]

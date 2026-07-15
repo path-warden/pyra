@@ -37,11 +37,15 @@ func healthRepo(t *testing.T) string {
 func TestRunHealth_JSON(t *testing.T) {
 	root := healthRepo(t)
 	out := captureStdout(t, func() {
-		healthCmd.Flags().Set("json", "true")
+		if err := healthCmd.Flags().Set("json", "true"); err != nil {
+			t.Fatal(err)
+		}
 		if err := runHealth(healthCmd, []string{root}); err != nil {
 			t.Fatal(err)
 		}
-		healthCmd.Flags().Set("json", "false")
+		if err := healthCmd.Flags().Set("json", "false"); err != nil {
+			t.Fatal(err)
+		}
 	})
 	var rep codehealth.Report
 	if err := json.Unmarshal([]byte(out), &rep); err != nil {
@@ -58,11 +62,15 @@ func TestRunHealth_JSON(t *testing.T) {
 func TestRunHealth_FileView(t *testing.T) {
 	root := healthRepo(t)
 	out := captureStdout(t, func() {
-		healthCmd.Flags().Set("file", "bad.go")
+		if err := healthCmd.Flags().Set("file", "bad.go"); err != nil {
+			t.Fatal(err)
+		}
 		if err := runHealth(healthCmd, []string{root}); err != nil {
 			t.Fatal(err)
 		}
-		healthCmd.Flags().Set("file", "")
+		if err := healthCmd.Flags().Set("file", ""); err != nil {
+			t.Fatal(err)
+		}
 	})
 	if !strings.Contains(out, "bad.go") || !strings.Contains(out, "findings") {
 		t.Errorf("--file view should show findings for bad.go:\n%s", out)
@@ -72,15 +80,25 @@ func TestRunHealth_FileView(t *testing.T) {
 func TestRunHealth_CoverageIngestion(t *testing.T) {
 	root := healthRepo(t)
 	cov := filepath.Join(root, "cov.info")
-	os.WriteFile(cov, []byte("SF:bad.go\nDA:1,0\nDA:2,0\nDA:3,0\nend_of_record\n"), 0o644)
+	if err := os.WriteFile(cov, []byte("SF:bad.go\nDA:1,0\nDA:2,0\nDA:3,0\nend_of_record\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
 	out := captureStdout(t, func() {
-		healthCmd.Flags().Set("json", "true")
-		healthCmd.Flags().Set("coverage", cov)
+		if err := healthCmd.Flags().Set("json", "true"); err != nil {
+			t.Fatal(err)
+		}
+		if err := healthCmd.Flags().Set("coverage", cov); err != nil {
+			t.Fatal(err)
+		}
 		if err := runHealth(healthCmd, []string{root}); err != nil {
 			t.Fatal(err)
 		}
-		healthCmd.Flags().Set("coverage", "")
-		healthCmd.Flags().Set("json", "false")
+		if err := healthCmd.Flags().Set("coverage", ""); err != nil {
+			t.Fatal(err)
+		}
+		if err := healthCmd.Flags().Set("json", "false"); err != nil {
+			t.Fatal(err)
+		}
 	})
 	if !strings.Contains(out, "coverage_gap") && !strings.Contains(out, "coverage_gradient") {
 		t.Errorf("coverage ingestion should add coverage findings:\n%s", out)

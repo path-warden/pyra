@@ -141,7 +141,7 @@ func computeGate(storeRoot string, cfg config.Config, src changegate.Source, on,
 	if err != nil {
 		return gate.Result{}, -1, err
 	}
-	defer st.Close()
+	defer func() { _ = st.Close() }()
 	ops := codeintel.NewOps(nil, storeRoot)
 	res = res.Merge(gate.ApplyPolicy(cfg, changegate.Evaluate(st, ops, files)))
 

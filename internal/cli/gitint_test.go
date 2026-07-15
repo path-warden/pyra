@@ -85,11 +85,15 @@ func TestRunHotspots_JSONAndNonGit(t *testing.T) {
 	root := hotRepo(t)
 	out := captureStdout(t, func() {
 		cmd := hotspotsCmd
-		cmd.Flags().Set("json", "true")
+		if err := cmd.Flags().Set("json", "true"); err != nil {
+			t.Fatal(err)
+		}
 		if err := runHotspots(cmd, []string{root}); err != nil {
 			t.Fatal(err)
 		}
-		cmd.Flags().Set("json", "false")
+		if err := cmd.Flags().Set("json", "false"); err != nil {
+			t.Fatal(err)
+		}
 	})
 	var hot []gitint.FileHistory
 	if err := json.Unmarshal([]byte(out), &hot); err != nil {

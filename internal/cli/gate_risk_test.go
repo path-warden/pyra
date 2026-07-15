@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"os"
 	"testing"
 
 	"github.com/chasedputnam/pyra/internal/changegate"
@@ -54,9 +53,6 @@ Fast.
 }
 
 func TestComputeGate_RiskMergesHeadlineAndDirectives(t *testing.T) {
-	if _, err := os.Stat("/usr/bin/git"); err != nil {
-		// git presence is checked inside gitCmd via LookPath+Skip.
-	}
 	root := stageRiskRepo(t)
 
 	res, _, err := computeGate(root, config.Default(),
