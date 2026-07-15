@@ -57,6 +57,8 @@ source checkout.
 - [REQ-303] WHEN the user requests the supported-tool list THEN Pyra SHALL print stable tool identifiers and human-readable names without modifying the repository.
 - [REQ-304] WHEN no tool is selected and interactive selection is unavailable or declined THEN Pyra SHALL still initialize the Pyra store and `AGENTS.md`, SHALL not create an MCP configuration for an unselected tool, and SHALL explain how to enable tools later.
 - [REQ-305] WHEN initialization runs with quiet output enabled THEN Pyra SHALL suppress success output while preserving errors and all requested filesystem effects.
+- [REQ-306] WHEN the user runs initialization with agent-only mode and one or more selected tools THEN Pyra SHALL update the managed `AGENTS.md` section and exactly the selected repository-local MCP client configurations without reading or writing `.okf/config.yaml`, creating Canon directories, or installing or updating hooks.
+- [REQ-307] IF agent-only mode is requested without a selected tool or with a store- or hook-configuration flag THEN Pyra SHALL reject the invocation before writing any files and identify the incompatible input.
 
 ### Requirement 4: Local Enforcement and Replacement of the Installer
 
@@ -76,7 +78,7 @@ source checkout.
 - [REQ-502] WHEN an existing Pyra store is initialized without the existing overwrite authorization THEN Pyra SHALL retain the current refusal behavior and SHALL NOT modify `AGENTS.md`, MCP configuration, or hooks.
 - [REQ-503] WHEN overwrite authorization is supplied THEN Pyra SHALL overwrite the Pyra store configuration as requested while still preserving non-Pyra content in `AGENTS.md`, tool configuration, and hook files.
 - [REQ-504] IF initialization fails after creating or updating one of the new agent setup artifacts THEN Pyra SHALL report which changes completed and which did not, and SHALL NOT claim successful initialization.
-- [REQ-505] The initialization implementation SHALL have automated tests covering new files, merges into existing files, repeated runs, multi-tool selection, unsupported tools, malformed existing configuration, quiet mode, hook setup, and preservation of unrelated content.
+- [REQ-505] The initialization implementation SHALL have automated tests covering new files, merges into existing files, repeated runs, multi-tool selection, unsupported tools, malformed existing configuration, quiet mode, hook setup, agent-only isolation, and preservation of unrelated content.
 - [REQ-506] Existing `pyra init` configuration flags and default store configuration SHALL remain compatible unless a new tool-selection option is explicitly used.
 
 ### Requirement 6: Spec-Driven Authority Lifecycle Mapping

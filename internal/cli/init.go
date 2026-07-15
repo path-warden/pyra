@@ -24,7 +24,9 @@ MCP configuration, and applicable repository-local gate hooks.
 
 The defaults match pyra's implicit configuration, so an initialized store and
 a config-less store behave identically. init is safe by default: it refuses to
-overwrite an existing store unless --force is given.`,
+overwrite an existing store unless --force is given. Use --agents-only to update
+only AGENTS.md and selected MCP client configuration, without changing the store
+configuration, Canon directories, or hooks.`,
 	Args: cobra.MaximumNArgs(1),
 	// init owns its own error/usage output so it can route messages to stderr.
 	SilenceUsage:  true,
@@ -40,6 +42,7 @@ func init() {
 	initCmd.Flags().Bool("force", false, "Overwrite an existing .okf/config.yaml")
 	initCmd.Flags().Bool("quiet", false, "Suppress success output")
 	initCmd.Flags().StringArray("agent", nil, "Agent tool to configure locally (repeatable; use --list-agents)")
+	initCmd.Flags().Bool("agents-only", false, "Only update AGENTS.md and selected agent MCP configurations; skip store config and hooks")
 	initCmd.Flags().String("kiro-agent", "", "Kiro CLI agent config to update when multiple agents exist")
 	initCmd.Flags().Bool("list-agents", false, "List supported agent identifiers without modifying the repository")
 }
@@ -61,6 +64,10 @@ func runInit(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		printStatus("Error: " + err.Error())
 		return err
+	}
+	agentsOnly, _ := cmd.Flags().GetBool("agents-only")
+	if agentsOnly {
+		return runAgentOnlyInit(cmd, storeRoot, selected, quiet)
 	}
 
 	cfg, err := resolveInitConfig(cmd)
@@ -124,6 +131,41 @@ func runInit(cmd *cobra.Command, args []string) error {
 
 	if !quiet {
 		printInitSummary(storeRoot, cfgPath, cfg, plan, hookResults)
+	}
+	return nil
+}
+
+// runAgentOnlyInit updates the shared AGENTS.md contract and selected MCP client
+// configuration without reading or writing store configuration, Canon roots, or
+// hooks. Store-only flags are rejected so callers never mistake ignored input for
+// an applied configuration change.
+func runAgentOnlyInit(cmd *cobra.Command, storeRoot string, selected []agents.ID, quiet bool) error {
+	if len(selected) == 0 {
+		err := fmt.Errorf("--agents-only requires at least one --agent (use --list-agents)")
+		printStatus("Error: " + err.Error())
+		return err
+	}
+	for _, name := range []string{"repository-key", "canon-root", "ticketing", "force", "kiro-agent"} {
+		if cmd.Flags().Changed(name) {
+			err := fmt.Errorf("--%s cannot be used with --agents-only", name)
+			printStatus("Error: " + err.Error())
+			return err
+		}
+	}
+
+	plan, err := agents.BuildPlan(storeRoot, selected)
+	if err != nil {
+		printStatus("Error: " + err.Error())
+		return err
+	}
+	result, err := agents.ApplyPlan(plan)
+	if err != nil {
+		printStatus("Error: " + err.Error())
+		reportInitProgress(result.Completed, result.Pending)
+		return err
+	}
+	if !quiet {
+		printAgentOnlySummary(storeRoot, plan)
 	}
 	return nil
 }
@@ -321,7 +363,7 @@ func printInitSummary(storeRoot, cfgPath string, cfg config.Config, plan agents.
 		}
 	}
 	if len(plan.Agents) == 0 {
-		fmt.Println("\nNo MCP clients selected. Re-run with --force --agent <id> to enable one or more agents.")
+		fmt.Println("\nNo MCP clients selected. Run with --agents-only --agent <id> to enable one or more agents later.")
 	}
 	for _, id := range plan.Agents {
 		switch id {
@@ -338,4 +380,25 @@ func printInitSummary(storeRoot, cfgPath string, cfg config.Config, plan agents.
 	example := filepath.Join(firstRoot, "adr-001-example.md")
 	fmt.Println("\nNext: author your first Canon artifact")
 	fmt.Printf("  pyra new decision %s --title \"My first decision\"\n", example)
+}
+
+func printAgentOnlySummary(storeRoot string, plan agents.Plan) {
+	color.Green("Configured Pyra agents at %s", storeRoot)
+	for _, change := range plan.Changes {
+		fmt.Printf("  Agent setup: %s (%s)\n", change.Path, change.Action)
+	}
+	for _, selected := range plan.Agents {
+		for _, definition := range agents.Definitions() {
+			if definition.ID == selected {
+				fmt.Printf("  MCP tool: %s (%s)\n", definition.ID, definition.Name)
+				break
+			}
+		}
+		switch selected {
+		case agents.Codex:
+			fmt.Println("  Codex: trust this project, then restart Codex if needed.")
+		case agents.Pi:
+			fmt.Println("  Pi: trust the project, allow the project-scoped pi-mcp-adapter install, then restart Pi.")
+		}
+	}
 }

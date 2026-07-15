@@ -31,7 +31,8 @@ repository-local MCP renderers for Claude Code, Codex, OpenCode, Pi, and Kiro.
 Validate and render every affected file before writes, apply individual files
 atomically, then dispatch existing and new local hook installers. Pi receives a
 project-scoped MCP adapter declaration because its core intentionally has no MCP
-client.
+client. An `--agents-only` branch applies only the agent plan and bypasses store
+configuration resolution, store creation, and hook planning or installation.
 
 ## Constraints
 

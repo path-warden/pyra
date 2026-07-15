@@ -27,6 +27,7 @@ func newInitCmd() *cobra.Command {
 	c.Flags().Bool("force", false, "")
 	c.Flags().Bool("quiet", false, "")
 	c.Flags().StringArray("agent", nil, "")
+	c.Flags().Bool("agents-only", false, "")
 	c.Flags().String("kiro-agent", "", "")
 	c.Flags().Bool("list-agents", false, "")
 	return c
@@ -192,6 +193,106 @@ func TestInit_ForceOverwrites(t *testing.T) {
 	cfg, _ := config.Load(dir)
 	if cfg.RepositoryKey != "OKF" {
 		t.Errorf("expected overwritten config (OKF), got %q", cfg.RepositoryKey)
+	}
+}
+
+func TestInit_AgentsOnlyPreservesStoreAndHooks(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(dir, ".okf"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	// Deliberately malformed: agent-only mode must preserve this file without
+	// even attempting to parse it.
+	configBody := []byte("not: [valid\n")
+	if err := os.WriteFile(config.Path(dir), configBody, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	canonPath := filepath.Join(dir, "authority", "keep.md")
+	if err := os.MkdirAll(filepath.Dir(canonPath), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(canonPath, []byte("# keep"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	hookPath := filepath.Join(dir, ".git", "hooks", "pre-commit")
+	if err := os.MkdirAll(filepath.Dir(hookPath), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(hookPath, []byte("#!/bin/sh\necho keep\n"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	codexHookPath := filepath.Join(dir, ".codex", "hooks.json")
+	if err := os.MkdirAll(filepath.Dir(codexHookPath), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(codexHookPath, []byte(`{"hooks":"keep"}`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	err := runInitT(t, []string{dir}, map[string]string{"agents-only": "true"}, map[string][]string{
+		"agent": {"claude", "codex"},
+	})
+	if err != nil {
+		t.Fatalf("agents-only init failed: %v", err)
+	}
+
+	for path, want := range map[string][]byte{
+		config.Path(dir): configBody,
+		canonPath:        []byte("# keep"),
+		hookPath:         []byte("#!/bin/sh\necho keep\n"),
+		codexHookPath:    []byte(`{"hooks":"keep"}`),
+	} {
+		got, readErr := os.ReadFile(path)
+		if readErr != nil || !reflect.DeepEqual(got, want) {
+			t.Errorf("agents-only changed %s: got=%q want=%q err=%v", path, got, want, readErr)
+		}
+	}
+	for _, rel := range []string{"AGENTS.md", ".mcp.json", filepath.Join(".codex", "config.toml")} {
+		if _, statErr := os.Stat(filepath.Join(dir, rel)); statErr != nil {
+			t.Errorf("agents-only did not create %s: %v", rel, statErr)
+		}
+	}
+}
+
+func TestInit_AgentsOnlyRequiresAgentAndRejectsStoreFlags(t *testing.T) {
+	for _, tc := range []struct {
+		name  string
+		flags map[string]string
+		multi map[string][]string
+		want  string
+	}{
+		{name: "missing agent", flags: map[string]string{"agents-only": "true"}, want: "requires at least one --agent"},
+		{name: "store flag", flags: map[string]string{"agents-only": "true", "force": "true"}, multi: map[string][]string{"agent": {"codex"}}, want: "--force cannot be used"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			dir := t.TempDir()
+			err := runInitT(t, []string{dir}, tc.flags, tc.multi)
+			if err == nil || !strings.Contains(err.Error(), tc.want) {
+				t.Fatalf("expected %q error, got %v", tc.want, err)
+			}
+			for _, rel := range []string{"AGENTS.md", ".okf", ".codex"} {
+				if _, statErr := os.Stat(filepath.Join(dir, rel)); !os.IsNotExist(statErr) {
+					t.Errorf("%s written despite validation error: %v", rel, statErr)
+				}
+			}
+		})
+	}
+}
+
+func TestInit_AgentsOnlyDoesNotCreateStoreOrHooks(t *testing.T) {
+	dir := t.TempDir()
+	if err := runInitT(t, []string{dir}, map[string]string{"agents-only": "true"}, map[string][]string{"agent": {"opencode"}}); err != nil {
+		t.Fatal(err)
+	}
+	for _, rel := range []string{".okf", "canon", ".git"} {
+		if _, statErr := os.Stat(filepath.Join(dir, rel)); !os.IsNotExist(statErr) {
+			t.Errorf("agents-only created %s: %v", rel, statErr)
+		}
+	}
+	for _, rel := range []string{"AGENTS.md", "opencode.json"} {
+		if _, statErr := os.Stat(filepath.Join(dir, rel)); statErr != nil {
+			t.Errorf("agents-only did not create %s: %v", rel, statErr)
+		}
 	}
 }
 

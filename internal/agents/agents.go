@@ -76,27 +76,26 @@ const (
 
 const managedInstructions = `## Pyra authority workflow (managed)
 
-This repository uses Pyra as its authority layer. These rules apply to equivalent activities under any skill, command, prompt, or agent workflow—not only workflows named spec, dev, or code-review.
+Apply these rules to equivalent specification, planning, implementation, and review work, regardless of skill, command, prompt, or workflow name.
 
-### Requirements, design, and specification work
+### Plan
 
-- Obtain explicit human approval before advancing from requirements to design or from design to implementation planning.
-- Before drafting or updating a design, use ` + "`get_artifact`" + ` for the approved requirements and ` + "`find_decisions`" + `/` + "`get_context`" + ` for applicable Canon; preserve literal requirement and Canon IDs in the design's relationships.
-- After approving requirements or design, run ` + "`pyra project <approved-file>`" + ` (add ` + "`--write`" + ` when updating an existing projection), then run ` + "`pyra gate .`" + ` before treating that phase as complete.
-- Implementation tasks must trace to approved requirements and design authority. Do not implement while governing artifacts are unapproved or the gate fails.
+- Obtain explicit human approval before requirements → design and design → implementation planning.
+- Before design: ` + "`get_artifact`" + ` approved requirements; ` + "`find_decisions`" + `/` + "`get_context`" + ` applicable Canon; preserve literal IDs and relationships.
+- After requirements/design approval: ` + "`pyra project <file>`" + ` (` + "`--write`" + ` if existing), then ` + "`pyra gate .`" + `. Tasks must trace to approved requirements/design. Do not implement unapproved or failing authority.
 
-### Implementation work
+### Implement
 
-- Before exploring or changing code, use the configured Pyra MCP server: call ` + "`find_decisions`" + ` for the area, ` + "`get_artifact`" + ` for governing Canon, and ` + "`get_context`" + ` for a Canon-first context pack.
-- Treat Accepted Canon as binding. If requested work conflicts with it, stop and surface the conflict instead of working around it.
-- If authority status or relationships change, run ` + "`pyra rebuild .`" + ` before relying on later MCP grounding.
+- Before code exploration/change, query Pyra MCP: ` + "`find_decisions`" + ` (area), ` + "`get_artifact`" + ` (governing Canon), ` + "`get_context`" + ` (Canon-first context).
+- Accepted Canon is binding. On conflict, stop and report; never work around it.
+- After authority status/relationship changes, run ` + "`pyra rebuild .`" + ` before further grounding.
 
-### Review and completion
+### Review and complete
 
-- For any code review, change review, pre-commit review, or equivalent activity, run ` + "`pyra gate . --sarif`" + ` and ` + "`pyra relationships . --summary --validate`" + ` in addition to normal correctness, security, test, clarity, and convention checks.
-- Treat every gate-blocking authority finding as a blocking review finding, cite the relevant Canon artifact when known, fix it, and rerun the checks before approval.
-- Do not claim completion without reporting applicable test evidence, a passing Pyra gate, and no unresolved blocking relationship-integrity failures.
-- Ensure ` + "`pyra`" + ` is available on PATH; repository-local MCP configuration starts ` + "`pyra serve`" + ` automatically.`
+- For any code/change/pre-commit/equivalent review, check correctness, security, tests, clarity, and conventions; also run ` + "`pyra gate . --sarif`" + ` and ` + "`pyra relationships . --summary --validate`" + `.
+- Blocking gate findings block approval: cite known Canon, fix, and rerun.
+- Claim completion only with test evidence, a passing gate, and no blocking relationship-integrity failures.
+- Keep ` + "`pyra`" + ` on PATH; repository-local MCP configuration starts ` + "`pyra serve`" + ` automatically.`
 
 func renderAgents(existing string) (string, error) {
 	starts := strings.Count(existing, agentsBegin)

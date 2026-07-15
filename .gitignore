@@ -4,5 +4,11 @@ specs/
 .okf/
 docs/
 
+.pi/
+.claude/
+.kiro/
+.codex/
+.mcp.json
+
 .DS_Store
 .crush

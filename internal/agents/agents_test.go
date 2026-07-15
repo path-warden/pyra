@@ -44,12 +44,16 @@ func TestRenderAgentsCreatesAndPreservesContent(t *testing.T) {
 	for _, required := range []string{
 		agentsBegin, agentsEnd, "pyra project", "pyra gate .", "find_decisions",
 		"get_artifact", "get_context", "pyra rebuild .", "pyra relationships . --summary --validate",
-		"any skill, command, prompt, or agent workflow", "Accepted Canon", "blocking",
-		"Before drafting or updating a design", "approved requirements", "applicable Canon",
+		"regardless of skill, command, prompt, or workflow name", "Accepted Canon", "blocking",
+		"Before design", "approved requirements", "applicable Canon", "explicit human approval",
+		"Do not implement unapproved or failing authority", "stop and report", "test evidence",
 	} {
 		if !strings.Contains(got, required) {
 			t.Errorf("managed instructions missing %q", required)
 		}
+	}
+	if words := len(strings.Fields(managedInstructions)); words > 210 {
+		t.Errorf("managed instructions are too verbose: %d words (limit 210)", words)
 	}
 
 	again, err := renderAgents(got)

@@ -192,7 +192,7 @@ func TestInitCommandHelpListsLocalAgentSetup(t *testing.T) {
 	if err != nil {
 		t.Fatalf("init help failed: %v", err)
 	}
-	for _, want := range []string{"--agent", "--kiro-agent", "--list-agents", "AGENTS.md", "MCP configuration"} {
+	for _, want := range []string{"--agent", "--agents-only", "--kiro-agent", "--list-agents", "AGENTS.md", "MCP configuration", "skip store config and hooks"} {
 		if !strings.Contains(output, want) {
 			t.Errorf("init help missing %q:\n%s", want, output)
 		}
