@@ -36,9 +36,9 @@ Pyra can tell an agent what the team decided, but it cannot see the code that th
 
 ### Requirement 3 — One self-contained Go binary (native re-implementation)
 
-- [REQ-301] WHEN a user installs Pyra THEN the code-intelligence operations SHALL be invocable from the `pyra` binary with no separate `grove` installation and no Rust runtime present.
+- [REQ-301] WHEN a user installs Pyra THEN the code-intelligence operations SHALL be invocable from the `pyra` binary with no separate installation or external binary.
 - [REQ-302] WHEN a code-intelligence operation executes THEN Pyra SHALL run it through native Go code using tree-sitter Go bindings.
-- [REQ-303] WHEN a code-intelligence operation executes THEN Pyra SHALL NOT shell out to, embed, or proxy a prebuilt grove binary.
+- [REQ-303] WHEN a code-intelligence operation executes THEN Pyra SHALL NOT shell out to, embed, or proxy a prebuilt binary.
 - [REQ-304] IF a required language grammar is not present THEN Pyra SHALL provision or locate it through a documented cache-based mechanism and SHALL NOT fail silently.
 - [REQ-305] WHERE grammars cannot be statically linked into the Go binary THEN Pyra SHALL bundle or fetch-and-cache them while preserving the no-separate-user-install guarantee.
 
@@ -62,7 +62,7 @@ Pyra can tell an agent what the team decided, but it cannot see the code that th
 
 - [REQ-601] WHEN a file's language is supported and provisioned THEN Pyra SHALL parse it and SHALL return structural results.
 - [REQ-602] IF a file's language is not provisioned THEN Pyra SHALL report the unsupported language clearly and SHALL continue operating on the supported files.
-- [REQ-603] WHERE grove supports a language through its runtime grammar registry THEN Pyra SHALL define how that language is made available and SHALL document the supported set.
+- [REQ-603] WHERE we can support a language through its runtime grammar registry THEN Pyra SHALL define how that language is made available and SHALL document the supported set.
 - [REQ-604] IF grammar provisioning uses a remote registry THEN provisioned grammars SHALL be cached locally and reusable offline.
 - [REQ-605] WHERE grammars are provisioned THEN Pyra SHOULD make them integrity-checkable through a content hash or lockfile.
 
@@ -84,15 +84,12 @@ Pyra can tell an agent what the team decided, but it cannot see the code that th
 - A single `pyra` binary answers both "what did we decide?" and "what does the code do?" with no second executable required for core use.
 - `pyra serve` exposes one MCP server carrying both tool families; an agent can pass a symbol-id from a code tool into a follow-up code tool, and resolve a Canon reference to real source.
 - `pyra gate` remains byte-for-byte deterministic and offline; the `internal/canon` architecture test still passes.
-- The seven code operations return results equivalent to grove for the same inputs on supported languages.
 
 ## Risks
 
 - **tree-sitter Go bindings and grammar delivery.** Native parsing depends on cgo tree-sitter bindings and per-language grammars; static linking, binary size, and cross-compilation (the Makefile cross-builds five targets) are non-trivial and may pressure the "single self-contained binary" goal. Flagged for design.
-- **grove parity.** Reproducing grove's `symbol-id` scheme, `.scm` tag/locals/imports query semantics, and JSON shapes exactly enough for equivalence is a meaningful surface area to verify.
 - **Authority-path purity.** Grammar fetching introduces network and cache code that must be kept strictly out of `internal/canon/...` or the architecture test (and the offline-determinism guarantee) breaks.
 
 ## Assumptions
 
 TODO
-

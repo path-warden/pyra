@@ -25,9 +25,7 @@ substrate change-risk consumes today and code-health (parity capability #4) will
 build on next.
 
 The signals are computed from **public, well-described methods** (Kamei-style
-change metrics, temporal/decayed churn, commit-author ownership) — this is an
-**independent implementation**, not a port of repowise source, and it involves **no
-learned constants**, so nothing here carries a third-party license.
+change metrics, temporal/decayed churn, commit-author ownership).
 
 The hard invariant it inherits: everything stays **deterministic and offline**. In
 particular, all recency windows are anchored to **HEAD's commit timestamp**, never
@@ -118,4 +116,3 @@ TODO
 ## Assumptions
 
 TODO
-

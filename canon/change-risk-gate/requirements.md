@@ -26,15 +26,10 @@ code) and as a standalone `pyra risk <range>` command.
 
 Like the rest of the gate path it must be **deterministic, offline, and AI-free**,
 and must not weaken the authority-path boundary (`internal/canon/...` may not
-depend on it). To make Pyra **parity-testable against repowise from day one**,
+depend on it). To make Pyra **parity-testable**,
 the initial model (feature standardization, the logistic formula, and its learned
-constants) is a **faithful port of repowise's change-risk model**, confined to a
-single, clearly-attributed, swappable file so the constants can be replaced later
-without touching the rest of the feature. (Note: repowise is AGPL-3.0; the ported
-constants carry that license, which is relevant if Pyra is distributed under
-other terms.) Regardless of the raw model, Pyra still **leads with the
-repo-relative ranking**, because repowise itself documents that the absolute band
-is not portable across repos while the ranking is the sound signal.
+constants), confined to a single, clearly-attributed, swappable file so the 
+constants can be replaced later without touching the rest of the feature.
 
 ### Scope
 
@@ -49,10 +44,8 @@ SARIF; a standalone `pyra risk [range]` command.
 
 **Should have:** attributable per-metric drivers (which features raised or lowered
 the raw score) for transparency; a configurable baseline sample size for the
-repo-relative distribution; a **parity test** that pins Pyra's raw score to
-repowise's on identical diff inputs (the reason for porting the model verbatim);
-the `missing_tests` source↔test mapping via a built-in **language-aware
-convention map** covering Pyra's supported languages.
+repo-relative distribution; the `missing_tests` source↔test mapping via a 
+built-in **language-aware convention map** covering Pyra's supported languages.
 
 **Nice to have:** subsystem/directory diffusion breakdown in verbose output.
 
@@ -71,8 +64,7 @@ cross-repo/workspace risk.
 - [REQ-102] WHEN an author identity is available for the change THEN Pyra SHALL include the author's prior-commit count as an experience metric, and WHERE it is unavailable Pyra SHALL score experience neutrally rather than failing.
 - [REQ-103] WHEN the metrics are combined into a raw score THEN Pyra SHALL use a fixed, documented logistic formula whose per-metric contributions are individually attributable.
 - [REQ-104] WHEN the same change is scored twice on identical repository state THEN Pyra SHALL produce an identical score and identical drivers.
-- [REQ-105] WHERE the model's learned constants and formula are ported from repowise for parity THEN Pyra SHALL confine them to a single, clearly-attributed source file that can be replaced without changing the metric computation, ranking, directive, or integration code.
-- [REQ-106] WHEN Pyra scores a set of reference diffs THEN its raw score SHALL match repowise's score for the same diffs within a documented tolerance, verified by an automated parity test.
+- [REQ-105] WHERE the model's learned constants and formula are needed THEN Pyra SHALL confine them to a single, clearly-attributed source file that can be replaced without changing the metric computation, ranking, directive, or integration code.
 
 ### Requirement 2 — Repo-relative ranking as the headline
 
@@ -123,4 +115,3 @@ TODO
 ## Assumptions
 
 TODO
-

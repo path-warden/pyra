@@ -25,12 +25,9 @@ for the top marker, and surfaces pyra-unique **authority** signals: an
 and *contradictory decisions*.
 
 The scoring **kernel** (severity deductions, per-biomarker weight multipliers,
-per-category caps, the three-dimension composition, and the [1.0, 10.0] clamp) and
-its **calibrated constants** are a **faithful port of repowise's**, so pyra is
-parity-testable against it; the ported constants are confined to one file so they
-can be swapped later. (repowise is AGPL-3.0; those constants carry that license —
-the same posture as change-risk.) The biomarkers themselves are pyra's own
-deterministic detectors over the layers it owns.
+per-category caps, the three-dimension composition, and the [1.0, 10.0] clamp); 
+the constants are confined to one file so they can be swapped later. 
+The biomarkers themselves are pyra's own deterministic detectors over the layers it owns.
 
 Delivering the full roster requires one **enabler**: extending `internal/codeintel`
 with an **AST-metrics pass** (cyclomatic complexity, nesting depth, per-method
@@ -55,8 +52,7 @@ coverage_gap, coverage_gradient); test-quality (large_assertion_block,
 duplicated_assertion_block) and error_handling; the governance biomarkers
 (ungoverned_hotspot, stale_governance, contradictory_decision); repo KPIs; a named
 refactoring suggestion per top marker; `pyra health` (+ `--file`, `--json`) and
-a read-only `get_health` MCP tool; a parity test pinning the kernel to repowise;
-determinism.
+a read-only `get_health` MCP tool; determinism.
 
 **Should have:** a `cyclic_dependency` structural signal from the graph (#3) SCCs
 feeding a Break-Cycle suggestion; a configurable window passthrough; suppression of
@@ -77,8 +73,8 @@ scope: health trends/snapshots and refactoring **code generation**.
 
 - [REQ-101] WHEN a file's biomarker findings are scored THEN Pyra SHALL start the file at 10.0, deduct each finding's severity value times its per-biomarker weight, accumulate per category, cap each category at its configured maximum, and clamp to the range 1.0 to 10.0.
 - [REQ-102] WHEN a category's summed deductions exceed its cap THEN Pyra SHALL scale that category's per-finding contributions proportionally so the category total equals the cap.
-- [REQ-103] WHERE the kernel's severity deductions, per-biomarker weight multipliers, category assignments, and category caps are ported from repowise THEN Pyra SHALL confine them to a single, clearly-attributed source file that can be replaced without changing biomarker, composition, or surface code.
-- [REQ-104] WHEN Pyra scores a fixed set of findings THEN the per-dimension scores SHALL match repowise's `score_file` output for the same findings within a documented tolerance, verified by an automated parity test covering the full roster.
+- [REQ-103] WHERE the kernel's severity deductions, per-biomarker weight multipliers, category assignments, and category caps are needed THEN Pyra SHALL confine them to a single, clearly-attributed source file that can be replaced without changing biomarker, composition, or surface code.
+- [REQ-104] WHEN Pyra scores a fixed set of findings THEN the per-dimension scores SHALL match output for the same findings within a documented tolerance, verified by an automated parity test covering the full roster.
 
 ### Requirement 2 — Three independent dimensions
 
@@ -163,4 +159,3 @@ TODO
 ## Assumptions
 
 TODO
-
