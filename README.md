@@ -4,19 +4,32 @@
 
 > **Ensure your codebases stand the test of time, just like the Great Pyramid of Giza.**
 
-# Pyra
+## Pyra (Pronounced 'pir.a')
 
-**Pyra is an enforceable authority layer for AI coding agents.** It is a single Go binary that turns the decisions, requirements, and designs your team agrees to into **'Canon'**, which is: typed Markdown artifacts, validated against real standards, wired into a blocking **gate** system, and served to agents over **MCP**. No decision goes unrecorded, and no agent silently violates one.
+### **Pyra is an enforceable authority layer for AI coding agents.**
 
-The problem Pyra solves is simple to state and expensive to ignore: an AI agent's only real constraint is its context window, and most "memory" tools conflate two very different properties. **Authority** asks whether something is the canonical truth the team agreed to. **Discoverability** asks whether the right piece can be found at the right moment. Vector stores optimize discoverability and have no concept of authority. Pyra makes authority a first-class, *enforced* property: Canon artifacts are typed, their relationships are integrity-checked, and a deterministic gate rejects malformed or conflicting authority before it lands, with no LLM and no network in that path.
+It is a single Go binary that turns the decisions, requirements, and designs your team agrees to into **'Canon'**, which is: typed Markdown artifacts, validated against real standards, wired into a blocking **gate** system, and served to agents over **MCP**. No decision goes unrecorded, and no agent silently violates one.
 
-Pyra is built directly for **spec-driven development**. The specs your workflow already produces (`requirements.md`, `design.md`) become typed Canon with one command, and the agents that read them are held to that Canon automatically, whether you drive the `/spec → /dev → /code-review` skills in Claude Code or Kiro, or any MCP client.
+The problem Pyra solves is simple: an AI agent's only real constraint is its context window. Most "memory" tools try to solve the problem of **Discoverability** while continuing to allow agents to make any changes they like which removed **Authority** from the decisions and requirements engineers set.
 
-**Memory is Canon. Context is the *budgeted projection* of Canon (and optional Reference). AI lives only in the projection. The substrate is Git.**
+- **Authority** asks whether something is the canonical truth the team agreed to.
+- **Discoverability** asks whether the right piece can be found at the right moment.
+
+> [!NOTE]
+> Vector stores optimize discoverability but have no concept of authority. Pyra makes authority a first-class, *enforced* property: Canon artifacts are typed, their relationships are integrity-checked, and a deterministic gate rejects malformed or conflicting authority before it lands, with no LLM and no network in that path.
+
+Pyra is built directly for **spec-driven development**. The specs your workflow already produces (`requirements.md`, `design.md`) become typed Canon with one command, and the agents that read them are held to that Canon automatically, whether you drive the `/spec → /dev → /code-review` skills in Claude Code or Kiro, or any other AI agent tool or client.
+
+**Memory should be Canon. Context is the *budgeted projection* of Canon (and optional Reference). AI currently lives only in this projection of knowledge.**
 
 The Canon authority model conforms to the concept of **Requirements-as-Code (RaC)**.
 
-Pyra also speaks **code**. The same binary and the same MCP server expose **structural code intelligence** — byte-precise, token-cheap search and navigation over your source via tree-sitter (`outline`, `symbols`, go-to-`definition`, `callers`, and more) so one agent using one server can answer both *what the team decided* (Canon) and *what the code actually does*. The two connect: a Canon artifact can **ground** in real code, resolving an authoritative decision to the exact symbols it governs, and a symbol back to the decisions that constrain it. Authoritative decisions and real code search are centralized into a single binary and MCP server.
+### **Pyra also speaks *code***. 
+
+The same binary and the same MCP server expose **structural code intelligence** — byte-precise, token-cheap search and navigation over your source via tree-sitter (`outline`, `symbols`, go-to-`definition`, `callers`, and more) so one agent using one server can answer both *what the team decided* (Canon) and *what the code actually does*. 
+
+> [!NOTE]
+> The two connect: a Canon artifact can **ground** in real code, resolving an authoritative decision to the exact symbols it governs, and a symbol back to the decisions that constrain it. Authoritative decisions and real code search are centralized into a single binary and MCP server.
 
 ---
 
@@ -29,7 +42,7 @@ You make an architectural decision — "use Bleve for search" — while working 
         → skill projects it into typed Canon and runs the gate   → the decision lands as authority
 ```
 
-Two weeks later, in a brand-new session with no memory of that conversation, an agent proposes ripping out Bleve for a vector database. Because Pyra is wired into the workflow through the same skills:
+Two weeks later, in a brand-new session with no memory of that conversation, an agent proposes ripping out Bleve for a vector database. Because Pyra is wired into the workflow:
 
 - `/dev` **grounds on Canon over MCP** first. `find_decisions` surfaces the "Use Bleve for search" artifact with status **Accepted** and its consequences, so the agent argues *from* the decision instead of around it.
 - If a change still lands that contradicts Accepted Canon, the **gate blocks it** at commit time (git hook), inside `/code-review`, and in CI (`gate --sarif`), citing the exact artifact and rule.
@@ -51,27 +64,35 @@ Pyra gives an agent two kinds of knowledge over one substrate, plain Markdown pl
 | Validation | Typed, standards-checked, relationship-integrity-checked, **gated in CI** | Permissive, abundant and searchable |
 | Determinism | Pure function of repo state, **no LLM, no network** | AI may summarize and rank in the discovery layer |
 
-A **store** is one directory in Git holding both tiers. The only thing separating them is `canon_roots` in `.okf/config.yaml`: files under those roots are Canon, and everything else is Reference. Canon is the hero of Pyra. Reference is an optional convenience for teams that also want a large docs corpus searchable as agent memory (see the [Appendix](#appendix-reference-tier-and-okf-format)).
+A **store** is one directory in Git holding both tiers. The only thing separating them is `canon_roots` in `.okf/config.yaml`: files under those roots are Canon, and everything else is Reference. 
+
+**Canon** is the hero of Pyra. *Reference* is an optional convenience for teams that also want a large docs corpus searchable as agent memory (see the [Appendix](#appendix-reference-tier-and-okf-format)).
 
 ### The five Canon artifact types
 
-Each is typed Markdown with required sections, a minted opaque ID (`<repository-key>-<12-char Crockford base32>`, for example `OKF-KTQ63DPSMF19`), a lifecycle status, and typed relationships (`## Related <Type>`, `## Supersedes`).
+Each artifact is typed Markdown with required sections, a minted opaque ID (`<repository-key>-<12-char Crockford base32>`, for example `OKF-KTQ63DPSMF19`), a lifecycle status, and typed relationships (`## Related <Type>`, `## Supersedes`).
 
 | Type | Captures | Key required sections |
 |---|---|---|
 | `requirement` | What must hold | `## Problem`, `## Requirements` (`[REQ-NNN] … SHALL …`) |
-| `decision` | A choice and its rationale (ADR) | `## Context`, `## Decision`, `## Consequences` |
+| `decision` | A choice and its rationale (Decision Record) | `## Context`, `## Decision`, `## Consequences` |
 | `design` | How something is built | `## Context`, `## User Need`, `## Design`, `## Constraints` |
 | `roadmap` | Intended outcomes over time | `## Outcomes`, `## Initiatives` |
 | `prompt` | A reusable, versioned prompt | `## Objective`, `## Input`, `## Instructions`, `## Output` |
 
-### The gate
+### The gate (Enforces the Authority)
 
-`pyra gate` is the enforcement mechanism and the heart of the authority model. It loads the corpus, validates every artifact, checks relationship integrity, applies your enforcement policy, and exits non-zero on any blocking finding, emitting SARIF for required-checks. It is **deterministic and offline** (a build-failing test forbids `net/http` or any LLM dependency in the authority path), so it is safe in pre-commit hooks and CI. Validation includes:
+`pyra gate` is the enforcement mechanism and the heart of the authority model. 
 
-> **Change-aware mode (`--diff`).** By default the gate checks whether *Canon* is well-formed. Add `--diff` (staged diff), `--since <ref>`, or `--changed <files>` and the gate additionally reports which **Accepted Canon artifacts govern each changed file** — an artifact governs a file when its prose cites that file path or a symbol-id in it — so a change that touches governed code is surfaced with a citation, and drift (a cited symbol that no longer resolves) is flagged. These findings are **advisory by default**; escalate them to blocking via the enforcement rule codes `canon-governed-change` and `governed-symbol-unresolved`. The mode reuses the same policy, exit code, and SARIF output, and stays deterministic and offline (the mapping is purely structural — it lives in `internal/changegate`, outside the authority path).
+It loads the corpus, validates every artifact, checks relationship integrity, applies your enforcement policy, and exits non-zero on any blocking finding, emitting SARIF for required-checks. It is **deterministic and offline** (a build-failing test forbids `net/http` or any LLM dependency in the authority path), so it is safe in pre-commit hooks and CI. 
 
-> **Change-risk (`--risk`).** Add `--risk` (or run `pyra risk`) and the gate also scores the change itself for **defect risk** from the shape of the diff (Kamei just-in-time metrics: lines ±, files, directories, subsystems, diffusion entropy, author experience). The headline is **repo-relative** — `Below typical` / `Typical` / `Elevated` plus a percentile against the repo's *own* recent commits (the portable signal; the raw 0–10 is shown only as a secondary, uncalibrated number). It emits PR **directives** as advisory findings: `risk-missing-tests` (changed source with no test in the diff), `risk-missing-cochanges` (files that usually change together but were omitted — hidden coupling, minus structural import links), `risk-will-break` (structural dependents of changed symbols), and `risk-governance` (the change touches Accepted Canon). All merge into the same result, exit code, JSON, and SARIF. Deterministic and offline — no LLM, no network — in `internal/changerisk` (with a minimal git-history substrate in `internal/gitint`), both outside the authority path.
+Validation includes:
+
+- **Change-aware mode (`--diff`)**
+  - By default the gate checks whether *Canon* is well-formed. Add `--diff` (staged diff), `--since <ref>`, or `--changed <files>` and the gate additionally reports which **Accepted Canon artifacts govern each changed file** — an artifact governs a file when its prose cites that file path or a symbol-id in it — so a change that touches governed code is surfaced with a citation, and drift (a cited symbol that no longer resolves) is flagged. These findings are **advisory by default**; escalate them to blocking via the enforcement rule codes `canon-governed-change` and `governed-symbol-unresolved`. The mode reuses the same policy, exit code, and SARIF output, and stays deterministic and offline (the mapping is purely structural — it lives in `internal/changegate`, outside the authority path).
+
+- **Change-risk (`--risk`)**
+  - Add `--risk` (or run `pyra risk`) and the gate also scores the change itself for **defect risk** from the shape of the diff (Kamei just-in-time metrics: lines ±, files, directories, subsystems, diffusion entropy, author experience). The headline is **repo-relative** — `Below typical` / `Typical` / `Elevated` plus a percentile against the repo's *own* recent commits (the portable signal; the raw 0–10 is shown only as a secondary, uncalibrated number). It emits PR **directives** as advisory findings: `risk-missing-tests` (changed source with no test in the diff), `risk-missing-cochanges` (files that usually change together but were omitted — hidden coupling, minus structural import links), `risk-will-break` (structural dependents of changed symbols), and `risk-governance` (the change touches Accepted Canon). All merge into the same result, exit code, JSON, and SARIF. Deterministic and offline — no LLM, no network — in `internal/changerisk` (with a minimal git-history substrate in `internal/gitint`), both outside the authority path.
 
 - **BCP-14 / RFC 8174**: only ALL-CAPS `MUST`/`SHALL`/`SHOULD` carry normative weight.
 - **ISO/IEC/IEEE 29148**: requirements should be singular and testable.
@@ -82,7 +103,9 @@ Each is typed Markdown with required sections, a minted opaque ID (`<repository-
 
 ## Code intelligence
 
-Beyond memory, Pyra reads code. The same `pyra` binary and MCP server expose seven **read-only, structural** operations built on a pure-Go tree-sitter runtime — no cgo, grammars embedded, fully offline:
+Beyond memory, **Pyra reads code**. 
+
+The same `pyra` binary and MCP server expose seven **read-only, structural** operations built on a pure-Go tree-sitter runtime — no cgo, grammars are embedded, and it operates fully offline:
 
 | Operation | Answers |
 |---|---|
@@ -94,15 +117,26 @@ Beyond memory, Pyra reads code. The same `pyra` binary and MCP server expose sev
 | `map <dir>` | A directory's dependency graph: each definition and its outgoing references, no bodies. |
 | `definition <name> \| --at file:line:col` | Go-to-definition; the `--at` form is scope-aware and follows imports across files. |
 
-Every result carries a stable **symbol-id** — `<lang>:<relpath>#<name>@<line>` (1-based) — that an agent passes from one call to the next. This is deliberately *not* an LSP: it is purely syntactic, token-cheap, and offline, and it replaces an agent's habit of grepping and reading whole files with one symbol at a time, by exact bytes. It never mutates source, honors `.gitignore`, and confines traversal to the working root.
+Every result carries a stable **symbol-id** — `<lang>:<relpath>#<name>@<line>` (1-based) that an agent passes from one call to the next. 
 
-Supported languages by default: **Go, Python, JavaScript, TypeScript/TSX, Java, Rust** to keep the binary size small.
+> [!TIP]
+> This is deliberately *not* an LSP: it is purely syntactic, token-cheap, and offline. It replaces an agent's habit of grepping and reading whole files with one symbol at a time, by exact bytes. It never mutates source, honors `.gitignore`, and confines traversal to the working root.
+
+Supported languages by default (to keep the binary size small): 
+- Go
+- Python
+- JavaScript
+- TypeScript/TSX
+- Java
+- Rust
 
 Additional languages require building from source (see Instalation below).
 
 ### How Canon maps to code (grounding)
 
-Authority and code meet through the symbol-id. **A Canon artifact names the code it governs simply by mentioning a symbol-id in its prose** — the same way relationships between artifacts are inferred from literal `OKF-…` IDs, never fuzzy matching. Two read-only tools (and `pyra ground`) walk that bridge in both directions:
+Authority and code meet through the symbol-id. **A Canon artifact names the code it governs simply by mentioning a symbol-id in its prose** in the same way relationships between artifacts are inferred from literal `OKF-…` IDs so it never fuzzy matches. 
+
+Two read-only tools (and `pyra ground`) walk that bridge in both directions:
 
 - **Artifact → code** (`code_for_artifact`): given a Canon artifact ID, resolve every symbol-id in its body to the current source, and report any that no longer resolve (renamed, moved, or deleted) rather than returning an incorrect match.
 - **Code → artifacts** (`artifacts_for_symbol`): given a symbol-id or file path, find the Canon decisions, requirements, and designs that reference it.
@@ -112,7 +146,7 @@ decision  OKF-…  "cache documents in memory"   ──cites──►   go:inter
 symbol    go:internal/cache/store.go#Put@42     ──whose?──►   OKF-…  the decisions & requirements that govern it
 ```
 
-So a decision can point at the exact function that implements it; an agent can ask *"which decisions govern this symbol?"* before changing it; and a reviewer can see when an artifact's cited code has drifted out from under it. Authority and implementation stay tied together — **Canon is the memory, the symbol-id is the anchor into live code, and both live in one binary.**
+So a decision can point at the exact function that implements it; an agent can ask *"which decisions govern this symbol?"* before changing it; and a reviewer can see when an artifact's cited code has drifted out from under it. Authority and implementation stay tied together. **Canon is the memory, the symbol-id is the anchor into live code, and both live in one binary.**
 
 ---
 
@@ -138,15 +172,17 @@ make build
 
 ### Additional Language Grammar Inclusions
 
-The binary is **pure Go, no cgo**, and cross-compiles to every target with plain `go build`; code intelligence uses a pure-Go tree-sitter runtime to keep it that way. `make build` embeds only the grammars for the supported languages (via `grammar_subset` build tags) for a lean binary; a plain `go install`/`go build` without those tags embeds the runtime's full grammar set and produces a larger binary.
+The binary is **pure Go**, and cross-compiles to every target with a plain `go build`. The code intelligence functionality uses a pure-Go tree-sitter runtime. 
 
-> **Apple Intelligence (optional, Reference summaries only):** on macOS 26 Tahoe with Apple Silicon, Pyra can summarize Reference docs through Apple's on-device Foundation Models via the opt-in `applefm` build tag. See [docs/APPLE_INTELLIGENCE.md](docs/APPLE_INTELLIGENCE.md). This never touches the Canon authority path.
+`make build` embeds only the existing grammars for the supported languages (via `grammar_subset` build tags) to maintain a lean binary. A plain `go install`/`go build` without those tags embeds the runtime's full grammar set and produces a larger binary.
 
 ---
 
 ## Quick start
 
-Pyra is meant to sit underneath the spec, development, and review workflows your agents already use. `pyra init` writes repository-local instructions that map those activities to the right Pyra CLI and MCP operations, plus local MCP configuration for each selected tool.
+Pyra is meant to sit underneath the spec, development, and review workflows your agents already use as a part of Spec-driven development. 
+
+`pyra init` writes repository-local instructions that map those activities to the right Pyra CLI and MCP operations, plus local MCP configuration for each selected tool.
 
 ### One-time setup
 
@@ -157,7 +193,12 @@ mkdir my-store && cd my-store && git init
 pyra init . --agent claude --agent codex
 ```
 
-The repeatable `--agent` flag configures any combination of Claude Code, Codex, OpenCode, Pi, and Kiro. Initialization always creates or updates a marker-delimited Pyra section in the repository's `AGENTS.md`; existing instructions remain intact. It also installs Git gate hooks when `.git` exists and the applicable repository-local Claude, Codex, or Kiro gate hooks. List the accepted identifiers without writing anything with:
+The repeatable `--agent` flag configures any combination of Claude Code, Codex, OpenCode, Pi, and Kiro.
+ 
+> [!NOTE]
+> Initialization always creates or updates a marker-delimited Pyra section in the repository's `AGENTS.md`; existing instructions remain intact. It also installs Git gate hooks when `.git` exists and the applicable repository-local Claude, Codex, or Kiro gate hooks.
+
+List the accepted identifiers without writing anything with:
 
 ```bash
 pyra init --list-agents
@@ -170,11 +211,12 @@ To add or refresh agent integrations on an existing repository without changing
 pyra init . --agents-only --agent codex --agent opencode
 ```
 
-Agent-only mode updates the managed `AGENTS.md` section and only the selected
-repository-local MCP client files. It does not require `--force`.
+> [!IMPORTANT]
+> Agent-only mode updates the managed `AGENTS.md` section and only the selected repository-local MCP client files. It does not require `--force`.
+> 
+> The generated MCP commands use the repository's absolute path, so clients do not depend on their launch directory. If the repository moves, rerun `pyra init . --force` with the same `--agent` flags. Codex and Pi may ask you to trust the project; Pi may also ask permission to install its project-scoped MCP adapter. Restart a client after changing its configuration.
 
-The generated MCP commands use the repository's absolute path, so clients do not depend on their launch directory. If the repository moves, rerun `pyra init . --force` with the same `--agent` flags. Codex and Pi may ask you to trust the project; Pi may also ask permission to install its project-scoped MCP adapter. Restart a client after changing its configuration.
-
+> [!WARNING]
 > **Installed the binary only (`go install`)?** That is sufficient. Repository instructions, MCP setup, and hooks are generated by the `pyra` binary; no global skill copying or source checkout is required.
 
 ### The everyday loop
